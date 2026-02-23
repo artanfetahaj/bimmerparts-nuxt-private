@@ -1,0 +1,33 @@
+<script setup lang="ts">
+import type { PaginationLastProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { ButtonVariants } from '@/components/ui/button'
+import { reactiveOmit } from "@vueuse/core"
+import { ChevronRightIcon } from "lucide-vue-next"
+import { PaginationLast, useForwardProps } from "reka-ui"
+import { cn } from "@/lib/utils"
+import { buttonVariants } from '@/components/ui/button'
+
+const props = withDefaults(defineProps<PaginationLastProps & {
+  size?: ButtonVariants["size"]
+  class?: HTMLAttributes["class"]
+}>(), {
+  size: "default",
+})
+
+const delegatedProps = reactiveOmit(props, "class", "size")
+const forwarded = useForwardProps(delegatedProps)
+</script>
+
+<template>
+  <PaginationLast
+    data-slot="pagination-last"
+    :class="cn('inline-flex items-center justify-center h-9 px-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-gray-700 hover:bg-gray-100 gap-1', props.class)"
+    v-bind="forwarded"
+  >
+    <slot>
+      <span class="hidden sm:block">Last</span>
+      <ChevronRightIcon />
+    </slot>
+  </PaginationLast>
+</template>
