@@ -22,6 +22,7 @@ const route = useRoute()
 const router = useRouter()
 
 const currentPage = ref(Number(route.query.page) || 1)
+const searchQuery = ref<string>((route.query.search as string) || '')
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const products = ref<ProductType[]>([])
@@ -43,7 +44,11 @@ const cache = new Map<string, { products: ProductType[]; meta: typeof meta.value
 const carVariantStore = useCarVariantStore()
 
 const getCacheKey = (page: number) =>
-  JSON.stringify({ page, variant: carVariantStore.selectedVariant?.id ?? null })
+  JSON.stringify({ 
+    page, 
+    variant: carVariantStore.selectedVariant?.id ?? null,
+    search: searchQuery.value || null
+  })
 
 // ─── Load ─────────────────────────────────────────────────────────────────────
 const loadProducts = async (page: number = 1) => {
@@ -77,6 +82,7 @@ const fetchProducts = async (page: number, cacheKey: string, silent: boolean) =>
     const model = new Product()
       .filter({
         car_variants: carVariantStore.selectedVariant?.id ? [carVariantStore.selectedVariant.id] : undefined,
+        search: searchQuery.value || undefined,
       })
       .include([ProductIncludes.IMAGE, ProductIncludes.BRAND])
       .page(page)
@@ -137,6 +143,17 @@ watch(() => route.query.page, (val) => {
   }
 })
 
+// Watch for search query changes in URL
+watch(() => route.query.search, (val) => {
+  const newSearch = (val as string) || ''
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch
+    cache.clear()
+    currentPage.value = 1
+    loadProducts(1)
+  }
+})
+
 // Re-fetch when selected car variant changes
 watch(() => carVariantStore.selectedVariant, () => {
   cache.clear()
@@ -189,6 +206,18 @@ onMounted(() => loadProducts(currentPage.value))
 
         <!-- ── Product Grid ── -->
         <main class="flex-1">
+          <!-- Search Query Display -->
+          <div v-if="searchQuery" class="mb-4 flex items-center gap-2 text-sm">
+            <span class="text-gray-600">Showing results for:</span>
+            <span class="font-medium text-gray-900">"{{ searchQuery }}"</span>
+            <button
+              @click="router.push({ name: RouteName.PRODUCTS })"
+              class="text-orange-600 hover:text-orange-700 underline"
+            >
+              Clear search
+            </button>
+          </div>
+
           <p class="text-xs text-gray-500 mb-3">
             {{ meta.total }} results
             <span v-if="meta.total > meta.per_page">(showing {{ meta.from }}–{{ meta.to }})</span>
