@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, computed, reactive } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { useCart } from '../stores/cart'
 import { useLocale } from '../stores/locale'
-import authService from '../services/auth'
 import { useCarVariantStore } from '../stores/car-variant.store'
 import WishlistPopover from './Nav/WishlistPopover.vue'
 import SearchBar from './Nav/SearchBar.vue'
 import SelectedCarVariant from './Nav/SelectedCarVariant.vue'
-import { useRouter } from 'vue-router'
+import MegaMenu from './Nav/MegaMenu.vue'
+import MobileMenu from './Nav/MobileMenu.vue'
 import { Button } from './ui/button'
 import {
   ShoppingBag,
@@ -16,23 +16,32 @@ import {
   ChevronDown,
 } from 'lucide-vue-next'
 
-const router = useRouter()
-
 const { totalItems } = useCart()
 const { t } = useLocale()
 
 const isMobileMenuOpen = ref(false)
 const showBmwSeriesMenu = ref(false)
 
-watch(isMobileMenuOpen, (open) => {
-  const value = open ? 'hidden' : ''
-  document.documentElement.style.overflow = value
-  document.body.style.overflow = value
-})
+// ─── Mega-menu hover logic ───────────────────────────────────────────────────
+let closeTimer: ReturnType<typeof setTimeout> | null = null
+
+function openMegaMenu() {
+  if (closeTimer) { clearTimeout(closeTimer); closeTimer = null }
+  showBmwSeriesMenu.value = true
+}
+
+function scheduleMegaMenuClose() {
+  closeTimer = setTimeout(() => {
+    showBmwSeriesMenu.value = false
+  }, 200)
+}
+
+function cancelMegaMenuClose() {
+  if (closeTimer) { clearTimeout(closeTimer); closeTimer = null }
+}
 
 onBeforeUnmount(() => {
-  document.documentElement.style.overflow = ''
-  document.body.style.overflow = ''
+  if (closeTimer) clearTimeout(closeTimer)
 })
 
 const carVariantStore = useCarVariantStore()
@@ -50,13 +59,22 @@ function openSearchDialog() { carVariantStore.openDialog() }
 
       <!-- Desktop Nav -->
       <nav class="hidden lg:flex items-center gap-6 text-[14px] text-gray-700">
-        <div class="relative" id="bmw-series-dropdown-container">
+        <!-- BMW Series trigger -->
+        <div
+          class="relative"
+          id="bmw-series-dropdown-container"
+          @mouseenter="openMegaMenu"
+          @mouseleave="scheduleMegaMenuClose"
+        >
           <button
-            @click.stop="showBmwSeriesMenu = !showBmwSeriesMenu"
-            class="flex items-center gap-1 cursor-pointer text-gray-700 hover:text-orange-500"
+            class="flex items-center gap-1 cursor-pointer text-gray-700 hover:text-orange-500 transition-colors"
+            :class="{ 'text-orange-500': showBmwSeriesMenu }"
           >
             BMW Series
-            <ChevronDown class="w-4 h-4" />
+            <ChevronDown
+              class="w-4 h-4 transition-transform duration-200"
+              :class="{ 'rotate-180': showBmwSeriesMenu }"
+            />
           </button>
         </div>
 
@@ -65,27 +83,31 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <NuxtLink to="/contact" class="hover:text-orange-500">{{ t('nav.contact') }}</NuxtLink>
       </nav>
 
-      <!-- Search — takes up remaining space -->
-      <div class="flex flex-1">
+      <!-- Search — takes up remaining space (desktop only) -->
+      <div class="hidden lg:flex flex-1">
         <SearchBar />
       </div>
 
+      <!-- Spacer on mobile to push icons right -->
+      <div class="flex-1 lg:hidden" />
+
       <!-- Right icons -->
       <div class="flex items-center gap-2">
-        <SelectedCarVariant @click="openSearchDialog" />
+        <!-- Car variant selector (desktop only) -->
+        <div class="hidden lg:block">
+          <SelectedCarVariant @click="openSearchDialog" />
+        </div>
 
         <!-- Mobile menu toggle -->
-        <Button
+        <button
           @click.stop="isMobileMenuOpen = true"
-          variant="outline"
-          size="icon"
-          class="lg:hidden rounded-full"
+          class="lg:hidden flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
           aria-label="Open menu"
         >
           <Menu class="w-5 h-5" />
-        </Button>
+        </button>
 
-        <!-- Cart -->
+        <!-- Cart (desktop only) -->
         <NuxtLink
           to="/cart"
           class="relative items-center justify-center hidden w-10 h-10 transition-colors rounded-full lg:flex border border-gray-300 hover:bg-gray-50 text-gray-600"
@@ -97,12 +119,12 @@ function openSearchDialog() { carVariantStore.openDialog() }
           </span>
         </NuxtLink>
 
-        <!-- Wishlist Popover -->
+        <!-- Wishlist Popover (desktop only) -->
         <div class="hidden lg:block">
           <WishlistPopover />
         </div>
 
-        <!-- Account -->
+        <!-- Account (desktop only) -->
         <NuxtLink
           to="/account"
           class="relative items-center justify-center hidden w-10 h-10 transition-colors rounded-full lg:flex border border-gray-300 hover:bg-gray-50 text-gray-600"
@@ -113,14 +135,16 @@ function openSearchDialog() { carVariantStore.openDialog() }
       </div>
     </div>
 
-
+    <!-- Mega Menu Dropdown -->
+    <div
+      v-if="showBmwSeriesMenu"
+      @mouseenter="cancelMegaMenuClose"
+      @mouseleave="scheduleMegaMenuClose"
+    >
+      <MegaMenu />
+    </div>
   </header>
-</template>
 
-<style scoped>
-.mobile-menu-bg {
-  background-image: linear-gradient(180deg, #ffffff 0%, #fff7f1 40%, #ffe9db 100%);
-}
-.mobile-menu-bg a { color: #0f172a; }
-.mobile-menu-bg a:hover { color: #ff6a00; }
-</style>
+  <!-- Mobile Menu Drawer -->
+  <MobileMenu :open="isMobileMenuOpen" @close="isMobileMenuOpen = false" />
+</template>

@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { ChevronRight } from 'lucide-vue-next'
+import { ChevronRight, ShoppingBag, Heart, User } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { useCart } from '@/stores/cart'
+import { useWishlist } from '@/stores/wishlist'
 import HomeCarVariantSelector from '@/components/HomeCarVariantSelector.vue'
+
+const { totalItems } = useCart()
+const { items: wishlistItems } = useWishlist()
 
 defineProps({
   image: { type: String, required: false, default: '' },
@@ -92,8 +97,47 @@ onUnmounted(() => stopAutoSlide())
               </span>
             </div>
 
+            <!-- Mobile action icons (Cart, Wishlist, Account) -->
+            <div class="mt-6 flex items-center gap-3 lg:hidden">
+              <NuxtLink
+                to="/cart"
+                class="relative flex items-center justify-center w-11 h-11 rounded-full bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors"
+                aria-label="Cart"
+              >
+                <ShoppingBag class="w-5 h-5" />
+                <span
+                  v-if="totalItems > 0"
+                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-orange-500 rounded-full"
+                >
+                  {{ totalItems > 99 ? '99+' : totalItems }}
+                </span>
+              </NuxtLink>
+
+              <NuxtLink
+                to="/wishlist"
+                class="relative flex items-center justify-center w-11 h-11 rounded-full bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors"
+                aria-label="Wishlist"
+              >
+                <Heart class="w-5 h-5" />
+                <span
+                  v-if="wishlistItems.length > 0"
+                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-orange-500 rounded-full"
+                >
+                  {{ wishlistItems.length > 99 ? '99+' : wishlistItems.length }}
+                </span>
+              </NuxtLink>
+
+              <NuxtLink
+                to="/account"
+                class="flex items-center justify-center w-11 h-11 rounded-full bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors"
+                aria-label="Account"
+              >
+                <User class="w-5 h-5" />
+              </NuxtLink>
+            </div>
+
             <!-- CTA -->
-            <div class="mt-8 flex items-center gap-3">
+            <div class="mt-6 lg:mt-8 flex items-center gap-3">
               <Button
                 variant="outline"
                 class="rounded-full border-white/40 text-white bg-white/10 hover:bg-white/20 gap-2 px-5 h-10"

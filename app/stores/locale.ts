@@ -42,6 +42,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     
     // Search & Filters
     'search.placeholder': 'Search products',
+    'search.noResults': 'No products found',
+    'search.viewAll': 'View all results',
     'filters.title': 'Filters',
     'filters.price': 'Price',
     'filters.group': 'Group',
@@ -476,6 +478,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     
     // Search & Filters
     'search.placeholder': 'Zoek producten',
+    'search.noResults': 'Geen producten gevonden',
+    'search.viewAll': 'Bekijk alle resultaten',
     'filters.title': 'Filters',
     'filters.price': 'Prijs',
     'filters.group': 'Groep',
