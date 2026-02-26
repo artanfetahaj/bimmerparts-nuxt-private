@@ -13,6 +13,7 @@ export interface ProductImage {
 export interface Product {
   id: number
   name: string
+  slug?: string
   sku: string
   description?: string
   price: string // API returns price as string (e.g., "45.99")
@@ -85,6 +86,20 @@ class ProductService {
       return response.data
     } catch (error) {
       console.error('Error fetching product:', error)
+      throw error
+    }
+  }
+
+  async getProductBySlug(slug: string) {
+    try {
+      const response = await api.get(`/products/slug/${slug}`, {
+        params: {
+          'with[]': ['category', 'subcategory', 'brand', 'supplier', 'car_variants.model'],
+        },
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching product by slug:', error)
       throw error
     }
   }
@@ -322,6 +337,7 @@ class ProductService {
 
     return {
       id: product.id.toString(),
+      slug: product.slug || undefined,
       title: product.name,
       price: safeFinalPrice,
       oldPrice: safeFinalOldPrice,

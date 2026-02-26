@@ -66,21 +66,25 @@ export enum ProductIncludes {
 // ─── Filters enum ─────────────────────────────────────────────────────────────
 
 export enum ProductFilterKey {
-  SEARCH       = 'search',
-  CATEGORY     = 'category',
-  SUBCATEGORY  = 'subcategory',
-  BRAND        = 'brand',
-  STATUS       = 'status',
-  CAR_VARIANT  = 'car_variant_id',
+  SEARCH            = 'search',
+  MAIN_CATEGORY     = 'main_category',
+  PRODUCT_CATEGORY  = 'product_category',
+  SUBCATEGORY       = 'subcategory',
+  CATEGORY          = 'category',
+  BRAND             = 'brand',
+  STATUS            = 'status',
+  CAR_VARIANT       = 'car_variant_id',
 }
 
 export type ProductFilters = Partial<{
-  [ProductFilterKey.SEARCH]:      string
-  [ProductFilterKey.CATEGORY]:    string
-  [ProductFilterKey.SUBCATEGORY]: string
-  [ProductFilterKey.BRAND]:       string
-  [ProductFilterKey.STATUS]:      string
-  [ProductFilterKey.CAR_VARIANT]: string
+  [ProductFilterKey.SEARCH]:           string
+  [ProductFilterKey.MAIN_CATEGORY]:    string
+  [ProductFilterKey.PRODUCT_CATEGORY]: string
+  [ProductFilterKey.SUBCATEGORY]:      string
+  [ProductFilterKey.CATEGORY]:         string
+  [ProductFilterKey.BRAND]:            string
+  [ProductFilterKey.STATUS]:           string
+  [ProductFilterKey.CAR_VARIANT]:      string
 }>
 
 // ─── Nested types ─────────────────────────────────────────────────────────────

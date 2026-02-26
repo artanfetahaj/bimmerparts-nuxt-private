@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 import { getCategoryHierarchy, type MainCategory, type ProductCategory } from '../../services/category'
 import { ChevronRight, Loader2, FolderOpen } from 'lucide-vue-next'
 
+const emit = defineEmits<{ close: [] }>()
+
 const mainCategories = ref<MainCategory[]>([])
 const loading = ref(true)
 const error = ref(false)
@@ -81,7 +83,9 @@ const visibleSubcategories = computed(() => {
               @mouseenter="onMainCategoryHover(mainCat)"
               class="group"
             >
-              <button
+              <NuxtLink
+                :to="{ path: '/products', query: { main_category: mainCat.id } }"
+                @click="emit('close')"
                 class="w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left"
                 :class="[
                   hoveredMainCategory?.id === mainCat.id
@@ -98,7 +102,7 @@ const visibleSubcategories = computed(() => {
                       : 'text-gray-300 group-hover:text-gray-400'
                   ]"
                 />
-              </button>
+              </NuxtLink>
             </li>
           </ul>
         </div>
@@ -116,7 +120,9 @@ const visibleSubcategories = computed(() => {
                 @mouseenter="onProductCategoryHover(prodCat)"
                 class="group"
               >
-                <button
+                <NuxtLink
+                  :to="{ path: '/products', query: { product_category: prodCat.id } }"
+                  @click="emit('close')"
                   class="w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left"
                   :class="[
                     hoveredProductCategory?.id === prodCat.id
@@ -134,7 +140,7 @@ const visibleSubcategories = computed(() => {
                         : 'text-gray-300 group-hover:text-gray-400'
                     ]"
                   />
-                </button>
+                </NuxtLink>
               </li>
             </ul>
           </template>
@@ -158,7 +164,8 @@ const visibleSubcategories = computed(() => {
                 :key="subCat.id"
               >
                 <NuxtLink
-                  :to="`/products?subcategory=${subCat.slug}`"
+                  :to="{ path: '/products', query: { subcategory: subCat.slug } }"
+                  @click="emit('close')"
                   class="block px-3 py-2.5 text-sm rounded-lg transition-colors text-gray-700 hover:bg-orange-50 hover:text-orange-600"
                 >
                   {{ subCat.name }}

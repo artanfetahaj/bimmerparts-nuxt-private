@@ -5,6 +5,7 @@ import type { Product as ApiProduct } from '../services/product'
 
 interface UiProduct {
   id: string
+  slug?: string
   title: string
   price: number
   oldPrice?: number

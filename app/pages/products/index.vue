@@ -16,6 +16,7 @@ import { Product, ProductIncludes, ProductFilterKey } from '@/models/Product'
 import type { Product as ProductType } from '@/models/Product'
 import { useCarVariantStore } from '@/stores/car-variant.store'
 import { RouteName } from '@/enums/RouteName'
+import { getCategoryHierarchy, type MainCategory } from '@/services/category'
 
 // ─── URL query param sync ─────────────────────────────────────────────────────
 const route = useRoute()
@@ -23,6 +24,9 @@ const router = useRouter()
 
 const currentPage = ref(Number(route.query.page) || 1)
 const searchQuery = ref<string>((route.query.search as string) || '')
+const mainCategoryFilter = ref<string>((route.query.main_category as string) || '')
+const productCategoryFilter = ref<string>((route.query.product_category as string) || '')
+const subcategoryFilter = ref<string>((route.query.subcategory as string) || '')
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const products = ref<ProductType[]>([])
@@ -38,16 +42,59 @@ const meta = ref({
   to: 0,
 })
 
+// ─── Category filter label ────────────────────────────────────────────────────
+const categoryHierarchy = ref<MainCategory[]>([])
+
+
+const activeCategoryLabel = computed(() => {
+  if (subcategoryFilter.value) {
+    for (const mc of categoryHierarchy.value) {
+      for (const pc of mc.categories) {
+        const sc = pc.subcategories?.find(s => s.slug === subcategoryFilter.value)
+        if (sc) return sc.name
+      }
+    }
+    return subcategoryFilter.value
+  }
+  if (productCategoryFilter.value) {
+    for (const mc of categoryHierarchy.value) {
+      const pc = mc.categories.find(c => c.id === productCategoryFilter.value)
+      if (pc) return pc.name
+    }
+    return productCategoryFilter.value
+  }
+  if (mainCategoryFilter.value) {
+    const mc = categoryHierarchy.value.find(c => c.id === mainCategoryFilter.value)
+    if (mc) return mc.name
+    return mainCategoryFilter.value
+  }
+  return ''
+})
+
+const hasCategoryFilter = computed(() => !!(mainCategoryFilter.value || productCategoryFilter.value || subcategoryFilter.value))
+
+function clearCategoryFilter() {
+  const query = { ...route.query }
+  delete query.main_category
+  delete query.product_category
+  delete query.subcategory
+  delete query.page
+  router.replace({ query })
+}
+
 // Simple in-memory cache: key = serialised params → { products, meta }
 const cache = new Map<string, { products: ProductType[]; meta: typeof meta.value }>()
 
 const carVariantStore = useCarVariantStore()
 
 const getCacheKey = (page: number) =>
-  JSON.stringify({ 
-    page, 
+  JSON.stringify({
+    page,
     variant: carVariantStore.selectedVariant?.id ?? null,
-    search: searchQuery.value || null
+    search: searchQuery.value || null,
+    main_category: mainCategoryFilter.value || null,
+    product_category: productCategoryFilter.value || null,
+    subcategory: subcategoryFilter.value || null,
   })
 
 // ─── Load ─────────────────────────────────────────────────────────────────────
@@ -83,6 +130,9 @@ const fetchProducts = async (page: number, cacheKey: string, silent: boolean) =>
       .filter({
         car_variants: carVariantStore.selectedVariant?.id ? [carVariantStore.selectedVariant.id] : undefined,
         search: searchQuery.value || undefined,
+        main_category: mainCategoryFilter.value || undefined,
+        product_category: productCategoryFilter.value || undefined,
+        subcategory: subcategoryFilter.value || undefined,
       })
       .include([ProductIncludes.IMAGE, ProductIncludes.BRAND])
       .page(page)
@@ -154,6 +204,24 @@ watch(() => route.query.search, (val) => {
   }
 })
 
+// Watch for category filter changes in URL
+watch(
+  () => [route.query.main_category, route.query.product_category, route.query.subcategory],
+  ([newMainCat, newProdCat, newSubcat]) => {
+    const mc = (newMainCat as string) || ''
+    const pc = (newProdCat as string) || ''
+    const sc = (newSubcat as string) || ''
+    if (mc !== mainCategoryFilter.value || pc !== productCategoryFilter.value || sc !== subcategoryFilter.value) {
+      mainCategoryFilter.value = mc
+      productCategoryFilter.value = pc
+      subcategoryFilter.value = sc
+      cache.clear()
+      currentPage.value = 1
+      loadProducts(1)
+    }
+  },
+)
+
 // Re-fetch when selected car variant changes
 watch(() => carVariantStore.selectedVariant, () => {
   cache.clear()
@@ -167,7 +235,10 @@ watch(products, () => {
   if (!isLoading.value) prefetchAdjacentPages()
 })
 
-onMounted(() => loadProducts(currentPage.value))
+onMounted(() => {
+  loadProducts(currentPage.value)
+  getCategoryHierarchy().then(h => { categoryHierarchy.value = h }).catch(() => {})
+})
 </script>
 
 <template>
@@ -218,6 +289,17 @@ onMounted(() => loadProducts(currentPage.value))
             </button>
           </div>
 
+          <!-- Category Filter Display -->
+          <div v-if="hasCategoryFilter" class="mb-4 flex items-center gap-2 text-sm">
+            <span class="text-gray-600">Category:</span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 font-medium">
+              {{ activeCategoryLabel }}
+              <button @click="clearCategoryFilter" class="hover:text-orange-900" aria-label="Clear category filter">
+                &times;
+              </button>
+            </span>
+          </div>
+
           <p class="text-xs text-gray-500 mb-3">
             {{ meta.total }} results
             <span v-if="meta.total > meta.per_page">(showing {{ meta.from }}–{{ meta.to }})</span>
@@ -239,7 +321,7 @@ onMounted(() => loadProducts(currentPage.value))
             <NuxtLink
               v-for="product in products"
               :key="product.id"
-              :to="{ name: RouteName.PRODUCT_DETAILS, params: { slug: product.slug } }"
+              :to="product.slug ? `/products/${product.slug}` : '#'"
               class="block"
             >
               <ProductCard :product="product" />

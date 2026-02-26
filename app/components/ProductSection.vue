@@ -8,6 +8,7 @@ const { t } = useLocale()
 
 interface Product {
   id: string
+  slug?: string
   title: string
   price: number
   oldPrice?: number
@@ -18,13 +19,8 @@ interface Product {
 const props = defineProps<{ title: string; products: Product[] }>()
 
 const emit = defineEmits<{
-  navigateToProduct: [productId: string]
   navigateToProducts: []
 }>()
-
-const handleProductClick = (productId: string) => {
-  emit('navigateToProduct', productId)
-}
 
 const activeTab = ref('General')
 
@@ -70,12 +66,14 @@ const tabs = computed(() => [
       
       <!-- Products Grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        <ProductCard 
-          v-for="p in props.products" 
-          :key="p.id" 
-          :product="p" 
-          @navigate-to-product="handleProductClick"
-        />
+        <NuxtLink
+          v-for="p in props.products"
+          :key="p.id"
+          :to="p.slug ? `/products/${p.slug}` : '#'"
+          class="block"
+        >
+          <ProductCard :product="p" />
+        </NuxtLink>
       </div>
     </div>
   </section>

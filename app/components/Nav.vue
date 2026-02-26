@@ -141,7 +141,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
       @mouseenter="cancelMegaMenuClose"
       @mouseleave="scheduleMegaMenuClose"
     >
-      <MegaMenu />
+      <MegaMenu @close="showBmwSeriesMenu = false" />
     </div>
   </header>
 
