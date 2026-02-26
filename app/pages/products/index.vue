@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
+import ProductFilterSidebar from '@/components/ProductFilterSidebar.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Pagination,
@@ -27,6 +28,10 @@ const searchQuery = ref<string>((route.query.search as string) || '')
 const mainCategoryFilter = ref<string>((route.query.main_category as string) || '')
 const productCategoryFilter = ref<string>((route.query.product_category as string) || '')
 const subcategoryFilter = ref<string>((route.query.subcategory as string) || '')
+const brandFilter = ref<string>((route.query.brand as string) || '')
+const carModelFilter = ref<string>((route.query.car_model as string) || '')
+const priceMinFilter = ref<number | null>(route.query.price_min ? Number(route.query.price_min) : null)
+const priceMaxFilter = ref<number | null>(route.query.price_max ? Number(route.query.price_max) : null)
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const products = ref<ProductType[]>([])
@@ -95,6 +100,10 @@ const getCacheKey = (page: number) =>
     main_category: mainCategoryFilter.value || null,
     product_category: productCategoryFilter.value || null,
     subcategory: subcategoryFilter.value || null,
+    brand: brandFilter.value || null,
+    car_model: carModelFilter.value || null,
+    price_min: priceMinFilter.value ?? null,
+    price_max: priceMaxFilter.value ?? null,
   })
 
 // ─── Load ─────────────────────────────────────────────────────────────────────
@@ -133,6 +142,10 @@ const fetchProducts = async (page: number, cacheKey: string, silent: boolean) =>
         main_category: mainCategoryFilter.value || undefined,
         product_category: productCategoryFilter.value || undefined,
         subcategory: subcategoryFilter.value || undefined,
+        brand: brandFilter.value || undefined,
+        car_model: carModelFilter.value || undefined,
+        price_min: priceMinFilter.value ?? undefined,
+        price_max: priceMaxFilter.value ?? undefined,
       })
       .include([ProductIncludes.IMAGE, ProductIncludes.BRAND])
       .page(page)
@@ -222,6 +235,31 @@ watch(
   },
 )
 
+// Watch for brand, car_model, price_min, price_max filter changes in URL
+watch(
+  () => [route.query.brand, route.query.car_model, route.query.price_min, route.query.price_max],
+  ([newBrand, newCarModel, newPriceMin, newPriceMax]) => {
+    const b = (newBrand as string) || ''
+    const cm = (newCarModel as string) || ''
+    const pMin = newPriceMin ? Number(newPriceMin) : null
+    const pMax = newPriceMax ? Number(newPriceMax) : null
+    if (
+      b !== brandFilter.value ||
+      cm !== carModelFilter.value ||
+      pMin !== priceMinFilter.value ||
+      pMax !== priceMaxFilter.value
+    ) {
+      brandFilter.value = b
+      carModelFilter.value = cm
+      priceMinFilter.value = pMin
+      priceMaxFilter.value = pMax
+      cache.clear()
+      currentPage.value = 1
+      loadProducts(1)
+    }
+  },
+)
+
 // Re-fetch when selected car variant changes
 watch(() => carVariantStore.selectedVariant, () => {
   cache.clear()
@@ -248,8 +286,18 @@ onMounted(() => {
       <!-- ── Skeleton (initial load only) ── -->
       <div v-if="isLoading && isInitialLoad" class="flex gap-8">
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <Skeleton class="h-6 w-24" />
+          <div class="bg-white rounded-lg shadow-sm p-5">
+            <Skeleton class="h-6 w-24 mb-4" />
+            <Skeleton class="h-px w-full mb-4" />
+            <Skeleton class="h-5 w-16 mb-3" />
+            <Skeleton class="h-6 w-full mb-2" />
+            <Skeleton class="h-4 w-full mb-4" />
+            <Skeleton class="h-px w-full mb-4" />
+            <Skeleton class="h-5 w-16 mb-3" />
+            <Skeleton class="h-px w-full mb-4" />
+            <Skeleton class="h-5 w-20 mb-3" />
+            <Skeleton class="h-px w-full mb-4" />
+            <Skeleton class="h-5 w-16" />
           </div>
         </aside>
         <main class="flex-1">
@@ -271,8 +319,8 @@ onMounted(() => {
       <div v-else class="flex gap-3 lg:gap-8">
 
         <!-- ── Sidebar ── -->
-        <aside class="hidden lg:block w-64 shrink-0 bg-white rounded-lg shadow-sm p-6 h-fit">
-          <h2 class="text-xl font-bold text-gray-900">Filters</h2>
+        <aside class="hidden lg:block w-64 shrink-0 h-fit sticky top-4">
+          <ProductFilterSidebar />
         </aside>
 
         <!-- ── Product Grid ── -->
@@ -300,8 +348,8 @@ onMounted(() => {
             </span>
           </div>
 
-          <p class="text-xs text-gray-500 mb-3">
-            {{ meta.total }} results
+          <p class="text-sm text-gray-500 mb-3">
+            Total {{ meta.total }} results
             <span v-if="meta.total > meta.per_page">(showing {{ meta.from }}–{{ meta.to }})</span>
           </p>
 

@@ -74,6 +74,9 @@ export enum ProductFilterKey {
   BRAND             = 'brand',
   STATUS            = 'status',
   CAR_VARIANT       = 'car_variant_id',
+  CAR_MODEL         = 'car_model',
+  PRICE_MIN         = 'price_min',
+  PRICE_MAX         = 'price_max',
 }
 
 export type ProductFilters = Partial<{
@@ -85,6 +88,9 @@ export type ProductFilters = Partial<{
   [ProductFilterKey.BRAND]:            string
   [ProductFilterKey.STATUS]:           string
   [ProductFilterKey.CAR_VARIANT]:      string
+  [ProductFilterKey.CAR_MODEL]:        string
+  [ProductFilterKey.PRICE_MIN]:        number
+  [ProductFilterKey.PRICE_MAX]:        number
 }>
 
 // ─── Nested types ─────────────────────────────────────────────────────────────
