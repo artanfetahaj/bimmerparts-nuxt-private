@@ -16,8 +16,8 @@ import {
 import { Product, ProductIncludes, ProductFilterKey } from '@/models/Product'
 import type { Product as ProductType } from '@/models/Product'
 import { useCarVariantStore } from '@/stores/car-variant.store'
+import { useCategoryStore } from '@/stores/category.store'
 import { RouteName } from '@/enums/RouteName'
-import { getCategoryHierarchy, type MainCategory } from '@/services/category'
 
 // ─── URL query param sync ─────────────────────────────────────────────────────
 const route = useRoute()
@@ -47,31 +47,18 @@ const meta = ref({
   to: 0,
 })
 
-// ─── Category filter label ────────────────────────────────────────────────────
-const categoryHierarchy = ref<MainCategory[]>([])
-
+// ─── Category filter label (resolved from store — no extra fetch needed) ──────
+const categoryStore = useCategoryStore()
 
 const activeCategoryLabel = computed(() => {
   if (subcategoryFilter.value) {
-    for (const mc of categoryHierarchy.value) {
-      for (const pc of mc.categories) {
-        const sc = pc.subcategories?.find(s => s.slug === subcategoryFilter.value)
-        if (sc) return sc.name
-      }
-    }
-    return subcategoryFilter.value
+    return categoryStore.getSubcategoryBySlug(subcategoryFilter.value)?.name ?? subcategoryFilter.value
   }
   if (productCategoryFilter.value) {
-    for (const mc of categoryHierarchy.value) {
-      const pc = mc.categories.find(c => c.id === productCategoryFilter.value)
-      if (pc) return pc.name
-    }
-    return productCategoryFilter.value
+    return categoryStore.getProductCategoryById(productCategoryFilter.value)?.name ?? productCategoryFilter.value
   }
   if (mainCategoryFilter.value) {
-    const mc = categoryHierarchy.value.find(c => c.id === mainCategoryFilter.value)
-    if (mc) return mc.name
-    return mainCategoryFilter.value
+    return categoryStore.getMainCategoryById(mainCategoryFilter.value)?.name ?? mainCategoryFilter.value
   }
   return ''
 })
@@ -87,7 +74,7 @@ function clearCategoryFilter() {
   router.replace({ query })
 }
 
-// Simple in-memory cache: key = serialised params → { products, meta }
+// ─── Cache ────────────────────────────────────────────────────────────────────
 const cache = new Map<string, { products: ProductType[]; meta: typeof meta.value }>()
 
 const carVariantStore = useCarVariantStore()
@@ -110,7 +97,6 @@ const getCacheKey = (page: number) =>
 const loadProducts = async (page: number = 1) => {
   const cacheKey = getCacheKey(page)
 
-  // Serve from cache instantly while still showing fresh data
   if (cache.has(cacheKey)) {
     const cached = cache.get(cacheKey)!
     products.value = cached.products
@@ -118,7 +104,6 @@ const loadProducts = async (page: number = 1) => {
     currentPage.value = page
     isLoading.value = false
     isInitialLoad.value = false
-    // Revalidate in the background
     fetchProducts(page, cacheKey, /* silent */ true)
     return
   }
@@ -156,10 +141,8 @@ const fetchProducts = async (page: number, cacheKey: string, silent: boolean) =>
     const newProducts: ProductType[] = Array.isArray(response) ? response : response?.data ?? []
     const newMeta = response?.meta ?? meta.value
 
-    // Update cache
     cache.set(cacheKey, { products: newProducts, meta: newMeta })
 
-    // Only update UI if this is still the page the user is on
     if (page === currentPage.value) {
       products.value = newProducts
       meta.value = newMeta
@@ -192,12 +175,11 @@ const prefetchAdjacentPages = () => {
 // ─── Pagination ───────────────────────────────────────────────────────────────
 const goToPage = (page: number) => {
   if (page < 1 || page > meta.value.last_page || page === currentPage.value) return
-  // Update URL query param without full navigation
   router.replace({ query: { ...route.query, page: page === 1 ? undefined : page } })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Sync page state from URL — the single source of truth
+// ─── Watchers ────────────────────────────────────────────────────────────────
 watch(() => route.query.page, (val) => {
   const page = Number(val) || 1
   if (page !== currentPage.value) {
@@ -206,7 +188,6 @@ watch(() => route.query.page, (val) => {
   }
 })
 
-// Watch for search query changes in URL
 watch(() => route.query.search, (val) => {
   const newSearch = (val as string) || ''
   if (newSearch !== searchQuery.value) {
@@ -217,7 +198,6 @@ watch(() => route.query.search, (val) => {
   }
 })
 
-// Watch for category filter changes in URL
 watch(
   () => [route.query.main_category, route.query.product_category, route.query.subcategory],
   ([newMainCat, newProdCat, newSubcat]) => {
@@ -235,7 +215,6 @@ watch(
   },
 )
 
-// Watch for brand, car_model, price_min, price_max filter changes in URL
 watch(
   () => [route.query.brand, route.query.car_model, route.query.price_min, route.query.price_max],
   ([newBrand, newCarModel, newPriceMin, newPriceMax]) => {
@@ -260,7 +239,6 @@ watch(
   },
 )
 
-// Re-fetch when selected car variant changes
 watch(() => carVariantStore.selectedVariant, () => {
   cache.clear()
   router.replace({ query: { ...route.query, page: undefined } })
@@ -268,14 +246,12 @@ watch(() => carVariantStore.selectedVariant, () => {
   loadProducts(1)
 })
 
-// Prefetch after data loads
 watch(products, () => {
   if (!isLoading.value) prefetchAdjacentPages()
 })
 
 onMounted(() => {
   loadProducts(currentPage.value)
-  getCategoryHierarchy().then(h => { categoryHierarchy.value = h }).catch(() => {})
 })
 </script>
 
@@ -327,30 +303,30 @@ onMounted(() => {
         <main class="flex-1">
           <!-- Search Query Display -->
           <div v-if="searchQuery" class="mb-4 flex items-center gap-2 text-sm">
-            <span class="text-gray-600">Showing results for:</span>
+            <span class="text-gray-600">Zoekresultaten voor:</span>
             <span class="font-medium text-gray-900">"{{ searchQuery }}"</span>
             <button
               @click="router.push({ name: RouteName.PRODUCTS })"
               class="text-orange-600 hover:text-orange-700 underline"
             >
-              Clear search
+              Zoekopdracht wissen
             </button>
           </div>
 
           <!-- Category Filter Display -->
           <div v-if="hasCategoryFilter" class="mb-4 flex items-center gap-2 text-sm">
-            <span class="text-gray-600">Category:</span>
+            <span class="text-gray-600">Categorie:</span>
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 font-medium">
               {{ activeCategoryLabel }}
-              <button @click="clearCategoryFilter" class="hover:text-orange-900" aria-label="Clear category filter">
+              <button @click="clearCategoryFilter" class="hover:text-orange-900" aria-label="Categorie filter wissen">
                 &times;
               </button>
             </span>
           </div>
 
           <p class="text-sm text-gray-500 mb-3">
-            Total {{ meta.total }} results
-            <span v-if="meta.total > meta.per_page">(showing {{ meta.from }}–{{ meta.to }})</span>
+            {{ meta.total }} resultaten
+            <span v-if="meta.total > meta.per_page">({{ meta.from }}–{{ meta.to }} getoond)</span>
           </p>
 
           <!-- Error -->
@@ -358,10 +334,10 @@ onMounted(() => {
 
           <!-- Empty -->
           <div v-else-if="!isLoading && products.length === 0" class="text-center py-16 text-gray-500 text-sm">
-            No products found.
+            Geen producten gevonden.
           </div>
 
-          <!-- Cards — keep old grid visible while loading next page -->
+          <!-- Cards -->
           <div
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 transition-opacity duration-150"
             :class="isLoading && !isInitialLoad ? 'opacity-50 pointer-events-none' : 'opacity-100'"

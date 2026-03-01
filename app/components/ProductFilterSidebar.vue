@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { SlidersHorizontal } from 'lucide-vue-next'
 import {
   Accordion,
@@ -8,13 +8,12 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { getProductBrands, type ProductBrand } from '@/services/productBrand'
-import { getCategoryHierarchy, type MainCategory } from '@/services/category'
-import { getBmwModelsBySeries, type BmwModel } from '@/services/bmw'
+import { useCategoryStore } from '@/stores/category.store'
 import api from '@/services/api'
 
-// ─── URL query param sync ─────────────────────────────────────────────────────
 const route = useRoute()
 const router = useRouter()
+const categoryStore = useCategoryStore()
 
 // ─── Price range ─────────────────────────────────────────────────────────────
 const PRICE_FLOOR = 0
@@ -23,7 +22,6 @@ const PRICE_CEILING = 20000
 const priceMin = ref(Number(route.query.price_min) || PRICE_FLOOR)
 const priceMax = ref(Number(route.query.price_max) || PRICE_CEILING)
 
-// Debounce for price slider
 let priceDebounce: ReturnType<typeof setTimeout> | null = null
 
 function onPriceMinInput(e: Event) {
@@ -57,7 +55,6 @@ function commitPriceFilter() {
 
 watch([priceMin, priceMax], commitPriceFilter)
 
-// Track position percentage for slider styling
 const minPercent = computed(() => ((priceMin.value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100)
 const maxPercent = computed(() => ((priceMax.value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100)
 
@@ -78,8 +75,7 @@ function selectBrand(brandId: string) {
   router.replace({ query })
 }
 
-// ─── Categories ──────────────────────────────────────────────────────────────
-const categoryHierarchy = ref<MainCategory[]>([])
+// ─── Categories (from store — already loaded by Nav) ─────────────────────────
 const selectedMainCategory = ref<string>((route.query.main_category as string) || '')
 const selectedProductCategory = ref<string>((route.query.product_category as string) || '')
 const selectedSubcategory = ref<string>((route.query.subcategory as string) || '')
@@ -129,7 +125,7 @@ function selectSubcategory(slug: string) {
   router.replace({ query })
 }
 
-// ─── Group (Car models) ─────────────────────────────────────────────────────
+// ─── Car models ──────────────────────────────────────────────────────────────
 interface CarModel {
   id: string
   name: string
@@ -152,7 +148,6 @@ function selectCarModel(modelId: string) {
   router.replace({ query })
 }
 
-// Group car models by series
 const carModelsBySeries = computed(() => {
   const grouped = new Map<string, CarModel[]>()
   for (const model of carModels.value) {
@@ -163,38 +158,32 @@ const carModelsBySeries = computed(() => {
   return grouped
 })
 
-// ─── Sync URL → local state ─────────────────────────────────────────────────
+// ─── Sync URL → local state ───────────────────────────────────────────────────
 watch(
   () => route.query,
   (q) => {
-    selectedBrand.value = (q.brand as string) || ''
-    selectedMainCategory.value = (q.main_category as string) || ''
+    selectedBrand.value           = (q.brand as string) || ''
+    selectedMainCategory.value    = (q.main_category as string) || ''
     selectedProductCategory.value = (q.product_category as string) || ''
-    selectedSubcategory.value = (q.subcategory as string) || ''
-    selectedCarModel.value = (q.car_model as string) || ''
-    priceMin.value = Number(q.price_min) || PRICE_FLOOR
-    priceMax.value = Number(q.price_max) || PRICE_CEILING
+    selectedSubcategory.value     = (q.subcategory as string) || ''
+    selectedCarModel.value        = (q.car_model as string) || ''
+    priceMin.value                = Number(q.price_min) || PRICE_FLOOR
+    priceMax.value                = Number(q.price_max) || PRICE_CEILING
   },
   { deep: true },
 )
 
 // ─── Init ────────────────────────────────────────────────────────────────────
-onMounted(async () => {
+onMounted(() => {
   getProductBrands()
     .then((b) => { brands.value = b })
     .catch(() => {})
 
-  getCategoryHierarchy()
-    .then((h) => { categoryHierarchy.value = h })
-    .catch(() => {})
-
-  // Fetch car models
   api.get('/car-models', { params: { limit: 200 } })
     .then((res) => { carModels.value = res.data?.data || [] })
     .catch(() => {})
 })
 
-// ─── Accordion default state ────────────────────────────────────────────────
 const openSections = ref(['price'])
 </script>
 
@@ -211,20 +200,16 @@ const openSections = ref(['price'])
       <!-- ── Price Range ── -->
       <AccordionItem value="price">
         <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
-          Price
+          Prijs
         </AccordionTrigger>
         <AccordionContent>
           <div class="px-1">
-            <!-- Dual range slider -->
             <div class="relative h-6 mb-3">
-              <!-- Track background -->
               <div class="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-gray-200" />
-              <!-- Active track -->
               <div
                 class="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-orange-500"
                 :style="{ left: minPercent + '%', right: (100 - maxPercent) + '%' }"
               />
-              <!-- Min thumb -->
               <input
                 type="range"
                 :min="PRICE_FLOOR"
@@ -233,7 +218,6 @@ const openSections = ref(['price'])
                 @input="onPriceMinInput"
                 class="range-thumb absolute top-0 left-0 w-full h-full appearance-none bg-transparent pointer-events-none z-[3]"
               />
-              <!-- Max thumb -->
               <input
                 type="range"
                 :min="PRICE_FLOOR"
@@ -244,21 +228,21 @@ const openSections = ref(['price'])
               />
             </div>
             <div class="flex justify-between text-sm text-gray-600">
-              <span class="font-medium">${{ priceMin.toLocaleString() }}</span>
-              <span class="font-medium">${{ priceMax.toLocaleString() }}</span>
+              <span class="font-medium">€{{ priceMin.toLocaleString() }}</span>
+              <span class="font-medium">€{{ priceMax.toLocaleString() }}</span>
             </div>
           </div>
         </AccordionContent>
       </AccordionItem>
 
-      <!-- ── Group (Car Models) ── -->
+      <!-- ── Car Models ── -->
       <AccordionItem value="group">
         <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
-          Group
+          Model
         </AccordionTrigger>
         <AccordionContent>
           <div v-if="carModels.length === 0" class="text-sm text-gray-400 py-1">
-            No models available
+            Geen modellen beschikbaar
           </div>
           <div v-else class="max-h-52 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
             <template v-for="[series, models] in carModelsBySeries" :key="series">
@@ -279,29 +263,34 @@ const openSections = ref(['price'])
                 <span class="text-sm text-gray-700">{{ model.name }}</span>
               </label>
             </template>
-            <!-- Clear -->
             <button
               v-if="selectedCarModel"
               @click="selectCarModel(selectedCarModel)"
               class="text-xs text-orange-600 hover:text-orange-700 mt-1"
             >
-              Clear selection
+              Wis selectie
             </button>
           </div>
         </AccordionContent>
       </AccordionItem>
 
-      <!-- ── Category ── -->
+      <!-- ── Category (from store) ── -->
       <AccordionItem value="category">
         <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
-          Category
+          Categorie
         </AccordionTrigger>
         <AccordionContent>
-          <div v-if="categoryHierarchy.length === 0" class="text-sm text-gray-400 py-1">
-            No categories available
+          <!-- Loading -->
+          <div v-if="categoryStore.loading" class="text-sm text-gray-400 py-1">
+            Categorieën laden...
           </div>
+          <!-- Empty -->
+          <div v-else-if="categoryStore.mainCategories.length === 0" class="text-sm text-gray-400 py-1">
+            Geen categorieën beschikbaar
+          </div>
+          <!-- Tree -->
           <div v-else class="max-h-60 overflow-y-auto space-y-0.5 pr-1 scrollbar-thin">
-            <template v-for="mc in categoryHierarchy" :key="mc.id">
+            <template v-for="mc in categoryStore.mainCategories" :key="mc.id">
               <!-- Main category -->
               <label class="flex items-center gap-2 py-1.5 px-1 rounded cursor-pointer hover:bg-gray-50 transition-colors">
                 <input
@@ -334,7 +323,7 @@ const openSections = ref(['price'])
                 </label>
               </template>
             </template>
-            <!-- Clear -->
+
             <button
               v-if="selectedMainCategory || selectedProductCategory || selectedSubcategory"
               @click="() => {
@@ -347,7 +336,7 @@ const openSections = ref(['price'])
               }"
               class="text-xs text-orange-600 hover:text-orange-700 mt-1"
             >
-              Clear selection
+              Wis selectie
             </button>
           </div>
         </AccordionContent>
@@ -356,11 +345,11 @@ const openSections = ref(['price'])
       <!-- ── Brand ── -->
       <AccordionItem value="brand" class="border-b-0">
         <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
-          Brand
+          Merk
         </AccordionTrigger>
         <AccordionContent>
           <div v-if="brands.length === 0" class="text-sm text-gray-400 py-1">
-            No brands available
+            Geen merken beschikbaar
           </div>
           <div v-else class="max-h-52 overflow-y-auto space-y-0.5 pr-1 scrollbar-thin">
             <label
@@ -378,13 +367,12 @@ const openSections = ref(['price'])
               />
               <span class="text-sm text-gray-700">{{ brand.name }}</span>
             </label>
-            <!-- Clear -->
             <button
               v-if="selectedBrand"
               @click="selectBrand(selectedBrand)"
               class="text-xs text-orange-600 hover:text-orange-700 mt-1"
             >
-              Clear selection
+              Wis selectie
             </button>
           </div>
         </AccordionContent>
@@ -395,7 +383,6 @@ const openSections = ref(['price'])
 </template>
 
 <style scoped>
-/* ─── Dual range slider thumbs ─── */
 .range-thumb::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -421,7 +408,6 @@ const openSections = ref(['price'])
   pointer-events: auto;
 }
 
-/* Hide default track for overlapping inputs */
 .range-thumb::-webkit-slider-runnable-track {
   -webkit-appearance: none;
   appearance: none;
@@ -433,18 +419,8 @@ const openSections = ref(['price'])
   background: transparent;
 }
 
-/* Scrollbar for filter lists */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 2px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 </style>

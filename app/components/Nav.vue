@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { useCart } from '../stores/cart'
 import { useLocale } from '../stores/locale'
 import { useCarVariantStore } from '../stores/car-variant.store'
+import { useCategoryStore } from '../stores/category.store'
 import WishlistPopover from './Nav/WishlistPopover.vue'
 import SearchBar from './Nav/SearchBar.vue'
 import SelectedCarVariant from './Nav/SelectedCarVariant.vue'
@@ -21,6 +22,10 @@ const { t } = useLocale()
 
 const isMobileMenuOpen = ref(false)
 const showBmwSeriesMenu = ref(false)
+
+// ─── Pre-fetch categories as soon as the nav mounts ──────────────────────────
+const categoryStore = useCategoryStore()
+onMounted(() => categoryStore.fetchCategories())
 
 // ─── Mega-menu hover logic ───────────────────────────────────────────────────
 let closeTimer: ReturnType<typeof setTimeout> | null = null
@@ -50,11 +55,11 @@ function openSearchDialog() { carVariantStore.openDialog() }
 </script>
 
 <template>
-  <header class="z-50 w-full relative bg-white shadow-sm border-b text-gray-900">
-    <div class="outer-container flex items-center h-16 gap-6 px-6 mx-auto md:px-10">
+  <header class="relative z-50 w-full text-gray-900 bg-white border-b shadow-sm">
+    <div class="flex items-center h-16 gap-6 px-6 mx-auto outer-container md:px-10">
       <!-- Brand -->
-      <NuxtLink to="/" class="flex items-center gap-2 min-w-[160px]">
-        <span class="text-[20px] font-semibold text-[#ff6a00]">BIMMERParts</span>
+      <NuxtLink to="/" class="flex items-center min-w-[160px]">
+        <img src="/bimmerparts-logo-transparent.png" alt="BIMMERParts" class="h-auto w-[140px] object-contain" />
       </NuxtLink>
 
       <!-- Desktop Nav -->
@@ -67,10 +72,10 @@ function openSearchDialog() { carVariantStore.openDialog() }
           @mouseleave="scheduleMegaMenuClose"
         >
           <button
-            class="flex items-center gap-1 cursor-pointer text-gray-700 hover:text-orange-500 transition-colors"
+            class="flex items-center gap-1 text-gray-700 transition-colors cursor-pointer hover:text-orange-500"
             :class="{ 'text-orange-500': showBmwSeriesMenu }"
           >
-            BMW Series
+            Categorieën
             <ChevronDown
               class="w-4 h-4 transition-transform duration-200"
               :class="{ 'rotate-180': showBmwSeriesMenu }"
@@ -78,13 +83,13 @@ function openSearchDialog() { carVariantStore.openDialog() }
           </button>
         </div>
 
-        <NuxtLink to="/products" class="hover:text-orange-500">{{ t('nav.autoParts') }}</NuxtLink>
+        <NuxtLink to="/products" class="hover:text-orange-500">Producten</NuxtLink>
         <NuxtLink to="/about" class="hover:text-orange-500">{{ t('nav.about') }}</NuxtLink>
         <NuxtLink to="/contact" class="hover:text-orange-500">{{ t('nav.contact') }}</NuxtLink>
       </nav>
 
       <!-- Search — takes up remaining space (desktop only) -->
-      <div class="hidden lg:flex flex-1">
+      <div class="flex-1 hidden lg:flex">
         <SearchBar />
       </div>
 
@@ -101,7 +106,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <!-- Mobile menu toggle -->
         <button
           @click.stop="isMobileMenuOpen = true"
-          class="lg:hidden flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+          class="flex items-center justify-center w-10 h-10 text-gray-700 transition-colors border border-gray-300 rounded-full lg:hidden hover:bg-gray-50"
           aria-label="Open menu"
         >
           <Menu class="w-5 h-5" />
@@ -110,7 +115,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <!-- Cart (desktop only) -->
         <NuxtLink
           to="/cart"
-          class="relative items-center justify-center hidden w-10 h-10 transition-colors rounded-full lg:flex border border-gray-300 hover:bg-gray-50 text-gray-600"
+          class="relative items-center justify-center hidden w-10 h-10 text-gray-600 transition-colors border border-gray-300 rounded-full lg:flex hover:bg-gray-50"
           aria-label="Cart"
         >
           <ShoppingBag class="w-5 h-5" />
@@ -127,7 +132,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <!-- Account (desktop only) -->
         <NuxtLink
           to="/account"
-          class="relative items-center justify-center hidden w-10 h-10 transition-colors rounded-full lg:flex border border-gray-300 hover:bg-gray-50 text-gray-600"
+          class="relative items-center justify-center hidden w-10 h-10 text-gray-600 transition-colors border border-gray-300 rounded-full lg:flex hover:bg-gray-50"
           aria-label="Account"
         >
           <User class="w-5 h-5" />

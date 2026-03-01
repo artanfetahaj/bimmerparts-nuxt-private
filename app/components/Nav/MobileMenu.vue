@@ -1,41 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { X, ChevronDown, Loader2 } from 'lucide-vue-next'
 import { useLocale } from '../../stores/locale'
 import type { SupportedLocale } from '../../stores/locale'
-import { getCategoryHierarchy, type MainCategory } from '../../services/category'
+import { useCategoryStore } from '../../stores/category.store'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 
 const { t, currentLocale, setLocale } = useLocale()
+const categoryStore = useCategoryStore()
 
-// BMW Series accordion
-const showBmwSeries = ref(false)
-const mainCategories = ref<MainCategory[]>([])
-const loadingCategories = ref(false)
+// ─── Accordion state ──────────────────────────────────────────────────────────
+const showCategoriesMenu = ref(false)
 const expandedMainCat = ref<string | null>(null)
 
-function toggleBmwSeries() {
-  showBmwSeries.value = !showBmwSeries.value
-  if (showBmwSeries.value && mainCategories.value.length === 0) {
-    loadCategories()
-  }
+function toggleCategoriesMenu() {
+  showCategoriesMenu.value = !showCategoriesMenu.value
 }
 
 function toggleMainCat(id: string) {
   expandedMainCat.value = expandedMainCat.value === id ? null : id
-}
-
-async function loadCategories() {
-  loadingCategories.value = true
-  try {
-    mainCategories.value = await getCategoryHierarchy()
-  } catch {
-    console.error('Failed to load categories')
-  } finally {
-    loadingCategories.value = false
-  }
 }
 
 function switchLocale(locale: SupportedLocale) {
@@ -72,13 +57,13 @@ watch(() => props.open, (open) => {
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-5 pt-5 pb-4">
-          <NuxtLink to="/" class="text-[20px] font-semibold text-[#ff6a00]" @click="navigate">
-            BIMMERParts
+          <NuxtLink to="/" @click="navigate">
+            <img src="/bimmerparts-logo-transparent.png" alt="BIMMERParts" class="h-8 w-auto object-contain" />
           </NuxtLink>
           <button
             @click="emit('close')"
             class="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="Close menu"
+            aria-label="Sluiten"
           >
             <X class="w-6 h-6" />
           </button>
@@ -86,29 +71,30 @@ watch(() => props.open, (open) => {
 
         <!-- Navigation Links -->
         <nav class="flex-1 px-5 pt-2 overflow-y-auto">
-          <!-- BMW Series (accordion) -->
+
+          <!-- Categorieën (accordion) -->
           <div>
             <button
-              @click="toggleBmwSeries"
+              @click="toggleCategoriesMenu"
               class="flex items-center gap-2 w-full text-left text-[22px] font-semibold text-gray-900 py-3"
             >
-              BMW Series
+              Categorieën
               <ChevronDown
                 class="w-5 h-5 transition-transform duration-200"
-                :class="{ 'rotate-180': showBmwSeries }"
+                :class="{ 'rotate-180': showCategoriesMenu }"
               />
             </button>
 
-            <!-- Expandable categories -->
             <Transition name="accordion">
-              <div v-if="showBmwSeries" class="pl-4 pb-2">
-                <div v-if="loadingCategories" class="flex items-center gap-2 py-3">
+              <div v-if="showCategoriesMenu" class="pl-4 pb-2">
+                <!-- Loading — only shown if the store hasn't resolved yet -->
+                <div v-if="categoryStore.loading" class="flex items-center gap-2 py-3">
                   <Loader2 class="w-4 h-4 animate-spin text-orange-500" />
-                  <span class="text-sm text-gray-500">Loading...</span>
+                  <span class="text-sm text-gray-500">Laden...</span>
                 </div>
 
                 <div v-else>
-                  <div v-for="mainCat in mainCategories" :key="mainCat.id" class="mb-1">
+                  <div v-for="mainCat in categoryStore.mainCategories" :key="mainCat.id" class="mb-1">
                     <button
                       @click="toggleMainCat(mainCat.id)"
                       class="flex items-center justify-between w-full text-left text-base text-gray-700 py-2"
@@ -127,7 +113,7 @@ watch(() => props.open, (open) => {
                         <NuxtLink
                           v-for="prodCat in mainCat.categories"
                           :key="prodCat.id"
-                          :to="`/products?category=${prodCat.code}`"
+                          :to="{ path: '/products', query: { product_category: prodCat.id } }"
                           class="block text-sm text-gray-600 py-1.5 hover:text-orange-500 transition-colors"
                           @click="navigate"
                         >
@@ -141,7 +127,7 @@ watch(() => props.open, (open) => {
             </Transition>
           </div>
 
-          <!-- Auto Parts -->
+          <!-- Producten -->
           <NuxtLink
             to="/products"
             class="block text-[22px] font-semibold text-gray-900 py-3"
@@ -150,7 +136,7 @@ watch(() => props.open, (open) => {
             {{ t('nav.autoParts') }}
           </NuxtLink>
 
-          <!-- About Us -->
+          <!-- Over ons -->
           <NuxtLink
             to="/about"
             class="block text-[22px] font-semibold text-gray-900 py-3"
@@ -169,7 +155,7 @@ watch(() => props.open, (open) => {
           </NuxtLink>
         </nav>
 
-        <!-- Language Selector (bottom) -->
+        <!-- Language Selector -->
         <div class="px-5 pb-6 pt-4 flex items-center gap-3">
           <button
             @click="switchLocale('en')"
@@ -200,40 +186,23 @@ watch(() => props.open, (open) => {
   background-image: linear-gradient(180deg, #ffffff 0%, #fff7f1 40%, #ffe9db 100%);
 }
 
-/* Slide from right */
 .slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.3s ease;
-}
+.slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from,
-.slide-leave-to {
-  transform: translateX(100%);
-}
+.slide-leave-to { transform: translateX(100%); }
 
-/* Fade backdrop */
 .fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
+.fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+.fade-leave-to { opacity: 0; }
 
-/* Accordion expand/collapse */
 .accordion-enter-active,
 .accordion-leave-active {
   transition: all 0.25s ease;
   overflow: hidden;
 }
 .accordion-enter-from,
-.accordion-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
+.accordion-leave-to { opacity: 0; max-height: 0; }
 .accordion-enter-to,
-.accordion-leave-from {
-  opacity: 1;
-  max-height: 500px;
-}
+.accordion-leave-from { opacity: 1; max-height: 500px; }
 </style>

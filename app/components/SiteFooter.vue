@@ -10,7 +10,7 @@ const { t } = useLocale()
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Left Section: Logo & Description -->
         <div class="md:col-span-1">
-          <h3 class="text-2xl font-bold text-orange-500 mb-4">BIMMERParts</h3>
+          <img src="/bimmerparts-logo-transparent.png" alt="BIMMERParts" class="h-10 w-auto object-contain mb-4" />
           <p class="text-gray-600 text-sm mb-6">{{ t('footer.description') }}</p>
           <NuxtLink to="/contact" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 text-sm hover:bg-gray-50 transition-colors inline-block">
             {{ t('footer.contact') }}
