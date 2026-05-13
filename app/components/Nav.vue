@@ -55,6 +55,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
 </script>
 
 <template>
+  <div>
   <header class="relative z-50 w-full text-gray-900 bg-white border-b shadow-sm">
     <div class="flex items-center h-16 gap-6 px-6 mx-auto outer-container md:px-10">
       <!-- Brand -->
@@ -152,4 +153,5 @@ function openSearchDialog() { carVariantStore.openDialog() }
 
   <!-- Mobile Menu Drawer -->
   <MobileMenu :open="isMobileMenuOpen" @close="isMobileMenuOpen = false" />
+  </div>
 </template>

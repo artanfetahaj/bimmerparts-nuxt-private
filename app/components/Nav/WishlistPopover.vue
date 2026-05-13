@@ -9,10 +9,11 @@ const router = useRouter()
 const { items: wishlistItems, totalItems: wishlistCount, removeFromWishlist } = useWishlist()
 const { t } = useLocale()
 
-const handleWishlistItemClick = (productId: string | number) => {
-  const idString = String(productId)
-  if (idString && idString !== 'undefined' && idString !== 'null' && idString !== '') {
-    router.push(`/products/${idString}`)
+const handleWishlistItemClick = (item: { id: string; slug?: string }) => {
+  // Always prefer slug — navigating by UUID would try to match it as a slug and fail
+  const identifier = item.slug || item.id
+  if (identifier && identifier !== 'undefined' && identifier !== 'null' && identifier !== '') {
+    router.push(`/products/${identifier}`)
   }
 }
 </script>
@@ -38,7 +39,7 @@ const handleWishlistItemClick = (productId: string | number) => {
         <div
           v-for="item in wishlistItems"
           :key="item.id"
-          @click="handleWishlistItemClick(item.id)"
+          @click="handleWishlistItemClick(item)"
           class="flex items-start gap-3 py-3 transition-colors cursor-pointer select-none hover:bg-gray-50"
         >
           <img :src="item.image || '/images/placeholder-product.svg'" :alt="item.title" class="flex-shrink-0 object-contain w-12 h-12 border rounded pointer-events-none" />

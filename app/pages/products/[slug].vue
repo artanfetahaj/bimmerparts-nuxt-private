@@ -616,7 +616,7 @@ watch(() => route.params.slug, (newSlug) => {
 
           <!-- Ratings -->
           <div v-if="activeTab === 'ratings'">
-            <ProductReviews :product-id="parseInt(product.id)" />
+            <ProductReviews :product-id="product.id" />
           </div>
         </div>
       </div>
@@ -633,7 +633,7 @@ watch(() => route.params.slug, (newSlug) => {
           <NuxtLink
             v-for="sp in similarProducts"
             :key="sp.id"
-            :to="`/products/${sp.slug || sp.id}`"
+            :to="sp.slug ? `/products/${sp.slug}` : '#'"
             class="block"
           >
             <ProductCard :product="sp" />

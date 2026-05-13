@@ -4,6 +4,7 @@ import authService from '../services/auth'
 
 export interface WishlistItem {
   id: string
+  slug?: string
   title: string
   price: number
   oldPrice?: number
@@ -27,6 +28,7 @@ const loadWishlist = async () => {
         const productId = String(item.id || item.product_id || item.product?.id || '')
         return {
           id: productId,
+          slug: item.slug || undefined,
           title: item.title || item.product?.name || item.name || 'Product',
           price: parseFloat(item.price || item.product?.price || 0),
           oldPrice: item.oldPrice ? parseFloat(item.oldPrice) : undefined,
@@ -101,7 +103,7 @@ export function useWishlist() {
   const addToWishlist = async (productId: string | number, product?: Partial<WishlistItem>) => {
     try {
       const response = await api.post('/wishlist', {
-        product_id: parseInt(String(productId))
+        product_id: String(productId)
       })
       
       if (response.data?.success) {

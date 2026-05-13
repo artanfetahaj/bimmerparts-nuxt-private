@@ -243,7 +243,20 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'auth.validation.lastNameRequired': 'Last name is required',
     'auth.validation.confirmPasswordRequired': 'Please confirm your password',
     'auth.validation.passwordsDontMatch': 'Passwords do not match',
-    
+    'auth.forgotPasswordTitle': 'Forgot your password?',
+    'auth.forgotPasswordSubtitle': 'Enter your email address and we will send you a reset link.',
+    'auth.sendResetLink': 'Send reset link',
+    'auth.sendingResetLink': 'Sending...',
+    'auth.backToLogin': 'Back to login',
+    'auth.resetPasswordTitle': 'Set new password',
+    'auth.resetPasswordSubtitle': 'Enter your new password below.',
+    'auth.resetPassword': 'Reset password',
+    'auth.resettingPassword': 'Resetting...',
+    'auth.newPassword': 'New password',
+    'auth.confirmNewPassword': 'Confirm new password',
+    'auth.resetSuccess': 'Password changed successfully. You can now log in.',
+    'auth.invalidResetLink': 'This reset link is invalid or has expired.',
+
     // Account
     'account.title': 'My Account',
     'account.personalInfo': 'Personal Information',
@@ -383,6 +396,9 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'thankyou.order.title': 'Thank you for your order!',
     'thankyou.order.message': "We're thrilled to have you as a customer. Your payment has been processed successfully, and you should receive a confirmation email shortly.",
     'thankyou.backHome': 'Back Home',
+    'thankyou.orderNumber': 'Your order number is',
+    'thankyou.dhlTracking': 'You can track your order with DHL using the following tracking number',
+    'thankyou.trackPackage': 'Track Package',
 
     // Legal Pages
     'legal.privacy.title': 'Privacy Policy',
@@ -679,7 +695,20 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'auth.validation.lastNameRequired': 'Achternaam is verplicht',
     'auth.validation.confirmPasswordRequired': 'Bevestig uw wachtwoord',
     'auth.validation.passwordsDontMatch': 'Wachtwoorden komen niet overeen',
-    
+    'auth.forgotPasswordTitle': 'Wachtwoord vergeten?',
+    'auth.forgotPasswordSubtitle': 'Voer uw e-mailadres in en wij sturen u een resetlink.',
+    'auth.sendResetLink': 'Resetlink versturen',
+    'auth.sendingResetLink': 'Versturen...',
+    'auth.backToLogin': 'Terug naar inloggen',
+    'auth.resetPasswordTitle': 'Nieuw wachtwoord instellen',
+    'auth.resetPasswordSubtitle': 'Voer hieronder uw nieuwe wachtwoord in.',
+    'auth.resetPassword': 'Wachtwoord opnieuw instellen',
+    'auth.resettingPassword': 'Opnieuw instellen...',
+    'auth.newPassword': 'Nieuw wachtwoord',
+    'auth.confirmNewPassword': 'Bevestig nieuw wachtwoord',
+    'auth.resetSuccess': 'Wachtwoord succesvol gewijzigd. U kunt nu inloggen.',
+    'auth.invalidResetLink': 'Deze resetlink is ongeldig of verlopen.',
+
     // Account
     'account.title': 'Mijn Account',
     'account.personalInfo': 'Persoonlijke Informatie',
@@ -819,6 +848,9 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'thankyou.order.title': 'Bedankt voor uw bestelling!',
     'thankyou.order.message': 'We zijn blij u als klant te hebben. Uw betaling is succesvol verwerkt en u ontvangt binnenkort een bevestigingsmail.',
     'thankyou.backHome': 'Terug naar Home',
+    'thankyou.orderNumber': 'Uw bestelnummer is',
+    'thankyou.dhlTracking': 'U kunt uw bestelling volgen via DHL met het volgende trackingnummer',
+    'thankyou.trackPackage': 'Pakket Volgen',
 
     // Legal Pages
     'legal.privacy.title': 'Privacybeleid',

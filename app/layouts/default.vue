@@ -1,5 +1,5 @@
 <template>
-  <Nav variant="solid" />
+  <Nav />
   <slot />
   <SiteFooter />
 </template>

@@ -4,7 +4,7 @@ import { submitReview, type SubmitReviewData } from '../../services/review'
 import authService from '../../services/auth'
 
 interface Props {
-  productId: number
+  productId: string
 }
 
 const props = defineProps<Props>()

@@ -179,6 +179,32 @@ class AuthService {
   }
 
   /**
+   * Send password reset link
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/auth/forgot-password', { email })
+      return response.data
+    } catch (error: any) {
+      if (error.response?.data) throw error.response.data
+      throw { success: false, message: 'Network error occurred' }
+    }
+  }
+
+  /**
+   * Reset password using token from email link
+   */
+  async resetPassword(data: { email: string; token: string; password: string; password_confirmation: string }): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/auth/reset-password', data)
+      return response.data
+    } catch (error: any) {
+      if (error.response?.data) throw error.response.data
+      throw { success: false, message: 'Network error occurred' }
+    }
+  }
+
+  /**
    * Validate token and restore session if valid
    */
   async validateSession(): Promise<boolean> {
