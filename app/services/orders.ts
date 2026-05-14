@@ -43,8 +43,8 @@ class OrdersService {
     billing_address?: string
     payment_method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery'
     notes?: string
-    items: { product_id: number; quantity: number }[]
-  }): Promise<{ order_number: string }> {
+    items: { product_id: string; quantity: number }[]
+  }): Promise<{ order_number: string; dhl_tracking_code?: string | null; dhl_label_url?: string | null }> {
     const res = await api.post('/orders', payload)
     return res.data?.data || { order_number: '' }
   }

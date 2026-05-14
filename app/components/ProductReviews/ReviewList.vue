@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { getProductReviews, type ProductReview } from '../../services/review'
 
 interface Props {
-  productId: number
+  productId: string
 }
 
 const props = defineProps<Props>()

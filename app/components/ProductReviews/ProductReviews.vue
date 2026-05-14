@@ -6,7 +6,7 @@ import ReviewForm from './ReviewForm.vue'
 import ReviewList from './ReviewList.vue'
 
 interface Props {
-  productId: number
+  productId: string
 }
 
 const props = defineProps<Props>()

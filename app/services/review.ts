@@ -2,7 +2,7 @@ import api from './api'
 
 export interface ProductReview {
   id: number
-  product_id: number
+  product_id: string
   customer_id?: number
   customer_name: string
   customer_email: string
@@ -34,7 +34,7 @@ export interface ReviewStatistics {
 }
 
 export interface SubmitReviewData {
-  product_id: number
+  product_id: string
   rating: number
   comment: string
   customer_name?: string
@@ -45,7 +45,7 @@ export interface SubmitReviewData {
  * Get reviews for a specific product
  */
 export async function getProductReviews(
-  productId: number,
+  productId: string,
   page = 1,
   perPage = 10
 ): Promise<{ data: ProductReview[]; meta: any }> {
@@ -66,7 +66,7 @@ export async function getProductReviews(
 /**
  * Get review statistics for a product
  */
-export async function getReviewStatistics(productId: number): Promise<ReviewStatistics> {
+export async function getReviewStatistics(productId: string): Promise<ReviewStatistics> {
   try {
     const response = await api.get(`/products/${productId}/reviews/statistics`)
     return response.data

@@ -12,6 +12,8 @@ export default defineNuxtConfig({
     '/products': { swr: 3600 },
     '/product/**': { swr: 600 },
     '/cart': { ssr: false },
+    '/checkout': { ssr: false },
+    '/order-thanks': { ssr: false },
     '/account': { ssr: false },
   },
 

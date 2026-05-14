@@ -112,7 +112,7 @@ export const useCart = () => {
     
     try {
       const response = await api.post('/cart', {
-        product_id: parseInt(String(productId)),
+        product_id: String(productId),
         quantity: quantity
       })
       

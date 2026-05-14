@@ -1,5 +1,5 @@
 // Test utility to verify order flow
-import orderService from '../services/order'
+import orderService from '../services/orders'
 
 export async function testOrderFlow() {
   console.log('🧪 Testing Order Flow...')

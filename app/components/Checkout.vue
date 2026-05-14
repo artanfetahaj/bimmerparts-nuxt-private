@@ -1,26 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCart } from '../stores/cart'
 import { useLocale } from '../stores/locale'
-import HeaderNav from './HeaderNav.vue'
 import SiteFooter from './SiteFooter.vue'
 import ordersService from '../services/orders'
-import productService from '../services/product'
 import authService from '../services/auth'
 
-const emit = defineEmits<{
-  navigateToHome: []
-  navigateToProducts: []
-  navigateToProduct: [productId: string]
-  navigateToCart: []
-  navigateToAbout: []
-  navigateToContact: []
-  navigateToTerms: []
-  navigateToPrivacy: []
-  navigateToWishlist: []
-  navigateToAccount: []
-  navigateToOrderThanks: []
-}>()
+const router = useRouter()
 
 const { cartItems, totalPrice, clearCart, removeFromCart, updateQuantity } = useCart()
 const { t } = useLocale()
@@ -90,52 +77,22 @@ const orderTotal = computed(() => subtotal.value + deliveryFee.value)
 
 // Watch for empty cart and redirect to products
 watch(() => cartItems.value.length, (newLength, oldLength) => {
-  // Only redirect if cart becomes empty (not on initial load when oldLength is undefined)
   if (newLength === 0 && oldLength !== undefined && oldLength > 0) {
-    emit('navigateToProducts')
+    router.push('/products')
   }
 })
 
-// Methods
-const handleHomeClick = () => {
-  emit('navigateToHome')
-}
-
-const handleNavigateToProducts = () => {
-  emit('navigateToProducts')
-}
-
-const handleNavigateToProduct = (productId: string) => {
-  emit('navigateToProduct', productId)
-}
-
-const handleNavigateToCart = () => {
-  emit('navigateToCart')
-}
-
-const handleNavigateToAbout = () => {
-  emit('navigateToAbout')
-}
-
-const handleNavigateToContact = () => {
-  emit('navigateToContact')
-}
-
-const handleNavigateToTerms = () => {
-  emit('navigateToTerms')
-}
-
-const handleNavigateToPrivacy = () => {
-  emit('navigateToPrivacy')
-}
-
-const handleNavigateToWishlist = () => {
-  emit('navigateToWishlist')
-}
-
-const handleNavigateToAccount = () => {
-  emit('navigateToAccount')
-}
+// Navigation handlers
+const handleHomeClick          = () => router.push('/')
+const handleNavigateToProducts = () => router.push('/products')
+const handleNavigateToProduct  = (productId: string) => router.push(`/products/${productId}`)
+const handleNavigateToCart     = () => router.push('/cart')
+const handleNavigateToAbout    = () => router.push('/about')
+const handleNavigateToContact  = () => router.push('/contact')
+const handleNavigateToTerms    = () => router.push('/terms')
+const handleNavigateToPrivacy  = () => router.push('/privacy')
+const handleNavigateToWishlist = () => router.push('/wishlist')
+const handleNavigateToAccount  = () => router.push('/account')
 
   // Validation function
 const validateForm = () => {
@@ -173,40 +130,42 @@ const handleOrderNow = async () => {
   orderError.value = ''
   isSubmitting.value = true
   
-  // Build order payload for API and CMS
-  // Use product_id instead of cart item id
-  const itemsPayload: { product_id: number; quantity: number }[] = cartItems.value.map(ci => ({
-    product_id: parseInt(ci.product_id || ci.id, 10), // Use product_id if available, fallback to id
+  const itemsPayload: { product_id: string; quantity: number }[] = cartItems.value.map(ci => ({
+    product_id: ci.product_id,
     quantity: ci.quantity
   }))
 
-  // If customer is logged in, use their account email to ensure proper order linking
-  const customerEmail = authService.isAuthenticated() 
+  const customerEmail = authService.isAuthenticated()
     ? (authService.getCurrentCustomer()?.email || formData.value.email)
     : formData.value.email
 
+  let orderResult: any = null
+
   try {
-    const result = await ordersService.create({
+    orderResult = await ordersService.create({
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
-      customer_email: customerEmail, // Use account email if logged in
+      customer_email: customerEmail,
       customer_phone: formData.value.phone,
       shipping_address: `${formData.value.address}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
       billing_address: `${formData.value.address}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
       payment_method: 'bank_transfer',
       items: itemsPayload
     })
-    
-    console.log('Order created successfully:', result)
   } catch (e: any) {
     console.error('Order creation failed', e)
     orderError.value = e?.response?.data?.message || e?.message || 'Failed to create order. Please try again.'
     isSubmitting.value = false
-    return // Don't navigate if order creation fails
+    return
   }
 
-  // Clear cart and navigate to thank you
   clearCart()
-  emit('navigateToOrderThanks')
+  const query: Record<string, string> = {
+    order: orderResult?.order_number ?? '',
+  }
+  if (orderResult?.dhl_tracking_code) {
+    query.tracking = orderResult.dhl_tracking_code
+  }
+  router.push({ path: '/order-thanks', query })
 }
 
 </script>

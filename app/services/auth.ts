@@ -63,7 +63,7 @@ class AuthService {
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
-          await api.post('/wishlist/merge')
+          // await api.post('/wishlist/merge')
         } catch (mergeError) {
           console.warn('Failed to merge cart/wishlist:', mergeError)
         }
@@ -97,7 +97,7 @@ class AuthService {
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
-          await api.post('/wishlist/merge')
+          // await api.post('/wishlist/merge')
         } catch (mergeError) {
           console.warn('Failed to merge cart/wishlist:', mergeError)
         }
@@ -176,6 +176,32 @@ class AuthService {
    */
   async changePassword(data: { current_password: string; password: string; password_confirmation: string }): Promise<void> {
     await api.post('/customer/change-password', data)
+  }
+
+  /**
+   * Send password reset link
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/auth/forgot-password', { email })
+      return response.data
+    } catch (error: any) {
+      if (error.response?.data) throw error.response.data
+      throw { success: false, message: 'Network error occurred' }
+    }
+  }
+
+  /**
+   * Reset password using token from email link
+   */
+  async resetPassword(data: { email: string; token: string; password: string; password_confirmation: string }): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post('/auth/reset-password', data)
+      return response.data
+    } catch (error: any) {
+      if (error.response?.data) throw error.response.data
+      throw { success: false, message: 'Network error occurred' }
+    }
   }
 
   /**

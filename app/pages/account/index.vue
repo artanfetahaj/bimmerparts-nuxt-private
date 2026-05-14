@@ -2,28 +2,22 @@
 import { ref, onMounted, computed } from 'vue'
 import authService from '@/services/auth'
 import { useLocale } from '@/stores/locale'
-import { useRouter } from 'vue-router'
+import { User, ShieldCheck, ShoppingBag, LogOut } from 'lucide-vue-next'
+import PersonalInformation from '@/components/account/PersonalInformation.vue'
+import Security from '@/components/account/Security.vue'
+import Orders from '@/components/account/Orders.vue'
 
-const router = useRouter()
+definePageMeta({ middleware: 'auth' })
+
 const { t } = useLocale()
 
 type TabKey = 'personal' | 'security' | 'orders'
 const activeTab = ref<TabKey>('personal')
 
+// Validate token freshness after mount; kick out if expired
 onMounted(async () => {
-  if (!authService.isAuthenticated()) {
-    router.push('/account/login')
-    return
-  }
-  try {
-    const isValid = await authService.validateSession()
-    if (!isValid) {
-      router.push('/account/login')
-    }
-  } catch (error) {
-    console.error('Error validating session:', error)
-    router.push('/account/login')
-  }
+  const isValid = await authService.validateSession().catch(() => false)
+  if (!isValid) navigateTo('/account/login')
 })
 
 const tabs = computed<{ key: TabKey; label: string }[]>(() => [
@@ -36,11 +30,16 @@ const setTab = (key: TabKey) => {
   activeTab.value = key
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+const handleLogout = async () => {
+  await authService.logout()
+  navigateTo('/account/login')
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 md:px-6 py-10">
+    <div class="container mx-auto px-4 md:px-6 py-15">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Sidebar -->
         <aside class="md:col-span-1">
@@ -55,13 +54,22 @@ const setTab = (key: TabKey) => {
                 :class="activeTab === tab.key ? 'bg-gray-50 text-slate-800 border border-gray-200' : 'text-slate-700 hover:bg-gray-50 border border-transparent'"
               >
                 <span class="flex items-center gap-3">
-                  <img v-if="tab.key === 'personal'" src="/images/Profile Icon.svg" alt="Profile" class="h-7 w-7" />
-                  <img v-else-if="tab.key === 'security'" src="/images/Security.svg" alt="Security" class="h-7 w-7" />
-                  <img v-else src="/images/Order.svg" alt="Orders" class="h-7 w-7" />
+                  <User v-if="tab.key === 'personal'" class="h-5 w-5 text-gray-500" />
+                  <ShieldCheck v-else-if="tab.key === 'security'" class="h-5 w-5 text-gray-500" />
+                  <ShoppingBag v-else class="h-5 w-5 text-gray-500" />
                   <span class="text-xl font-semibold">{{ tab.label }}</span>
                 </span>
               </button>
             </nav>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <button
+                @click="handleLogout"
+                class="w-full text-left px-3 py-3 rounded-2xl text-base flex items-center gap-3 text-red-500 hover:bg-red-50 border border-transparent transition-colors"
+              >
+                <LogOut class="h-5 w-5" />
+                <span class="text-xl font-semibold">{{ t('account.logout') }}</span>
+              </button>
+            </div>
           </div>
         </aside>
 
