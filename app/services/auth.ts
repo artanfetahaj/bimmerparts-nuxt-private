@@ -63,7 +63,7 @@ class AuthService {
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
-          await api.post('/wishlist/merge')
+          // await api.post('/wishlist/merge')
         } catch (mergeError) {
           console.warn('Failed to merge cart/wishlist:', mergeError)
         }
@@ -97,7 +97,7 @@ class AuthService {
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
-          await api.post('/wishlist/merge')
+          // await api.post('/wishlist/merge')
         } catch (mergeError) {
           console.warn('Failed to merge cart/wishlist:', mergeError)
         }

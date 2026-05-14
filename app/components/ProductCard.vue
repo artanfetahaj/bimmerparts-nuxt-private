@@ -13,19 +13,16 @@ const { t, currentLocale } = useLocale()
 const isInWishlist = (id: string) =>
   wishlistItems.value.some(item => String(item.id) === String(id))
 
-const handleToggleWishlist = async (e: MouseEvent) => {
+const handleToggleWishlist = (e: MouseEvent) => {
   e.stopPropagation()
   e.preventDefault()
-  try {
-    await toggleWishlist(props.product.id, {
-      id: props.product.id,
-      title: props.product.name,
-      price: displayPrice.value,
-      image: props.product.image?.url ?? '',
-    })
-  } catch (error) {
-    console.error('Failed to toggle wishlist:', error)
-  }
+  toggleWishlist(props.product.id, {
+    id: props.product.id,
+    slug: props.product.slug,
+    title: props.product.name,
+    price: displayPrice.value,
+    image: props.product.image?.url ?? '',
+  })
 }
 
 // Price helpers
