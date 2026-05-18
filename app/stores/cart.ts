@@ -69,12 +69,16 @@ export const useCart = () => {
     }
   })
 
-  // Listen for auth changes to merge cart
+  // Listen for auth changes — merge on login, clear on logout
   if (typeof window !== 'undefined') {
     window.addEventListener('auth-changed', async () => {
-      if (authService.isAuthenticated() && !initialized.value) {
+      if (authService.isAuthenticated()) {
         await mergeCart()
         await loadCart()
+      } else {
+        // User logged out — clear local cart state immediately
+        cartItems.value = []
+        initialized.value = false
       }
     })
   }
