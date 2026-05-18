@@ -3,6 +3,14 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductReviews from '@/components/ProductReviews/ProductReviews.vue'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { useCart } from '@/stores/cart'
 import { useWishlist } from '@/stores/wishlist'
 import { useLocale } from '@/stores/locale'
@@ -228,11 +236,19 @@ const cartItem = computed(() => {
   }
 })
 
+const showCartDialog = ref(false)
+
 const handleAddToCart = () => {
   if (!cartItem.value || isOutOfStock.value) return
+  showCartDialog.value = true
+}
+
+const confirmAddToCart = () => {
+  if (!cartItem.value) return
   const qty = Math.min(Math.max(1, quantity.value), stockCount.value)
   quantity.value = qty
   addToCart(cartItem.value, qty)
+  showCartDialog.value = false
 }
 
 const handleBuyNow = () => {
@@ -456,38 +472,6 @@ watch(() => route.params.slug, (newSlug) => {
               </div>
             </div>
 
-            <!-- Payment Options -->
-            <div class="space-y-3 min-w-0 -mx-2 sm:-mx-4">
-              <div class="flex items-center min-w-0 px-2 sm:px-4">
-                <p class="text-sm text-gray-600 flex-shrink-0">{{ t('checkout.paymentMethod') }}:</p>
-                <div class="flex-1 border-t border-gray-200 ml-4 min-w-0"></div>
-              </div>
-              <div :class="[
-                'flex items-center flex-wrap min-w-0 gap-2 px-2 sm:px-4',
-                currentLocale === 'en'
-                  ? 'space-x-8 min-[375px]:space-x-10 min-[425px]:space-x-12 md:space-x-20 lg:space-x-16 xl:space-x-20'
-                  : 'space-x-6 min-[375px]:space-x-8 min-[425px]:space-x-10 md:space-x-16 lg:space-x-14 xl:space-x-16'
-              ]">
-                <div class="flex items-center space-x-2 flex-shrink-0">
-                  <div class="w-8 h-8 min-[375px]:w-10 min-[375px]:h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <img src="/images/contant.svg" alt="Cash" class="h-5 w-5 min-[375px]:h-6 min-[375px]:w-6 flex-shrink-0" />
-                  </div>
-                  <span class="text-xs sm:text-sm text-gray-900 whitespace-nowrap">{{ t('productDetail.payCash') }}</span>
-                </div>
-                <div class="flex items-center space-x-2 flex-shrink-0">
-                  <div class="w-8 h-8 min-[375px]:w-10 min-[375px]:h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <img src="/images/Card.svg" alt="Card" class="h-5 w-5 min-[375px]:h-6 min-[375px]:w-6 flex-shrink-0" />
-                  </div>
-                  <span class="text-xs sm:text-sm text-gray-900 whitespace-nowrap">{{ t('productDetail.payOnline') }}</span>
-                </div>
-                <div class="flex items-center space-x-2 flex-shrink-0">
-                  <div class="w-8 h-8 min-[375px]:w-10 min-[375px]:h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <img src="/images/Bank.svg" alt="Bank" class="h-5 w-5 min-[375px]:h-6 min-[375px]:w-6 flex-shrink-0" />
-                  </div>
-                  <span class="text-xs sm:text-sm text-gray-900 whitespace-nowrap">{{ t('productDetail.payBankTransfer') }}</span>
-                </div>
-              </div>
-            </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2 sm:gap-4">
@@ -524,7 +508,7 @@ watch(() => route.params.slug, (newSlug) => {
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
                 <span class="text-xs sm:text-base whitespace-nowrap hidden min-[375px]:inline">
-                  {{ isInWishlist(product.id) ? t('productDetail.inWishlist') : t('productDetail.addToWishlist') }}
+                  {{  t('productDetail.addToWishlist') }}
                 </span>
               </button>
             </div>
@@ -645,6 +629,46 @@ watch(() => route.params.slug, (newSlug) => {
       </div>
 
     </div>
+
+    <!-- ── Add to Cart Confirmation Dialog ── -->
+    <Dialog :open="showCartDialog" @update:open="showCartDialog = $event">
+      <DialogContent class="sm:max-w-md p-4">
+        <DialogHeader>
+          <DialogTitle>Toevoegen aan winkelwagen</DialogTitle>
+          <DialogDescription>
+            Weet je zeker dat je dit product wilt toevoegen aan je winkelwagen?
+          </DialogDescription>
+        </DialogHeader>
+
+        <!-- Product summary -->
+        <div class="flex items-center gap-4 py-2">
+          <div class="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+            <img :src="productImages[0]" :alt="product?.name" class="w-full h-full object-contain p-1" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">{{ product?.name }}</p>
+            <p class="text-sm text-gray-500 mt-0.5">Aantal: {{ quantity }}</p>
+            <p class="text-sm font-semibold text-gray-900 mt-0.5">&euro;{{ formatPrice(price * quantity) }}</p>
+          </div>
+        </div>
+
+        <DialogFooter class="flex gap-2 sm:gap-2">
+          <button
+            @click="showCartDialog = false"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Annuleren
+          </button>
+          <button
+            @click="confirmAddToCart"
+            class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
+          >
+            Toevoegen
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
   </div>
 </template>
 

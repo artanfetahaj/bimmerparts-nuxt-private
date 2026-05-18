@@ -5,6 +5,7 @@ import authService from '../services/auth'
 export interface CartItem {
   id: string
   product_id: string
+  slug?: string
   title: string
   price: number
   oldPrice: number
@@ -28,6 +29,7 @@ const loadCart = async () => {
       cartItems.value = response.data.data.items.map((item: any) => ({
         id: item.id,
         product_id: item.product_id,
+        slug: item.slug,
         title: item.title,
         price: parseFloat(item.price),
         oldPrice: item.oldPrice ? parseFloat(item.oldPrice) : parseFloat(item.price),

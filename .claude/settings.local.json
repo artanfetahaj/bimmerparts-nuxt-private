@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx nuxi typecheck)",
-      "Bash(npx nuxi build)"
+      "Bash(npx nuxi build)",
+      "Bash(Get-ChildItem -Path \"C:\\\\xampp\\\\htdocs\\\\\" -Directory | Select-Object Name)"
     ]
   }
 }

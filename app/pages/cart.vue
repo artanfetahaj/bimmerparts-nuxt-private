@@ -143,7 +143,10 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
                       <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-1" />
                     </div>
                     <div class="flex-1">
-                      <h3 class="text-sm font-medium text-gray-900 mb-1">{{ item.title }}</h3>
+                      <NuxtLink
+                        :to="item.slug ? `/products/${item.slug}` : `/products`"
+                        class="text-sm font-medium text-gray-900 mb-1 hover:text-orange-500 transition-colors line-clamp-2"
+                      >{{ item.title }}</NuxtLink>
                       <button @click="removeFromCart(item.id)" class="text-red-500 hover:text-red-700 transition-colors text-xs">
                         {{ t('cart.delete') }}
                       </button>

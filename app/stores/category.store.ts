@@ -12,6 +12,11 @@ export const useCategoryStore = defineStore('category', () => {
   const loaded = ref(false)
   const error = ref(false)
 
+  const variantCategories = ref<MainCategory[]>([])
+  const variantCategoriesLoading = ref(false)
+  const variantCategoriesError = ref(false)
+  const loadedVariantId = ref<string | null>(null)
+
   // ─── Getters ──────────────────────────────────────────────────────────────
 
   const allProductCategories = computed<ProductCategory[]>(() =>
@@ -62,6 +67,38 @@ export const useCategoryStore = defineStore('category', () => {
     }
   }
 
+  async function fetchCategoriesForVariant(variantId: string) {
+    if (loadedVariantId.value === variantId || variantCategoriesLoading.value) return
+
+    variantCategoriesLoading.value = true
+    variantCategoriesError.value = false
+
+    try {
+      const response = await new MainCategory()
+        .include(MainCategoryIncludes.CATEGORIES_SUBCATEGORIES)
+        .filter('car_variant', variantId)
+        .limit(100)
+        .all()
+
+      variantCategories.value = Array.isArray(response)
+        ? response
+        : (response.data ?? [])
+
+      loadedVariantId.value = variantId
+    } catch (e) {
+      console.error('[CategoryStore] Failed to fetch variant categories:', e)
+      variantCategoriesError.value = true
+    } finally {
+      variantCategoriesLoading.value = false
+    }
+  }
+
+  function resetVariantCategories() {
+    variantCategories.value = []
+    loadedVariantId.value = null
+    variantCategoriesError.value = false
+  }
+
   function reset() {
     mainCategories.value = []
     loaded.value = false
@@ -74,6 +111,9 @@ export const useCategoryStore = defineStore('category', () => {
     loading,
     loaded,
     error,
+    variantCategories,
+    variantCategoriesLoading,
+    variantCategoriesError,
     // getters
     allProductCategories,
     allSubcategories,
@@ -82,6 +122,8 @@ export const useCategoryStore = defineStore('category', () => {
     getSubcategoryBySlug,
     // actions
     fetchCategories,
+    fetchCategoriesForVariant,
+    resetVariantCategories,
     reset,
   }
 })

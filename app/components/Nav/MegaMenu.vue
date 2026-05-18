@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCategoryStore } from '../../stores/category.store'
+import { useCarVariantStore } from '../../stores/car-variant.store'
 import type { MainCategory } from '../../models/MainCategory'
 import type { ProductCategory } from '../../models/ProductCategory'
 import { ChevronRight, Loader2, FolderOpen } from 'lucide-vue-next'
@@ -9,19 +10,51 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 const emit = defineEmits<{ close: [] }>()
 
 const categoryStore = useCategoryStore()
+const carVariantStore = useCarVariantStore()
+
+// ─── Active category list (all or filtered by selected car variant) ──────────
+
+const activeCategories = computed<MainCategory[]>(() => {
+  if (carVariantStore.selectedVariant) {
+    return categoryStore.variantCategories
+  }
+  return categoryStore.mainCategories
+})
+
+const isLoading = computed(() =>
+  carVariantStore.selectedVariant
+    ? categoryStore.variantCategoriesLoading
+    : categoryStore.loading
+)
+
+// Fetch variant-specific categories whenever the selected car changes
+watch(
+  () => carVariantStore.selectedVariant,
+  (variant) => {
+    if (variant) {
+      categoryStore.fetchCategoriesForVariant(variant.id)
+    } else {
+      categoryStore.resetVariantCategories()
+    }
+  },
+  { immediate: true },
+)
 
 // ─── Local hover state ───────────────────────────────────────────────────────
 
 const hoveredMainCategory = ref<MainCategory | null>(null)
 const hoveredProductCategory = ref<ProductCategory | null>(null)
 
-// Auto-select first items when the store data becomes available
+// Auto-select first items when the active list changes
 watch(
-  () => categoryStore.mainCategories,
+  activeCategories,
   (cats) => {
-    if (cats.length && !hoveredMainCategory.value) {
+    if (cats.length) {
       hoveredMainCategory.value = cats[0]
       hoveredProductCategory.value = cats[0].categories?.[0] ?? null
+    } else {
+      hoveredMainCategory.value = null
+      hoveredProductCategory.value = null
     }
   },
   { immediate: true },
@@ -53,19 +86,19 @@ function onProductCategoryHover(prodCat: ProductCategory) {
   <div class="mega-menu absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-xl z-50">
 
     <!-- Loading state -->
-    <div v-if="categoryStore.loading" class="flex items-center justify-center py-16">
+    <div v-if="isLoading" class="flex items-center justify-center py-16">
       <Loader2 class="w-6 h-6 text-orange-500 animate-spin" />
       <span class="ml-2 text-sm text-gray-500">Categorieën laden...</span>
     </div>
 
     <!-- Error state -->
-    <div v-else-if="categoryStore.error" class="flex items-center justify-center py-16">
+    <div v-else-if="categoryStore.error || categoryStore.variantCategoriesError" class="flex items-center justify-center py-16">
       <span class="text-sm text-gray-500">Categorieën konden niet worden geladen.</span>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="categoryStore.mainCategories.length === 0" class="flex items-center justify-center py-16">
-      <span class="text-sm text-gray-500">Geen categorieën beschikbaar.</span>
+    <div v-else-if="activeCategories.length === 0" class="flex items-center justify-center py-16">
+      <span class="text-sm text-gray-500">Geen categorieën beschikbaar voor dit voertuig.</span>
     </div>
 
     <!-- 3-column layout -->
@@ -80,7 +113,7 @@ function onProductCategoryHover(prodCat: ProductCategory) {
           <ScrollArea class="flex-1 min-h-0">
             <ul class="pr-2 pb-4">
               <li
-                v-for="mainCat in categoryStore.mainCategories"
+                v-for="mainCat in activeCategories"
                 :key="mainCat.id"
                 @mouseenter="onMainCategoryHover(mainCat)"
                 class="group"
