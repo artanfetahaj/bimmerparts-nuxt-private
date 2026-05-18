@@ -6,13 +6,14 @@ import { useLocale } from '../stores/locale'
 import SiteFooter from './SiteFooter.vue'
 import ordersService from '../services/orders'
 import authService from '../services/auth'
+import { autocompleteAddress } from '../services/geocode'
 
 const router = useRouter()
 
 const { cartItems, totalPrice, clearCart, removeFromCart, updateQuantity } = useCart()
 const { t } = useLocale()
 
-// Form data 
+// Form data
 const formData = ref({
   firstName: '',
   lastName: '',
@@ -20,11 +21,36 @@ const formData = ref({
   city: '',
   address: '',
   address2: '',
+  houseNumber: '',
   postCode: '',
   country: '',
   email: '',
   phone: '',
 })
+
+// ─── Address autocomplete ─────────────────────────────────────────────────────
+const isGeocoding = ref(false)
+
+async function onAddressLookup() {
+  if (!formData.value.postCode || !formData.value.houseNumber) return
+
+  isGeocoding.value = true
+  try {
+    const result = await autocompleteAddress({
+      postcode: formData.value.postCode,
+      house_number: formData.value.houseNumber,
+    })
+
+    if (result) {
+      formData.value.address = result.street
+      formData.value.city = result.city
+    }
+  } catch (e) {
+    console.error('[Checkout] Address lookup failed:', e)
+  } finally {
+    isGeocoding.value = false
+  }
+}
 
 // Load customer profile data if authenticated
 const loadCustomerData = async () => {
@@ -235,7 +261,7 @@ const handleOrderNow = async () => {
                 </div>
               </div>
 
-              <!-- Row 2: Company | City -->
+              <!-- Row 2: Company -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.company') }}</label>
@@ -246,37 +272,36 @@ const handleOrderNow = async () => {
                     class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
                   />
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 mb-2">
-                    {{ t('checkout.city') }} <span class="text-red-500">*</span>
-                  </label>
-                  <input
-                    v-model="formData.city"
-                    @input="validationErrors.city = ''"
-                    type="text"
-                    :placeholder="t('checkout.enterCity')"
-                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                    :class="validationErrors.city ? 'border-red-500' : ''"
-                  />
-                  <p v-if="validationErrors.city" class="text-red-500 text-sm mt-1">{{ validationErrors.city }}</p>
-                </div>
               </div>
 
-              <!-- Row 3: Address | Address 2 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Row 3: Postcode | House number | Addition -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-2">
-                    {{ t('checkout.address') }} <span class="text-red-500">*</span>
+                    {{ t('checkout.postCode') }} <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="formData.address"
-                    @input="validationErrors.address = ''"
+                    v-model="formData.postCode"
+                    @input="validationErrors.postCode = ''"
+                    @change="onAddressLookup"
                     type="text"
-                    :placeholder="t('checkout.enterAddress')"
+                    :placeholder="t('checkout.enterPostCode')"
                     class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                    :class="validationErrors.address ? 'border-red-500' : ''"
+                    :class="validationErrors.postCode ? 'border-red-500' : ''"
                   />
-                  <p v-if="validationErrors.address" class="text-red-500 text-sm mt-1">{{ validationErrors.address }}</p>
+                  <p v-if="validationErrors.postCode" class="text-red-500 text-sm mt-1">{{ validationErrors.postCode }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    Huisnummer <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.houseNumber"
+                    @change="onAddressLookup"
+                    type="text"
+                    placeholder="10"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                  />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.address2') }}</label>
@@ -289,22 +314,42 @@ const handleOrderNow = async () => {
                 </div>
               </div>
 
-              <!-- Row 4: Post code | Country -->
+              <!-- Row 4: Street (auto-filled) | City (auto-filled) -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
+                <div class="relative">
                   <label class="block text-sm font-medium text-gray-500 mb-2">
-                    {{ t('checkout.postCode') }} <span class="text-red-500">*</span>
+                    {{ t('checkout.address') }} <span class="text-red-500">*</span>
                   </label>
                   <input
-                    v-model="formData.postCode"
-                    @input="validationErrors.postCode = ''"
+                    v-model="formData.address"
+                    @input="validationErrors.address = ''"
                     type="text"
-                    :placeholder="t('checkout.enterPostCode')"
-                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                    :class="validationErrors.postCode ? 'border-red-500' : ''"
+                    :placeholder="isGeocoding ? 'Ophalen...' : t('checkout.enterAddress')"
+                    :disabled="isGeocoding"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent disabled:opacity-50"
+                    :class="validationErrors.address ? 'border-red-500' : ''"
                   />
-                  <p v-if="validationErrors.postCode" class="text-red-500 text-sm mt-1">{{ validationErrors.postCode }}</p>
+                  <p v-if="validationErrors.address" class="text-red-500 text-sm mt-1">{{ validationErrors.address }}</p>
                 </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.city') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.city"
+                    @input="validationErrors.city = ''"
+                    type="text"
+                    :placeholder="isGeocoding ? 'Ophalen...' : t('checkout.enterCity')"
+                    :disabled="isGeocoding"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent disabled:opacity-50"
+                    :class="validationErrors.city ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.city" class="text-red-500 text-sm mt-1">{{ validationErrors.city }}</p>
+                </div>
+              </div>
+
+              <!-- Row 5: Country -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <label class="block text-sm font-medium text-gray-500 mb-2">
                     {{ t('checkout.country') }} <span class="text-red-500">*</span>
@@ -521,7 +566,7 @@ const handleOrderNow = async () => {
             <button 
               @click="handleOrderNow"
               :disabled="isSubmitting"
-              class="w-full flex items-center justify-center p-4 border-2 border-orange-500 bg-orange-50 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="isSubmitting" class="text-lg font-medium text-orange-500">
                 {{ t('checkout.processingOrder') }}

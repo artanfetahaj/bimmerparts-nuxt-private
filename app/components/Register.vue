@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import authService from '../services/auth'
 import type { ApiError } from '../services/auth'
@@ -22,6 +22,36 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const registerError = ref('')
+
+// ─── Live password validation ─────────────────────────────────────────────────
+const passwordTouched = ref(false)
+const confirmPasswordTouched = ref(false)
+
+const passwordRules = computed(() => [
+  {
+    label: 'Minimaal 8 tekens',
+    met: formData.value.password.length >= 8,
+  },
+  {
+    label: 'Minimaal 1 hoofdletter',
+    met: /[A-Z]/.test(formData.value.password),
+  },
+  {
+    label: 'Minimaal 1 cijfer',
+    met: /[0-9]/.test(formData.value.password),
+  },
+])
+
+const passwordsMatch = computed(() =>
+  formData.value.confirmPassword.length > 0 &&
+  formData.value.password === formData.value.confirmPassword
+)
+
+const passwordsMismatch = computed(() =>
+  confirmPasswordTouched.value &&
+  formData.value.confirmPassword.length > 0 &&
+  formData.value.password !== formData.value.confirmPassword
+)
 
 const validateForm = () => {
   const errors: Record<string, string> = {}
@@ -166,7 +196,7 @@ const handleRegister = async () => {
             <div class="relative">
               <input
                 v-model="formData.password"
-                @input="validationErrors.password = ''; registerError = ''"
+                @input="validationErrors.password = ''; registerError = ''; passwordTouched = true"
                 :type="showPassword ? 'text' : 'password'"
                 :disabled="isLoading"
                 class="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -183,7 +213,24 @@ const handleRegister = async () => {
                 </svg>
               </button>
             </div>
-            <p v-if="validationErrors.password" class="text-red-500 text-sm mt-1">{{ validationErrors.password }}</p>
+            <!-- Live password rules -->
+            <div v-if="passwordTouched" class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              <span
+                v-for="rule in passwordRules"
+                :key="rule.label"
+                class="flex items-center gap-1 text-xs"
+                :class="rule.met ? 'text-green-600' : 'text-red-500'"
+              >
+                <svg v-if="rule.met" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <svg v-else class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {{ rule.label }}
+              </span>
+            </div>
+            <p v-else-if="validationErrors.password" class="text-red-500 text-sm mt-1">{{ validationErrors.password }}</p>
           </div>
 
           <!-- Confirm Password -->
@@ -192,7 +239,7 @@ const handleRegister = async () => {
             <div class="relative">
               <input
                 v-model="formData.confirmPassword"
-                @input="validationErrors.confirmPassword = ''; registerError = ''"
+                @input="validationErrors.confirmPassword = ''; registerError = ''; confirmPasswordTouched = true"
                 :type="showConfirmPassword ? 'text' : 'password'"
                 :disabled="isLoading"
                 class="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -209,7 +256,20 @@ const handleRegister = async () => {
                 </svg>
               </button>
             </div>
-            <p v-if="validationErrors.confirmPassword" class="text-red-500 text-sm mt-1">{{ validationErrors.confirmPassword }}</p>
+            <!-- Live match indicator -->
+            <p v-if="passwordsMatch" class="flex items-center gap-1.5 text-xs text-green-600 mt-2">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Wachtwoorden komen overeen
+            </p>
+            <p v-else-if="passwordsMismatch" class="flex items-center gap-1.5 text-xs text-red-500 mt-2">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Wachtwoorden komen niet overeen
+            </p>
+            <p v-else-if="validationErrors.confirmPassword" class="text-red-500 text-sm mt-1">{{ validationErrors.confirmPassword }}</p>
           </div>
 
           <!-- Submit -->

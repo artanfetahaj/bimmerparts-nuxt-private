@@ -76,7 +76,7 @@ export const useCategoryStore = defineStore('category', () => {
     try {
       const response = await new MainCategory()
         .include(MainCategoryIncludes.CATEGORIES_SUBCATEGORIES)
-        .filter('car_variant_id', variantId)
+        .filter('car_variant', variantId)
         .limit(100)
         .all()
 
