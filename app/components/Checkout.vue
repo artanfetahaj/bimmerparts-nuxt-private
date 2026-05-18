@@ -203,149 +203,153 @@ const handleOrderNow = async () => {
             <h3 class="text-xl font-bold text-gray-900 mb-6">{{ t('checkout.secure') }}</h3>
             
             <form class="space-y-6">
+              <!-- Row 1: First name | Last name -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.firstName') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.firstName"
-                      @input="validationErrors.firstName = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterFirstName')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.firstName ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.firstName" class="text-red-500 text-sm mt-1">{{ validationErrors.firstName }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.company') }}</label>
-                    <input 
-                      v-model="formData.company"
-                      type="text" 
-                      :placeholder="t('checkout.enterCompany')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.address') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.address"
-                      @input="validationErrors.address = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterAddress')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.address ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.address" class="text-red-500 text-sm mt-1">{{ validationErrors.address }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.postCode') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.postCode"
-                      @input="validationErrors.postCode = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterPostCode')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.postCode ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.postCode" class="text-red-500 text-sm mt-1">{{ validationErrors.postCode }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.email') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.email"
-                      @input="validationErrors.email = ''"
-                      type="email" 
-                      :placeholder="t('checkout.enterEmail')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.email ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.email" class="text-red-500 text-sm mt-1">{{ validationErrors.email }}</p>
-                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.firstName') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.firstName"
+                    @input="validationErrors.firstName = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterFirstName')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.firstName ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.firstName" class="text-red-500 text-sm mt-1">{{ validationErrors.firstName }}</p>
                 </div>
-                
-                <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.lastName') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.lastName"
-                      @input="validationErrors.lastName = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterLastName')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.lastName ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.lastName" class="text-red-500 text-sm mt-1">{{ validationErrors.lastName }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.city') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.city"
-                      @input="validationErrors.city = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterCity')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.city ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.city" class="text-red-500 text-sm mt-1">{{ validationErrors.city }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.address2') }}</label>
-                    <input 
-                      v-model="formData.address2"
-                      type="text" 
-                      :placeholder="t('checkout.enterAddress2')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.country') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.country"
-                      @input="validationErrors.country = ''"
-                      type="text" 
-                      :placeholder="t('checkout.enterCountry')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.country ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.country" class="text-red-500 text-sm mt-1">{{ validationErrors.country }}</p>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-2">
-                      {{ t('checkout.phone') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input 
-                      v-model="formData.phone"
-                      @input="validationErrors.phone = ''"
-                      type="tel" 
-                      :placeholder="t('checkout.enterPhone')"
-                      class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
-                      :class="validationErrors.phone ? 'border-red-500' : ''"
-                    />
-                    <p v-if="validationErrors.phone" class="text-red-500 text-sm mt-1">{{ validationErrors.phone }}</p>
-                  </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.lastName') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.lastName"
+                    @input="validationErrors.lastName = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterLastName')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.lastName ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.lastName" class="text-red-500 text-sm mt-1">{{ validationErrors.lastName }}</p>
+                </div>
+              </div>
+
+              <!-- Row 2: Company | City -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.company') }}</label>
+                  <input
+                    v-model="formData.company"
+                    type="text"
+                    :placeholder="t('checkout.enterCompany')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.city') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.city"
+                    @input="validationErrors.city = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterCity')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.city ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.city" class="text-red-500 text-sm mt-1">{{ validationErrors.city }}</p>
+                </div>
+              </div>
+
+              <!-- Row 3: Address | Address 2 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.address') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.address"
+                    @input="validationErrors.address = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterAddress')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.address ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.address" class="text-red-500 text-sm mt-1">{{ validationErrors.address }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.address2') }}</label>
+                  <input
+                    v-model="formData.address2"
+                    type="text"
+                    :placeholder="t('checkout.enterAddress2')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                  />
+                </div>
+              </div>
+
+              <!-- Row 4: Post code | Country -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.postCode') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.postCode"
+                    @input="validationErrors.postCode = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterPostCode')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.postCode ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.postCode" class="text-red-500 text-sm mt-1">{{ validationErrors.postCode }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.country') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.country"
+                    @input="validationErrors.country = ''"
+                    type="text"
+                    :placeholder="t('checkout.enterCountry')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.country ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.country" class="text-red-500 text-sm mt-1">{{ validationErrors.country }}</p>
+                </div>
+              </div>
+
+              <!-- Row 5: Email | Phone -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.email') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.email"
+                    @input="validationErrors.email = ''"
+                    type="email"
+                    :placeholder="t('checkout.enterEmail')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.email ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.email" class="text-red-500 text-sm mt-1">{{ validationErrors.email }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">
+                    {{ t('checkout.phone') }} <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="formData.phone"
+                    @input="validationErrors.phone = ''"
+                    type="tel"
+                    :placeholder="t('checkout.enterPhone')"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    :class="validationErrors.phone ? 'border-red-500' : ''"
+                  />
+                  <p v-if="validationErrors.phone" class="text-red-500 text-sm mt-1">{{ validationErrors.phone }}</p>
                 </div>
               </div>
             </form>
@@ -488,11 +492,11 @@ const handleOrderNow = async () => {
               
               <div>
                 <label class="flex items-start space-x-3 cursor-pointer">
-                  <input 
+                  <input
                     v-model="acceptTerms"
                     @change="showTermsError = false"
-                    type="checkbox" 
-                    class="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                    type="checkbox"
+                    class="terms-checkbox mt-1 flex-shrink-0"
                   />
                   <span class="text-sm text-gray-600">
                     <span>{{ t('checkout.acceptTermsText') || 'I accept the' }}</span>
@@ -532,9 +536,33 @@ const handleOrderNow = async () => {
     </div>
 
     <!-- Footer -->
-    <SiteFooter @navigate-to-about="handleNavigateToAbout" @navigate-to-contact="handleNavigateToContact" @navigate-to-terms="handleNavigateToTerms" @navigate-to-privacy="handleNavigateToPrivacy" />
   </div>
 </template>
 
 <style scoped>
+.terms-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.terms-checkbox:checked {
+  background-color: #f97316;
+  border-color: #f97316;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.terms-checkbox:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
 </style>
