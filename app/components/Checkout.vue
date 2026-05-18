@@ -102,7 +102,10 @@ const deliveryFee = computed(() => selectedShippingMethod.value === 'post' ? 20 
 const orderTotal = computed(() => subtotal.value + deliveryFee.value)
 
 // Watch for empty cart and redirect to products
+// Guard: don't redirect when we just completed an order
+const isOrderComplete = ref(false)
 watch(() => cartItems.value.length, (newLength, oldLength) => {
+  if (isOrderComplete.value) return
   if (newLength === 0 && oldLength !== undefined && oldLength > 0) {
     router.push('/products')
   }
@@ -184,14 +187,17 @@ const handleOrderNow = async () => {
     return
   }
 
-  clearCart()
+  isOrderComplete.value = true
+
   const query: Record<string, string> = {
     order: orderResult?.order_number ?? '',
   }
   if (orderResult?.dhl_tracking_code) {
     query.tracking = orderResult.dhl_tracking_code
   }
-  router.push({ path: '/order-thanks', query })
+
+  await router.push({ path: '/order-thanks', query })
+  clearCart()
 }
 
 </script>
