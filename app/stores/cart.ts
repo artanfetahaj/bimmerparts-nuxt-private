@@ -18,6 +18,16 @@ const cartItems = ref<CartItem[]>([])
 const loading = ref(false)
 const initialized = ref(false)
 
+// Clear cart on logout — registered once at module level (same pattern as wishlist)
+if (typeof window !== 'undefined') {
+  window.addEventListener('auth-changed', () => {
+    if (!authService.isAuthenticated()) {
+      cartItems.value = []
+      initialized.value = false
+    }
+  })
+}
+
 // Load cart from API
 const loadCart = async () => {
   if (loading.value) return
@@ -69,16 +79,12 @@ export const useCart = () => {
     }
   })
 
-  // Listen for auth changes — merge on login, clear on logout
+  // Merge cart on login
   if (typeof window !== 'undefined') {
     window.addEventListener('auth-changed', async () => {
       if (authService.isAuthenticated()) {
         await mergeCart()
         await loadCart()
-      } else {
-        // User logged out — clear local cart state immediately
-        cartItems.value = []
-        initialized.value = false
       }
     })
   }
