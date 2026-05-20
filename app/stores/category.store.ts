@@ -51,6 +51,7 @@ export const useCategoryStore = defineStore('category', () => {
     try {
       const response = await new MainCategory()
         .include(MainCategoryIncludes.CATEGORIES_SUBCATEGORIES)
+        .filter('has_products', 'true')
         .limit(100)
         .all()
 
