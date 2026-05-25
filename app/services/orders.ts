@@ -16,6 +16,7 @@ export interface Order {
   date?: string
   created_at?: string
   items?: OrderItem[]
+  shipping_method?: string
 }
 
 class OrdersService {
@@ -41,6 +42,7 @@ class OrdersService {
     customer_phone?: string
     shipping_address: string
     billing_address?: string
+    shipping_method?: string
     payment_method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery'
     notes?: string
     items: { product_id: string; quantity: number }[]
