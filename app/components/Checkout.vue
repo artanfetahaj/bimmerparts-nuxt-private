@@ -175,9 +175,10 @@ const handleOrderNow = async () => {
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
       customer_email: customerEmail,
       customer_phone: formData.value.phone,
-      shipping_address: `${formData.value.address}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      billing_address: `${formData.value.address}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
+      shipping_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
+      billing_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
       payment_method: 'bank_transfer',
+      shipping_method: selectedShippingMethod.value,
       items: itemsPayload
     })
   } catch (e: any) {
