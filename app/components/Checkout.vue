@@ -44,6 +44,7 @@ async function onAddressLookup() {
     if (result) {
       formData.value.address = result.street
       formData.value.city = result.city
+      formData.value.country = result.country
     }
   } catch (e) {
     console.error('[Checkout] Address lookup failed:', e)
@@ -96,6 +97,27 @@ const orderError = ref('')
 
 // Required fields
 const requiredFields = ['firstName', 'lastName', 'city', 'address', 'postCode', 'country', 'email', 'phone']
+
+const countries = [
+  { value: 'Netherlands',     label: 'Netherlands' },
+  { value: 'Belgium',         label: 'Belgium' },
+  { value: 'Germany',         label: 'Germany' },
+  { value: 'France',          label: 'France' },
+  { value: 'Luxembourg',      label:  'Luxembourg' },
+  { value: 'United Kingdom',  label:  'United Kingdom' },
+  { value: 'Austria',         label: 'Austria' },
+  { value: 'Switzerland',     label: 'Switzerland' },
+  { value: 'Spain',           label: 'Spain' },
+  { value: 'Italy',           label: 'Italy' },
+  { value: 'Portugal',        label: 'Portugal' },
+  { value: 'Denmark',         label: 'Denmark' },
+  { value: 'Sweden',          label: 'Sweden' },
+  { value: 'Norway',          label: 'Norway' },
+  { value: 'Finland',         label: 'Finland' },
+  { value: 'Poland',          label: 'Poland' },
+  { value: 'United States',   label: 'United States' },
+  { value: 'Other',           label: '🌍 Other' },
+]
 
 // Computed values
 const subtotal = computed(() => totalPrice.value)
@@ -388,14 +410,15 @@ const handleOrderNow = async () => {
                   <label class="block text-sm font-medium text-gray-500 mb-2">
                     {{ t('checkout.country') }} <span class="text-red-500">*</span>
                   </label>
-                  <input
+                  <select
                     v-model="formData.country"
-                    @input="validationErrors.country = ''"
-                    type="text"
-                    :placeholder="t('checkout.enterCountry')"
-                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    @change="validationErrors.country = ''"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent appearance-none cursor-pointer"
                     :class="validationErrors.country ? 'border-red-500' : ''"
-                  />
+                  >
+                    <option value="" disabled>{{ t('checkout.selectCountry') }}</option>
+                    <option v-for="c in countries" :key="c.value" :value="c.value">{{ c.label }}</option>
+                  </select>
                   <p v-if="validationErrors.country" class="text-red-500 text-sm mt-1">{{ validationErrors.country }}</p>
                 </div>
               </div>

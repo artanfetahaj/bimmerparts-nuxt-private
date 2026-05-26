@@ -130,6 +130,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'checkout.enterAddress2': 'Enter additional address info (optional)',
     'checkout.enterPostCode': 'Enter postal code',
     'checkout.enterCountry': 'Enter your country',
+    'checkout.selectCountry': 'Select your country',
     'checkout.enterEmail': 'Enter your email address',
     'checkout.enterPhone': 'Enter your phone number',
     'checkout.fieldRequired': 'This field is required',
@@ -410,6 +411,9 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'thankyou.orderNumber': 'Your order number is',
     'thankyou.dhlTracking': 'You can track your order with DHL using the following tracking number',
     'thankyou.trackPackage': 'Track Package',
+    'thankyou.verifying': 'Verifying your payment…',
+    'thankyou.failed.title': 'Payment failed',
+    'thankyou.failed.message': 'Something went wrong with your payment. Please contact us if the amount was debited from your account.',
 
     // Legal Pages
     'legal.privacy.title': 'Privacy Policy',
@@ -593,6 +597,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'checkout.enterAddress2': 'Voer aanvullende adresgegevens in (optioneel)',
     'checkout.enterPostCode': 'Voer postcode in',
     'checkout.enterCountry': 'Voer uw land in',
+    'checkout.selectCountry': 'Selecteer uw land',
     'checkout.enterEmail': 'Voer uw e-mailadres in',
     'checkout.enterPhone': 'Voer uw telefoonnummer in',
     'checkout.fieldRequired': 'Dit veld is verplicht',
@@ -873,6 +878,9 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'thankyou.orderNumber': 'Uw bestelnummer is',
     'thankyou.dhlTracking': 'U kunt uw bestelling volgen via DHL met het volgende trackingnummer',
     'thankyou.trackPackage': 'Pakket Volgen',
+    'thankyou.verifying': 'Betaling controleren…',
+    'thankyou.failed.title': 'Betaling mislukt',
+    'thankyou.failed.message': 'Er is iets misgegaan met uw betaling. Neem contact met ons op als het bedrag toch van uw rekening is afgeschreven.',
 
     // Legal Pages
     'legal.privacy.title': 'Privacybeleid',

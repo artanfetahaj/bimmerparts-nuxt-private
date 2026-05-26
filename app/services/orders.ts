@@ -58,6 +58,11 @@ class OrdersService {
     })
     return res.data || { checkout_url: '', payment_id: '' }
   }
+
+  async getPaymentStatus(orderNumber: string): Promise<{ payment_status: string; order_status: string }> {
+    const res = await api.get(`/orders/${orderNumber}/payment/status`)
+    return res.data || { payment_status: 'pending', order_status: 'pending' }
+  }
 }
 
 export default new OrdersService()
