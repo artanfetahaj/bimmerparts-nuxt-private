@@ -43,12 +43,25 @@ class OrdersService {
     shipping_address: string
     billing_address?: string
     shipping_method?: string
-    payment_method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery'
+    payment_method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery' | 'creditcard' | 'ideal'
     notes?: string
     items: { product_id: string; quantity: number }[]
   }): Promise<{ order_number: string; dhl_tracking_code?: string | null; dhl_label_url?: string | null }> {
     const res = await api.post('/orders', payload)
     return res.data?.data || { order_number: '' }
+  }
+
+  async createMolliePayment(orderNumber: string, redirectUrl: string, method?: string): Promise<{ checkout_url: string; payment_id: string }> {
+    const res = await api.post(`/orders/${orderNumber}/payment`, {
+      redirect_url: redirectUrl,
+      ...(method ? { method } : {}),
+    })
+    return res.data || { checkout_url: '', payment_id: '' }
+  }
+
+  async getPaymentStatus(orderNumber: string): Promise<{ payment_status: string; order_status: string }> {
+    const res = await api.get(`/orders/${orderNumber}/payment/status`)
+    return res.data || { payment_status: 'pending', order_status: 'pending' }
   }
 }
 

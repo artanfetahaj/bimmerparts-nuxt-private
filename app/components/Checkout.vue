@@ -44,6 +44,7 @@ async function onAddressLookup() {
     if (result) {
       formData.value.address = result.street
       formData.value.city = result.city
+      formData.value.country = result.country
     }
   } catch (e) {
     console.error('[Checkout] Address lookup failed:', e)
@@ -84,8 +85,9 @@ onMounted(() => {
 
 // Shipping and payment methods
 const selectedShippingMethod = ref<'store' | 'post'>('store')
-const selectedPaymentMethod = ref<'bank'>('bank')
+const selectedPaymentMethod = ref<'bank' | 'card'>('bank')
 const acceptTerms = ref(false)
+
 const showTermsError = ref(false)
 
 // Validation state
@@ -95,6 +97,27 @@ const orderError = ref('')
 
 // Required fields
 const requiredFields = ['firstName', 'lastName', 'city', 'address', 'postCode', 'country', 'email', 'phone']
+
+const countries = [
+  { value: 'Netherlands',     label: 'Netherlands' },
+  { value: 'Belgium',         label: 'Belgium' },
+  { value: 'Germany',         label: 'Germany' },
+  { value: 'France',          label: 'France' },
+  { value: 'Luxembourg',      label:  'Luxembourg' },
+  { value: 'United Kingdom',  label:  'United Kingdom' },
+  { value: 'Austria',         label: 'Austria' },
+  { value: 'Switzerland',     label: 'Switzerland' },
+  { value: 'Spain',           label: 'Spain' },
+  { value: 'Italy',           label: 'Italy' },
+  { value: 'Portugal',        label: 'Portugal' },
+  { value: 'Denmark',         label: 'Denmark' },
+  { value: 'Sweden',          label: 'Sweden' },
+  { value: 'Norway',          label: 'Norway' },
+  { value: 'Finland',         label: 'Finland' },
+  { value: 'Poland',          label: 'Poland' },
+  { value: 'United States',   label: 'United States' },
+  { value: 'Other',           label: '🌍 Other' },
+]
 
 // Computed values
 const subtotal = computed(() => totalPrice.value)
@@ -138,7 +161,7 @@ const validateForm = () => {
   if (formData.value.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
     errors.email = t('checkout.validEmail')
   }
-  
+
   validationErrors.value = errors
   return Object.keys(errors).length === 0
 }
@@ -168,6 +191,11 @@ const handleOrderNow = async () => {
     ? (authService.getCurrentCustomer()?.email || formData.value.email)
     : formData.value.email
 
+  const paymentMethodMap: Record<'bank' | 'card', string> = {
+    bank: 'bank_transfer',
+    card: 'creditcard',
+  }
+
   let orderResult: any = null
 
   try {
@@ -177,7 +205,7 @@ const handleOrderNow = async () => {
       customer_phone: formData.value.phone,
       shipping_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
       billing_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      payment_method: 'bank_transfer',
+      payment_method: paymentMethodMap[selectedPaymentMethod.value] as any,
       shipping_method: selectedShippingMethod.value,
       items: itemsPayload
     })
@@ -189,6 +217,27 @@ const handleOrderNow = async () => {
   }
 
   isOrderComplete.value = true
+
+  // For card payments, create a Mollie payment and redirect to the hosted checkout
+  if (selectedPaymentMethod.value === 'card') {
+    try {
+      const redirectUrl = `${window.location.origin}/order-thanks?order=${orderResult?.order_number ?? ''}`
+      const mollieResult = await ordersService.createMolliePayment(
+        orderResult.order_number,
+        redirectUrl,
+        'creditcard',
+      )
+      clearCart()
+      window.location.href = mollieResult.checkout_url
+      return
+    } catch (e: any) {
+      console.error('Mollie payment creation failed', e)
+      orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate card payment. Please try again.'
+      isSubmitting.value = false
+      isOrderComplete.value = false
+      return
+    }
+  }
 
   const query: Record<string, string> = {
     order: orderResult?.order_number ?? '',
@@ -361,14 +410,15 @@ const handleOrderNow = async () => {
                   <label class="block text-sm font-medium text-gray-500 mb-2">
                     {{ t('checkout.country') }} <span class="text-red-500">*</span>
                   </label>
-                  <input
+                  <select
                     v-model="formData.country"
-                    @input="validationErrors.country = ''"
-                    type="text"
-                    :placeholder="t('checkout.enterCountry')"
-                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent"
+                    @change="validationErrors.country = ''"
+                    class="w-full text-base text-gray-900 border-0 border-b border-gray-300 pb-2 focus:outline-none focus:border-orange-500 bg-transparent appearance-none cursor-pointer"
                     :class="validationErrors.country ? 'border-red-500' : ''"
-                  />
+                  >
+                    <option value="" disabled>{{ t('checkout.selectCountry') }}</option>
+                    <option v-for="c in countries" :key="c.value" :value="c.value">{{ c.label }}</option>
+                  </select>
                   <p v-if="validationErrors.country" class="text-red-500 text-sm mt-1">{{ validationErrors.country }}</p>
                 </div>
               </div>
@@ -529,13 +579,40 @@ const handleOrderNow = async () => {
             <!-- Select Payment Method -->
             <div class="mb-6">
               <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.paymentMethod') }}</h4>
-              <div class="flex items-center justify-center space-x-3 p-4 border-2 border-orange-500 bg-orange-50 rounded-lg">
-                <div class="w-8 h-8 flex items-center justify-center">
-                  <img src="/images/bank.png" :alt="t('checkout.payment.bank')" class="w-6 h-6" />
-                </div>
-                <span class="text-sm font-medium">{{ t('checkout.payment.bank') }}</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Bank Transfer -->
+                <button
+                  @click="selectedPaymentMethod = 'bank'"
+                  type="button"
+                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                  :class="selectedPaymentMethod === 'bank' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <div class="w-8 h-8 flex items-center justify-center">
+                    <img src="/images/bank.png" :alt="t('checkout.payment.bank')" class="w-6 h-6" />
+                  </div>
+                  <span class="text-sm font-medium">{{ t('checkout.payment.bank') }}</span>
+                </button>
+
+                <!-- Credit / Debit Card -->
+                <button
+                  @click="selectedPaymentMethod = 'card'"
+                  type="button"
+                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                  :class="selectedPaymentMethod === 'card' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <div class="w-8 h-8 flex items-center justify-center">
+                    <!-- Card icon (inline SVG — no image dependency) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6 text-gray-600">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                      <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium">{{ t('checkout.payment.card') }}</span>
+                </button>
               </div>
             </div>
+
+
 
             <!-- Additional Information -->
             <div class="mb-6">
@@ -570,12 +647,15 @@ const handleOrderNow = async () => {
             </div>
 
             <!-- Order Now Button -->
-            <button 
+            <button
               @click="handleOrderNow"
               :disabled="isSubmitting"
               class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span v-if="isSubmitting" class="text-lg font-medium text-orange-500">
+              <span v-if="isSubmitting && selectedPaymentMethod === 'card'" class="text-lg font-medium text-orange-500">
+                {{ t('checkout.redirectingToPayment') }}
+              </span>
+              <span v-else-if="isSubmitting" class="text-lg font-medium text-orange-500">
                 {{ t('checkout.processingOrder') }}
               </span>
               <span v-else class="text-lg font-medium text-orange-500">
