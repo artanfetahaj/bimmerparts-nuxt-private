@@ -9,8 +9,8 @@ definePageMeta({
 const router = useRouter()
 const route  = useRoute()
 
-const orderNumber   = route.query.order as string | undefined
-const trackingCode  = route.query.tracking as string | undefined
+const orderNumber  = route.query.order as string | undefined
+const trackingCode = route.query.tracking as string | undefined
 </script>
 
 <template>

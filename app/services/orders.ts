@@ -63,6 +63,19 @@ class OrdersService {
     const res = await api.get(`/orders/${orderNumber}/payment/status`)
     return res.data || { payment_status: 'pending', order_status: 'pending' }
   }
+
+  async initiateCardPayment(payload: {
+    items: { product_id: string; quantity: number }[]
+    redirect_url: string
+  }): Promise<{ checkout_url: string; payment_id: string }> {
+    const res = await api.post('/payments/initiate', payload)
+    return res.data || { checkout_url: '', payment_id: '' }
+  }
+
+  async verifyPayment(paymentId: string): Promise<{ status: string }> {
+    const res = await api.get(`/payments/${paymentId}/verify`)
+    return res.data || { status: 'failed' }
+  }
 }
 
 export default new OrdersService()

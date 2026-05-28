@@ -167,50 +167,73 @@ const validateForm = () => {
 }
 
 const handleOrderNow = async () => {
-  // Validate form first
-  if (!validateForm()) {
-    return
-  }
-  
+  if (!validateForm()) return
+
   if (!acceptTerms.value) {
     showTermsError.value = true
     return
   }
-  
-  // Reset error state
+
   showTermsError.value = false
   orderError.value = ''
   isSubmitting.value = true
-  
+
   const itemsPayload: { product_id: string; quantity: number }[] = cartItems.value.map(ci => ({
     product_id: ci.product_id,
-    quantity: ci.quantity
+    quantity: ci.quantity,
   }))
 
   const customerEmail = authService.isAuthenticated()
     ? (authService.getCurrentCustomer()?.email || formData.value.email)
     : formData.value.email
 
-  const paymentMethodMap: Record<'bank' | 'card', string> = {
-    bank: 'bank_transfer',
-    card: 'creditcard',
+  const addressStr = `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`
+
+  // Card payment: initiate Mollie session first — order is created only after payment is confirmed
+  if (selectedPaymentMethod.value === 'card') {
+    try {
+      // Save all checkout data so OrderThankYou can create the order after payment
+      sessionStorage.setItem('pending_checkout', JSON.stringify({
+        customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+        customer_email: customerEmail,
+        customer_phone: formData.value.phone,
+        shipping_address: addressStr,
+        billing_address: addressStr,
+        payment_method: 'creditcard' as const,
+        shipping_method: selectedShippingMethod.value,
+        items: itemsPayload,
+      }))
+
+      const result = await ordersService.initiateCardPayment({
+        items: itemsPayload,
+        redirect_url: `${window.location.origin}/order-thanks`,
+      })
+
+      sessionStorage.setItem('pending_payment_id', result.payment_id)
+      window.location.href = result.checkout_url
+    } catch (e: any) {
+      sessionStorage.removeItem('pending_checkout')
+      sessionStorage.removeItem('pending_payment_id')
+      orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate payment. Please try again.'
+      isSubmitting.value = false
+    }
+    return
   }
 
+  // Bank transfer: create the order immediately
   let orderResult: any = null
-
   try {
     orderResult = await ordersService.create({
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
       customer_email: customerEmail,
       customer_phone: formData.value.phone,
-      shipping_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      billing_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      payment_method: paymentMethodMap[selectedPaymentMethod.value] as any,
+      shipping_address: addressStr,
+      billing_address: addressStr,
+      payment_method: 'bank_transfer',
       shipping_method: selectedShippingMethod.value,
-      items: itemsPayload
+      items: itemsPayload,
     })
   } catch (e: any) {
-    console.error('Order creation failed', e)
     orderError.value = e?.response?.data?.message || e?.message || 'Failed to create order. Please try again.'
     isSubmitting.value = false
     return
@@ -218,33 +241,8 @@ const handleOrderNow = async () => {
 
   isOrderComplete.value = true
 
-  // For card payments, create a Mollie payment and redirect to the hosted checkout
-  if (selectedPaymentMethod.value === 'card') {
-    try {
-      const redirectUrl = `${window.location.origin}/order-thanks?order=${orderResult?.order_number ?? ''}`
-      const mollieResult = await ordersService.createMolliePayment(
-        orderResult.order_number,
-        redirectUrl,
-        'creditcard',
-      )
-      clearCart()
-      window.location.href = mollieResult.checkout_url
-      return
-    } catch (e: any) {
-      console.error('Mollie payment creation failed', e)
-      orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate card payment. Please try again.'
-      isSubmitting.value = false
-      isOrderComplete.value = false
-      return
-    }
-  }
-
-  const query: Record<string, string> = {
-    order: orderResult?.order_number ?? '',
-  }
-  if (orderResult?.dhl_tracking_code) {
-    query.tracking = orderResult.dhl_tracking_code
-  }
+  const query: Record<string, string> = { order: orderResult?.order_number ?? '' }
+  if (orderResult?.dhl_tracking_code) query.tracking = orderResult.dhl_tracking_code
 
   await router.push({ path: '/order-thanks', query })
   clearCart()
