@@ -80,29 +80,19 @@ const handleNavigateToPrivacy = () => {
 const handleQuantityInput = (item: any, event: Event) => {
   const input = event.target as HTMLInputElement
   const value = parseInt(input.value) || 0
-  const maxQuantity = item.max_quantity || 999
-  
-  // If user types more than max, limit it immediately
-  if (value > maxQuantity) {
-    item.quantity = maxQuantity
-    input.value = maxQuantity.toString()
-  } else if (value < 1) {
+  if (value < 1) {
     item.quantity = 1
     input.value = '1'
   }
 }
 
 const handleQuantityChange = async (item: any) => {
-  // Ensure quantity is within bounds before updating
-  const maxQuantity = item.max_quantity || 999
-  if (item.quantity > maxQuantity) {
-    item.quantity = maxQuantity
-  } else if (item.quantity < 1) {
+  if (item.quantity < 1) {
     item.quantity = 1
   }
-  
+
   try {
-    await updateQuantity(item.id, item.quantity, item.max_quantity)
+    await updateQuantity(item.id, item.quantity)
   } catch (error: any) {
     // Error is already handled in updateQuantity (cart is reloaded)
     // Optionally show a toast notification here
@@ -288,7 +278,6 @@ watch(
                     @input="handleQuantityInput(item, $event)"
                     type="number" 
                     :min="1"
-                    :max="item.max_quantity || 999"
                     class="border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                     style="width: 80px; height: 37px; border-radius: 12px; padding: 0 16px;"
                   />

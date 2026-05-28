@@ -65,9 +65,10 @@ class OrdersService {
     return res.data || { payment_status: 'pending', order_status: 'pending' }
   }
 
-  async initiateCardPayment(payload: {
+  async initiatePayment(payload: {
     items: { product_id: string; quantity: number }[]
     redirect_url: string
+    method?: string
   }): Promise<{ checkout_url: string; payment_id: string }> {
     const res = await api.post('/payments/initiate', payload)
     return res.data || { checkout_url: '', payment_id: '' }

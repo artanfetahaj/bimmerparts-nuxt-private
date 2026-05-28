@@ -195,16 +195,6 @@ export const useCart = () => {
       return
     }
 
-    // Check if quantity exceeds available stock
-    if (maxQuantity !== undefined && maxQuantity > 0 && quantity > maxQuantity) {
-      // Limit quantity to available stock
-      const item = cartItems.value.find(item => item.id === itemId)
-      if (item) {
-        item.quantity = maxQuantity
-      }
-      quantity = maxQuantity
-    }
-
     try {
       const response = await api.put(`/cart/${itemId}`, {
         quantity: quantity

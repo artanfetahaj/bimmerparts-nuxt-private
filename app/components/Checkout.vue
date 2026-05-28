@@ -189,63 +189,42 @@ const handleOrderNow = async () => {
 
   const addressStr = `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`
 
-  // Card payment: initiate Mollie session first — order is created only after payment is confirmed
-  if (selectedPaymentMethod.value === 'card') {
-    try {
-      // Save all checkout data so OrderThankYou can create the order after payment
-      sessionStorage.setItem('pending_checkout', JSON.stringify({
-        customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
-        customer_email: customerEmail,
-        customer_phone: formData.value.phone,
-        shipping_address: addressStr,
-        billing_address: addressStr,
-        payment_method: 'creditcard' as const,
-        shipping_method: selectedShippingMethod.value,
-        items: itemsPayload,
-      }))
-
-      const result = await ordersService.initiateCardPayment({
-        items: itemsPayload,
-        redirect_url: `${window.location.origin}/order-thanks`,
-      })
-
-      sessionStorage.setItem('pending_payment_id', result.payment_id)
-      window.location.href = result.checkout_url
-    } catch (e: any) {
-      sessionStorage.removeItem('pending_checkout')
-      sessionStorage.removeItem('pending_payment_id')
-      orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate payment. Please try again.'
-      isSubmitting.value = false
-    }
-    return
+  // Both card and iDEAL/Wero go through Mollie — order is only created after payment is confirmed
+  const mollieMethodMap: Record<'bank' | 'card', string> = {
+    bank: 'ideal',       // iDEAL / Wero
+    card: 'creditcard',
+  }
+  const orderPaymentMethodMap: Record<'bank' | 'card', string> = {
+    bank: 'bank_transfer',
+    card: 'credit_card',
   }
 
-  // Bank transfer: create the order immediately
-  let orderResult: any = null
   try {
-    orderResult = await ordersService.create({
+    sessionStorage.setItem('pending_checkout', JSON.stringify({
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
       customer_email: customerEmail,
       customer_phone: formData.value.phone,
       shipping_address: addressStr,
       billing_address: addressStr,
-      payment_method: 'bank_transfer',
+      payment_method: orderPaymentMethodMap[selectedPaymentMethod.value],
       shipping_method: selectedShippingMethod.value,
       items: itemsPayload,
+    }))
+
+    const result = await ordersService.initiatePayment({
+      items: itemsPayload,
+      redirect_url: `${window.location.origin}/order-thanks`,
+      method: mollieMethodMap[selectedPaymentMethod.value],
     })
+
+    sessionStorage.setItem('pending_payment_id', result.payment_id)
+    window.location.href = result.checkout_url
   } catch (e: any) {
-    orderError.value = e?.response?.data?.message || e?.message || 'Failed to create order. Please try again.'
+    sessionStorage.removeItem('pending_checkout')
+    sessionStorage.removeItem('pending_payment_id')
+    orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate payment. Please try again.'
     isSubmitting.value = false
-    return
   }
-
-  isOrderComplete.value = true
-
-  const query: Record<string, string> = { order: orderResult?.order_number ?? '' }
-  if (orderResult?.dhl_tracking_code) query.tracking = orderResult.dhl_tracking_code
-
-  await router.push({ path: '/order-thanks', query })
-  clearCart()
 }
 
 </script>
@@ -650,11 +629,8 @@ const handleOrderNow = async () => {
               :disabled="isSubmitting"
               class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span v-if="isSubmitting && selectedPaymentMethod === 'card'" class="text-lg font-medium text-orange-500">
+              <span v-if="isSubmitting" class="text-lg font-medium text-orange-500">
                 {{ t('checkout.redirectingToPayment') }}
-              </span>
-              <span v-else-if="isSubmitting" class="text-lg font-medium text-orange-500">
-                {{ t('checkout.processingOrder') }}
               </span>
               <span v-else class="text-lg font-medium text-orange-500">
                 {{ t('checkout.orderNow') }}

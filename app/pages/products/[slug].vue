@@ -218,7 +218,7 @@ const selectImage = (index: number) => { currentImageIndex.value = index }
 
 // ─── Quantity ─────────────────────────────────────────────────────────────────
 const incrementQuantity = () => {
-  if (quantity.value < stockCount.value) quantity.value++
+  quantity.value++
 }
 const decrementQuantity = () => {
   if (quantity.value > 1) quantity.value--
@@ -239,21 +239,21 @@ const cartItem = computed(() => {
 const showCartDialog = ref(false)
 
 const handleAddToCart = () => {
-  if (!cartItem.value || isOutOfStock.value) return
+  if (!cartItem.value) return
   showCartDialog.value = true
 }
 
 const confirmAddToCart = () => {
   if (!cartItem.value) return
-  const qty = Math.min(Math.max(1, quantity.value), stockCount.value)
+  const qty = Math.max(1, quantity.value)
   quantity.value = qty
   addToCart(cartItem.value, qty)
   showCartDialog.value = false
 }
 
 const handleBuyNow = () => {
-  if (!cartItem.value || isOutOfStock.value) return
-  const qty = Math.min(Math.max(1, quantity.value), stockCount.value)
+  if (!cartItem.value) return
+  const qty = Math.max(1, quantity.value)
   quantity.value = qty
   addToCart(cartItem.value, qty)
   router.push('/cart')
@@ -454,17 +454,13 @@ watch(() => route.params.slug, (newSlug) => {
                 <div class="flex-1 border-t border-gray-200 ml-4 min-w-0"></div>
               </div>
               <div class="flex items-center space-x-4 min-w-0">
-                <div
-                  class="flex items-center border border-gray-300 rounded-lg flex-shrink-0"
-                  :class="isOutOfStock ? 'opacity-50' : ''"
-                >
-                  <button @click="decrementQuantity" :disabled="isOutOfStock" class="px-3 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">&minus;</button>
+                <div class="flex items-center border border-gray-300 rounded-lg flex-shrink-0">
+                  <button @click="decrementQuantity" class="px-3 py-2 hover:bg-gray-50">&minus;</button>
                   <input
-                    v-model="quantity" type="number" min="1" :max="stockCount"
-                    :disabled="isOutOfStock"
-                    class="w-16 text-center border-0 focus:outline-none disabled:cursor-not-allowed"
+                    v-model="quantity" type="number" min="1"
+                    class="w-16 text-center border-0 focus:outline-none"
                   />
-                  <button @click="incrementQuantity" :disabled="isOutOfStock || quantity >= stockCount" class="px-3 py-2 hover:bg-gray-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">+</button>
+                  <button @click="incrementQuantity" class="px-3 py-2 hover:bg-gray-50">+</button>
                 </div>
                 <span class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex-shrink-0" :class="stockStatusClass">
                   {{ stockStatusText }}
@@ -473,20 +469,26 @@ watch(() => route.params.slug, (newSlug) => {
             </div>
 
 
+            <!-- Delivery Time -->
+            <div v-if="deliveryLabel" class="flex items-center gap-2 text-sm text-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 flex-shrink-0 text-orange-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+              </svg>
+              <span>{{ currentLocale === 'nl' ? 'Levertijd' : 'Delivery time' }}: <strong>{{ deliveryLabel }}</strong></span>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2 sm:gap-4">
               <button
                 @click="handleBuyNow"
-                :disabled="isOutOfStock"
-                class="flex-1 min-w-0 bg-orange-500 text-white py-3 px-3 sm:px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1 sm:space-x-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+                class="flex-1 min-w-0 bg-orange-500 text-white py-3 px-3 sm:px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
               >
                 <img src="/images/shopping-bag.svg" alt="Shopping bag" class="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <span class="text-xs sm:text-base whitespace-nowrap">{{ t('button.buyNow') }}</span>
               </button>
               <button
                 @click="handleAddToCart"
-                :disabled="isOutOfStock"
-                class="px-3 sm:px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-1 sm:space-x-2 flex-shrink-0 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:border-gray-200"
+                class="px-3 sm:px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 flex-shrink-0">
                   <path d="M12 5v14M5 12h14"/>

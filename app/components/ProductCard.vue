@@ -80,7 +80,7 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
 <template>
   <article class="bg-white rounded-lg shadow-sm flex flex-col relative cursor-pointer transition-all duration-300 hover:shadow-lg md:hover:scale-105 h-full">
     <!-- Badges -->
-    <div v-if="badges.length" class="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10">
+    <!-- <div v-if="badges.length" class="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10">
       <span
         v-for="badge in badges"
         :key="badge.key"
@@ -89,7 +89,7 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
       >
         {{ badge.text }}
       </span>
-    </div>
+    </div> -->
 
     <!-- Wishlist -->
     <button

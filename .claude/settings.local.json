@@ -9,7 +9,9 @@
       "Bash(grep -rn \"payment/status\" . --include=\"*.ts\" --include=\"*.vue\" --include=\"*.js\" ! -path \"*/node_modules/*\" ! -path \"*/.nuxt/*\")",
       "Bash(ls -la /c/xampp/htdocs/bimmerparts-api/routes/)",
       "Bash(head -5 \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\\\\app\\\\Models\\\\Product\\\\Product.php\")",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "WebFetch(domain:docs.mollie.com)",
+      "PowerShell(Get-Content \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\\\\app\\\\Http\\\\Controllers\\\\Api\\\\OrderController.php\" | Select-Object -Index \\(95..125\\))"
     ]
   }
 }
