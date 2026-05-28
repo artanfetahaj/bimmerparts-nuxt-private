@@ -46,6 +46,7 @@ class OrdersService {
     payment_method: 'credit_card' | 'paypal' | 'bank_transfer' | 'cash_on_delivery' | 'creditcard' | 'ideal'
     notes?: string
     items: { product_id: string; quantity: number }[]
+    mollie_payment_id?: string
   }): Promise<{ order_number: string; dhl_tracking_code?: string | null; dhl_label_url?: string | null }> {
     const res = await api.post('/orders', payload)
     return res.data?.data || { order_number: '' }
@@ -62,6 +63,37 @@ class OrdersService {
   async getPaymentStatus(orderNumber: string): Promise<{ payment_status: string; order_status: string }> {
     const res = await api.get(`/orders/${orderNumber}/payment/status`)
     return res.data || { payment_status: 'pending', order_status: 'pending' }
+  }
+
+  async initiatePayment(payload: {
+    items: { product_id: string; quantity: number }[]
+    redirect_url: string
+    method?: string
+  }): Promise<{ checkout_url: string; payment_id: string }> {
+    const res = await api.post('/payments/initiate', payload)
+    return res.data || { checkout_url: '', payment_id: '' }
+  }
+
+  async verifyPayment(paymentId: string): Promise<{ status: string }> {
+    const res = await api.get(`/payments/${paymentId}/verify`)
+    return res.data || { status: 'failed' }
+  }
+
+  async getDetail(orderNumber: string): Promise<any> {
+    const res = await api.get(`/orders/${orderNumber}`)
+    return res.data?.data || null
+  }
+
+  async downloadInvoice(orderNumber: string): Promise<void> {
+    const res = await api.get(`/orders/${orderNumber}/invoice/download`, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoice_${orderNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 }
 

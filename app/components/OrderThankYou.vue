@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useLocale } from '../stores/locale'
+import { useCart } from '../stores/cart'
 import ordersService from '../services/orders'
 
 const props = defineProps<{
@@ -13,10 +14,47 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useLocale()
+const { clearCart } = useCart()
 
-const paymentStatus = ref<'pending' | 'paid' | 'failed' | 'checking'>('checking')
+const paymentStatus       = ref<'pending' | 'paid' | 'failed' | 'checking'>('checking')
+const resolvedOrderNumber = ref<string | undefined>(props.orderNumber)
 
 onMounted(async () => {
+  // Card payment flow: sessionStorage holds the payment_id and checkout data
+  const pendingPaymentId = sessionStorage.getItem('pending_payment_id')
+
+  if (pendingPaymentId) {
+    try {
+      const { status } = await ordersService.verifyPayment(pendingPaymentId)
+
+      if (status === 'paid') {
+        const raw = sessionStorage.getItem('pending_checkout')
+        const checkoutData = raw ? JSON.parse(raw) : null
+
+        if (checkoutData) {
+          checkoutData.mollie_payment_id = pendingPaymentId
+          const orderResult = await ordersService.create(checkoutData)
+          resolvedOrderNumber.value = orderResult.order_number
+        }
+
+        paymentStatus.value = 'paid'
+        clearCart()
+        sessionStorage.removeItem('pending_payment_id')
+        sessionStorage.removeItem('pending_checkout')
+      } else if (status === 'failed') {
+        paymentStatus.value = 'failed'
+        sessionStorage.removeItem('pending_payment_id')
+        sessionStorage.removeItem('pending_checkout')
+      } else {
+        paymentStatus.value = 'pending'
+      }
+    } catch {
+      paymentStatus.value = 'pending'
+    }
+    return
+  }
+
+  // Bank transfer flow: order already exists, just check its payment status
   if (!props.orderNumber) {
     paymentStatus.value = 'pending'
     return
@@ -24,7 +62,9 @@ onMounted(async () => {
 
   try {
     const result = await ordersService.getPaymentStatus(props.orderNumber)
-    paymentStatus.value = result.payment_status as 'pending' | 'paid' | 'failed'
+    const status = result.payment_status as 'pending' | 'paid' | 'failed'
+    paymentStatus.value = status
+    if (status === 'paid') clearCart()
   } catch {
     paymentStatus.value = 'pending'
   }
@@ -60,8 +100,8 @@ const dhlTrackingUrl = (code: string) =>
         <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ t('thankyou.order.title') }}</h1>
         <p class="text-gray-600 max-w-xl mb-8">{{ t('thankyou.order.message') }}</p>
 
-        <div v-if="orderNumber" class="mb-4 text-sm text-gray-500">
-          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ orderNumber }}</span>
+        <div v-if="resolvedOrderNumber" class="mb-4 text-sm text-gray-500">
+          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ resolvedOrderNumber }}</span>
         </div>
 
         <div v-if="trackingCode" class="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-md w-full">
@@ -90,8 +130,8 @@ const dhlTrackingUrl = (code: string) =>
         </div>
         <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ t('thankyou.failed.title') }}</h1>
         <p class="text-gray-600 max-w-xl mb-8">{{ t('thankyou.failed.message') }}</p>
-        <div v-if="orderNumber" class="mb-4 text-sm text-gray-500">
-          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ orderNumber }}</span>
+        <div v-if="resolvedOrderNumber" class="mb-4 text-sm text-gray-500">
+          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ resolvedOrderNumber }}</span>
         </div>
       </template>
 
@@ -104,8 +144,8 @@ const dhlTrackingUrl = (code: string) =>
         </div>
         <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ t('thankyou.order.title') }}</h1>
         <p class="text-gray-600 max-w-xl mb-8">{{ t('thankyou.order.message') }}</p>
-        <div v-if="orderNumber" class="mb-4 text-sm text-gray-500">
-          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ orderNumber }}</span>
+        <div v-if="resolvedOrderNumber" class="mb-4 text-sm text-gray-500">
+          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ resolvedOrderNumber }}</span>
         </div>
       </template>
 

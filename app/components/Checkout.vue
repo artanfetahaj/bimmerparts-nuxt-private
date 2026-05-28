@@ -167,87 +167,64 @@ const validateForm = () => {
 }
 
 const handleOrderNow = async () => {
-  // Validate form first
-  if (!validateForm()) {
-    return
-  }
-  
+  if (!validateForm()) return
+
   if (!acceptTerms.value) {
     showTermsError.value = true
     return
   }
-  
-  // Reset error state
+
   showTermsError.value = false
   orderError.value = ''
   isSubmitting.value = true
-  
+
   const itemsPayload: { product_id: string; quantity: number }[] = cartItems.value.map(ci => ({
     product_id: ci.product_id,
-    quantity: ci.quantity
+    quantity: ci.quantity,
   }))
 
   const customerEmail = authService.isAuthenticated()
     ? (authService.getCurrentCustomer()?.email || formData.value.email)
     : formData.value.email
 
-  const paymentMethodMap: Record<'bank' | 'card', string> = {
-    bank: 'bank_transfer',
+  const addressStr = `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`
+
+  // Both card and iDEAL/Wero go through Mollie — order is only created after payment is confirmed
+  const mollieMethodMap: Record<'bank' | 'card', string> = {
+    bank: 'ideal',       // iDEAL / Wero
     card: 'creditcard',
   }
-
-  let orderResult: any = null
+  const orderPaymentMethodMap: Record<'bank' | 'card', string> = {
+    bank: 'bank_transfer',
+    card: 'credit_card',
+  }
 
   try {
-    orderResult = await ordersService.create({
+    sessionStorage.setItem('pending_checkout', JSON.stringify({
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
       customer_email: customerEmail,
       customer_phone: formData.value.phone,
-      shipping_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      billing_address: `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`,
-      payment_method: paymentMethodMap[selectedPaymentMethod.value] as any,
+      shipping_address: addressStr,
+      billing_address: addressStr,
+      payment_method: orderPaymentMethodMap[selectedPaymentMethod.value],
       shipping_method: selectedShippingMethod.value,
-      items: itemsPayload
+      items: itemsPayload,
+    }))
+
+    const result = await ordersService.initiatePayment({
+      items: itemsPayload,
+      redirect_url: `${window.location.origin}/order-thanks`,
+      method: mollieMethodMap[selectedPaymentMethod.value],
     })
+
+    sessionStorage.setItem('pending_payment_id', result.payment_id)
+    window.location.href = result.checkout_url
   } catch (e: any) {
-    console.error('Order creation failed', e)
-    orderError.value = e?.response?.data?.message || e?.message || 'Failed to create order. Please try again.'
+    sessionStorage.removeItem('pending_checkout')
+    sessionStorage.removeItem('pending_payment_id')
+    orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate payment. Please try again.'
     isSubmitting.value = false
-    return
   }
-
-  isOrderComplete.value = true
-
-  // For card payments, create a Mollie payment and redirect to the hosted checkout
-  if (selectedPaymentMethod.value === 'card') {
-    try {
-      const redirectUrl = `${window.location.origin}/order-thanks?order=${orderResult?.order_number ?? ''}`
-      const mollieResult = await ordersService.createMolliePayment(
-        orderResult.order_number,
-        redirectUrl,
-        'creditcard',
-      )
-      clearCart()
-      window.location.href = mollieResult.checkout_url
-      return
-    } catch (e: any) {
-      console.error('Mollie payment creation failed', e)
-      orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate card payment. Please try again.'
-      isSubmitting.value = false
-      isOrderComplete.value = false
-      return
-    }
-  }
-
-  const query: Record<string, string> = {
-    order: orderResult?.order_number ?? '',
-  }
-  if (orderResult?.dhl_tracking_code) {
-    query.tracking = orderResult.dhl_tracking_code
-  }
-
-  await router.push({ path: '/order-thanks', query })
-  clearCart()
 }
 
 </script>
@@ -652,11 +629,8 @@ const handleOrderNow = async () => {
               :disabled="isSubmitting"
               class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span v-if="isSubmitting && selectedPaymentMethod === 'card'" class="text-lg font-medium text-orange-500">
+              <span v-if="isSubmitting" class="text-lg font-medium text-orange-500">
                 {{ t('checkout.redirectingToPayment') }}
-              </span>
-              <span v-else-if="isSubmitting" class="text-lg font-medium text-orange-500">
-                {{ t('checkout.processingOrder') }}
               </span>
               <span v-else class="text-lg font-medium text-orange-500">
                 {{ t('checkout.orderNow') }}
