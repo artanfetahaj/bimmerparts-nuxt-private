@@ -32,6 +32,7 @@ onMounted(async () => {
         const checkoutData = raw ? JSON.parse(raw) : null
 
         if (checkoutData) {
+          checkoutData.mollie_payment_id = pendingPaymentId
           const orderResult = await ordersService.create(checkoutData)
           resolvedOrderNumber.value = orderResult.order_number
         }
