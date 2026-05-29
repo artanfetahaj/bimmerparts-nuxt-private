@@ -7,6 +7,8 @@ import { submitContactForm } from '../services/contact'
 const router = useRouter()
 const { t } = useLocale()
 
+const submitted = ref(false)
+
 const formData = ref({
   firstName: '',
   lastName: '',
@@ -55,7 +57,7 @@ const handleSubmit = async () => {
     formData.value = { firstName: '', lastName: '', email: '', phone: '', message: '' }
     acceptPrivacy.value = false
     validationErrors.value = {}
-    router.push('/contact/thanks')
+    submitted.value = true
   } catch (error: any) {
     console.error('Error submitting contact form:', error)
     validationErrors.value = {
@@ -66,7 +68,8 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white">
+  <ContactThankYou v-if="submitted" @navigate-to-home="router.push('/')" />
+  <div v-else class="min-h-screen bg-white">
     <div class="container mx-auto px-6 py-16">
       <div class="text-center mb-16">
         <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">{{ t('contact.title') }}</h1>
@@ -112,7 +115,12 @@ const handleSubmit = async () => {
 
               <div class="p-4 rounded-lg border-2 transition-colors" :class="validationErrors.privacy ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-gray-50'">
                 <label class="flex items-start space-x-3 cursor-pointer">
-                  <input v-model="acceptPrivacy" @change="validationErrors.privacy = ''" type="checkbox" class="mt-1 w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer" />
+                  <input 
+                    v-model="acceptPrivacy" 
+                    @change="validationErrors.privacy = ''" 
+                    type="checkbox" 
+                    class="mt-1 flex-shrink-0 terms-checkbox"
+                   />
                   <span class="text-sm text-gray-700 font-medium">
                     {{ t('contact.privacyAgreement') }}
                     <NuxtLink to="/privacy" class="text-orange-500 hover:underline font-semibold">{{ t('contact.privacyPolicy') }}</NuxtLink> {{ t('contact.and') }}
@@ -187,3 +195,29 @@ const handleSubmit = async () => {
     </div>
   </div>
 </template>
+<style scoped>
+  .terms-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.terms-checkbox:checked {
+  background-color: #f97316;
+  border-color: #f97316;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.terms-checkbox:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+</style>

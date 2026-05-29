@@ -257,7 +257,7 @@ const openSections = ref(['price'])
                   name="car_model"
                   :value="model.id"
                   :checked="selectedCarModel === model.id"
-                  @change="selectCarModel(model.id)"
+                  @click="selectCarModel(model.id)"
                   class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
                 />
                 <span class="text-sm text-gray-700">{{ model.name }}</span>
@@ -298,7 +298,7 @@ const openSections = ref(['price'])
                   name="main_category"
                   :value="mc.id"
                   :checked="selectedMainCategory === mc.id && !selectedProductCategory && !selectedSubcategory"
-                  @change="selectMainCategory(mc.id)"
+                  @click="selectMainCategory(mc.id)"
                   class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
                 />
                 <span class="text-sm font-medium text-gray-800">{{ mc.name }}</span>
@@ -316,7 +316,7 @@ const openSections = ref(['price'])
                     name="product_category"
                     :value="pc.id"
                     :checked="selectedProductCategory === pc.id && !selectedSubcategory"
-                    @change="selectProductCategory(pc.id)"
+                    @click="selectProductCategory(pc.id)"
                     class="w-3.5 h-3.5 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
                   />
                   <span class="text-sm text-gray-700">{{ pc.name }}</span>
@@ -362,7 +362,7 @@ const openSections = ref(['price'])
                 name="brand"
                 :value="brand.id"
                 :checked="selectedBrand === brand.id"
-                @change="selectBrand(brand.id)"
+                @click="selectBrand(brand.id)"
                 class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
               />
               <span class="text-sm text-gray-700">{{ brand.name }}</span>
