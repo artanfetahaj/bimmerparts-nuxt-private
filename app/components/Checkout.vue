@@ -84,7 +84,7 @@ onMounted(() => {
 })
 
 // Shipping and payment methods
-const selectedShippingMethod = ref<'store' | 'post'>('store')
+const selectedShippingMethod = ref<'store' | 'post'>('post')
 const selectedPaymentMethod = ref<'bank' | 'card'>('bank')
 const acceptTerms = ref(false)
 
@@ -529,18 +529,7 @@ const handleOrderNow = async () => {
             <div class="mb-6">
               <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.selectShippingMethod') }}</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button 
-                  @click="selectedShippingMethod = 'store'"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedShippingMethod === 'store' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <img src="/images/building.png" :alt="t('checkout.atOurStore')" class="w-6 h-6" />
-                  </div>
-                  <span class="text-sm font-medium">{{ t('checkout.atOurStore') }}</span>
-                </button>
-                
-                <button 
+                <button
                   @click="selectedShippingMethod = 'post'"
                   class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
                   :class="selectedShippingMethod === 'post' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
@@ -550,6 +539,17 @@ const handleOrderNow = async () => {
                   </div>
                   <span class="text-sm font-medium">{{ t('checkout.viaPost') }}</span>
                 </button>
+
+                <button
+                  @click="selectedShippingMethod = 'store'"
+                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                  :class="selectedShippingMethod === 'store' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <div class="w-8 h-8 flex items-center justify-center">
+                    <img src="/images/building.png" :alt="t('checkout.atOurStore')" class="w-6 h-6" />
+                  </div>
+                  <span class="text-sm font-medium">{{ t('checkout.atOurStore') }}</span>
+                </button>
               </div>
             </div>
 
@@ -557,17 +557,15 @@ const handleOrderNow = async () => {
             <div class="mb-6">
               <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.paymentMethod') }}</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <!-- Bank Transfer -->
+                <!-- iDEAL -->
                 <button
                   @click="selectedPaymentMethod = 'bank'"
                   type="button"
                   class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
                   :class="selectedPaymentMethod === 'bank' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
                 >
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <img src="/images/bank.png" :alt="t('checkout.payment.bank')" class="w-6 h-6" />
-                  </div>
-                  <span class="text-sm font-medium">{{ t('checkout.payment.bank') }}</span>
+                  <img src="/images/ideal.png" alt="iDEAL" class="h-10 w-10 object-contain" />
+                  <span class="text-sm font-medium">iDEAL</span>
                 </button>
 
                 <!-- Credit / Debit Card -->
@@ -577,12 +575,9 @@ const handleOrderNow = async () => {
                   class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
                   :class="selectedPaymentMethod === 'card' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
                 >
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <!-- Card icon (inline SVG — no image dependency) -->
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6 text-gray-600">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                      <line x1="1" y1="10" x2="23" y2="10"/>
-                    </svg>
+                  <div class="flex items-center gap-1">
+                    <img src="/images/mastercard.png" alt="Mastercard" class="h-7 w-auto" />
+                    <img src="/images/visa.png" alt="Visa" class="h-5 w-auto" />
                   </div>
                   <span class="text-sm font-medium">{{ t('checkout.payment.card') }}</span>
                 </button>
