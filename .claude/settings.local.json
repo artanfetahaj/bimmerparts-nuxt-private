@@ -11,7 +11,11 @@
       "Bash(head -5 \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\\\\app\\\\Models\\\\Product\\\\Product.php\")",
       "Bash(php artisan *)",
       "WebFetch(domain:docs.mollie.com)",
-      "PowerShell(Get-Content \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\\\\app\\\\Http\\\\Controllers\\\\Api\\\\OrderController.php\" | Select-Object -Index \\(95..125\\))"
+      "PowerShell(Get-Content \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\\\\app\\\\Http\\\\Controllers\\\\Api\\\\OrderController.php\" | Select-Object -Index \\(95..125\\))",
+      "Bash(python -c \"import fitz; print\\('pymupdf ok'\\)\")",
+      "Bash(pip install *)",
+      "Bash(curl -s http://127.0.0.1:8000/api/car-variants)",
+      "Bash(find /c/xampp/htdocs -name \"*.php\" -path \"*CarVariant*\" 2>/dev/null | head -20 *)"
     ]
   }
 }

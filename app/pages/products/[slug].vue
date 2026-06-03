@@ -549,7 +549,7 @@ watch(() => route.params.slug, (newSlug) => {
               class="text-gray-700 leading-relaxed break-words"
               v-html="product.description"
             />
-            <p v-else class="text-gray-500 italic">{{ t('productDetail.noDescription') || 'No description available.' }}</p>
+            <p v-else class="text-gray-500 italic">{{ t('productDetail.noDescription') }}</p>
           </div>
 
           <!-- Details / Specifications -->
@@ -560,35 +560,27 @@ watch(() => route.params.slug, (newSlug) => {
                 <span class="text-gray-900 text-right">{{ product.sku }}</span>
               </div>
               <div v-if="brandName" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.brand') || 'Brand' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.brand') }}:</span>
                 <span class="text-gray-900 text-right">{{ brandName }}</span>
               </div>
               <div v-if="product.weight" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.weight') || 'Weight' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.weight') }}:</span>
                 <span class="text-gray-900 text-right">{{ product.weight }} kg</span>
               </div>
               <div v-if="product.packaging" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.packaging') || 'Packaging' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.packaging') }}:</span>
                 <span class="text-gray-900 text-right">{{ product.packaging }}</span>
               </div>
-              <div v-if="product.sold_unit" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.soldUnit') || 'Unit' }}:</span>
-                <span class="text-gray-900 text-right">{{ product.sold_unit }}</span>
-              </div>
               <div v-if="deliveryLabel" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.deliveryTime') || 'Delivery' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.deliveryTime') }}:</span>
                 <span class="text-gray-900 text-right">{{ deliveryLabel }}</span>
               </div>
-              <div v-if="product.vat_percentage" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.vat') || 'VAT' }}:</span>
-                <span class="text-gray-900 text-right">{{ product.vat_percentage }}%</span>
-              </div>
               <div v-if="product.category?.name" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.category') || 'Category' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.category') }}:</span>
                 <span class="text-gray-900 text-right">{{ product.category.name }}</span>
               </div>
               <div v-if="product.subcategory?.name" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">{{ t('productDetail.subcategory') || 'Subcategory' }}:</span>
+                <span class="font-medium text-gray-600">{{ t('productDetail.subcategory') }}:</span>
                 <span class="text-gray-900 text-right">{{ product.subcategory.name }}</span>
               </div>
             </div>
@@ -596,7 +588,7 @@ watch(() => route.params.slug, (newSlug) => {
               v-if="!product.sku && !brandName && !product.weight && !product.packaging && !product.sold_unit && !deliveryLabel"
               class="text-gray-500 italic"
             >
-              {{ t('productDetail.noDetails') || 'No details available.' }}
+              {{ t('productDetail.noDetails') }}
             </div>
           </div>
 
