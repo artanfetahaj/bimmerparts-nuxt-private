@@ -389,7 +389,7 @@ const openSections = ref(['price'])
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #f97316;
+  background: #d3ba74;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   cursor: pointer;
@@ -401,7 +401,7 @@ const openSections = ref(['price'])
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #f97316;
+  background: #d3ba74;
   border: 2px solid white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   cursor: pointer;
