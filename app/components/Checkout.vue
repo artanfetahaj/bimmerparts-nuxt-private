@@ -464,7 +464,7 @@ const handleOrderNow = async () => {
                   <h4 class="text-lg font-semibold text-gray-900 mb-2 truncate">{{ item.title }}</h4>
                   <div class="space-y-1">
                     <div class="text-xl font-bold text-gray-900">€ {{ item.price.toFixed(2).replace('.', ',') }}</div>
-                    <div v-if="item.oldPrice" class="text-lg text-gray-500 line-through">€ {{ item.oldPrice.toFixed(2).replace('.', ',') }}</div>
+                    <div v-if="item.oldPrice < item.price" class="text-lg text-gray-500 line-through">€ {{ item.oldPrice.toFixed(2).replace('.', ',') }}</div>
                   </div>
                 </div>
                 
@@ -502,10 +502,6 @@ const handleOrderNow = async () => {
               <div class="flex justify-between">
                 <span class="text-gray-600">{{ t('checkout.bagTotal') }}</span>
                 <span class="font-medium">€{{ subtotal.toFixed(2).replace('.', ',') }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">{{ t('checkout.bagDiscount') }}</span>
-                <span class="font-medium text-green-600">-€{{ (subtotal * 0.2).toFixed(2).replace('.', ',') }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">{{ t('checkout.deliveryFee') }}</span>
