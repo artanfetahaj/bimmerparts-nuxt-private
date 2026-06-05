@@ -128,15 +128,15 @@ const stockCount = computed(() => {
 const isOutOfStock = computed(() => stockCount.value <= 0)
 const isLowStock = computed(() => stockCount.value > 0 && stockCount.value < 10)
 
-const stockStatusText = computed(() => {
-  if (isOutOfStock.value) return t('product.outOfStock')
-  if (isLowStock.value) {
-    return currentLocale.value === 'nl'
-      ? `Nog ${stockCount.value} op voorraad`
-      : `Only ${stockCount.value} left in stock`
-  }
-  return t('status.inStock')
-})
+// const stockStatusText = computed(() => {
+//   if (isOutOfStock.value) return t('product.outOfStock')
+//   if (isLowStock.value) {
+//     return currentLocale.value === 'nl'
+//       ? `Nog ${stockCount.value} op voorraad`
+//       : `Only ${stockCount.value} left in stock`
+//   }
+//   return t('status.inStock')
+// })
 
 const stockStatusClass = computed(() => {
   if (isOutOfStock.value) return 'bg-red-100 text-red-600'
@@ -462,9 +462,6 @@ watch(() => route.params.slug, (newSlug) => {
                   />
                   <button @click="incrementQuantity" class="px-3 py-2 hover:bg-gray-50">+</button>
                 </div>
-                <span class="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap flex-shrink-0" :class="stockStatusClass">
-                  {{ stockStatusText }}
-                </span>
               </div>
             </div>
 
