@@ -24,7 +24,7 @@ export const BMW_SERIES: BmwSeriesItem[] = [
   { series: 'X',        label: 'X Serie', image: '/images/bmw-x-series.png' },
   { series: 'Z',        label: 'Z Serie', image: '/images/bmw-z-series.png' },
   { series: 'i',        label: 'i Serie', image: '/images/bmw-i8.png'       },
-  { series: 'M',        label: 'M Serie', image: '/images/bmw-m-series.png' },
+  { series: 'MINI',     label: 'MINI', image: '/images/MINI.png' },
 ]
 
 /** Resolve the series image from the collection by series string (case-insensitive). */
