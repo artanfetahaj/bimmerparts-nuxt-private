@@ -85,7 +85,7 @@ onMounted(() => {
 
 // Shipping and payment methods
 const selectedShippingMethod = ref<'store' | 'post'>('post')
-const selectedPaymentMethod = ref<'bank' | 'card'>('bank')
+const selectedPaymentMethod = ref<'bank' | 'card' | 'bancontact'>('bank')
 const acceptTerms = ref(false)
 
 const showTermsError = ref(false)
@@ -190,13 +190,15 @@ const handleOrderNow = async () => {
   const addressStr = `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`
 
   // Both card and iDEAL/Wero go through Mollie — order is only created after payment is confirmed
-  const mollieMethodMap: Record<'bank' | 'card', string> = {
-    bank: 'ideal',       // iDEAL / Wero
+  const mollieMethodMap: Record<'bank' | 'card' | 'bancontact', string> = {
+    bank: 'ideal',
     card: 'creditcard',
+    bancontact: 'bancontact',
   }
-  const orderPaymentMethodMap: Record<'bank' | 'card', string> = {
+  const orderPaymentMethodMap: Record<'bank' | 'card' | 'bancontact', string> = {
     bank: 'bank_transfer',
     card: 'credit_card',
+    bancontact: 'bancontact',
   }
 
   try {
@@ -577,6 +579,20 @@ const handleOrderNow = async () => {
                   </div>
                   <span class="text-sm font-medium">{{ t('checkout.payment.card') }}</span>
                 </button>
+
+                <!-- Bancontact -->
+                <button
+                  @click="selectedPaymentMethod = 'bancontact'"
+                  type="button"
+                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                  :class="selectedPaymentMethod === 'bancontact' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                >
+                  <div class="flex items-center justify-center w-10 h-10 rounded-md bg-[#005498]">
+                    <span class="text-[10px] font-bold text-white leading-none text-center">Bancon<br>tact</span>
+                  </div>
+                  <span class="text-sm font-medium">Bancontact</span>
+                </button>
+
               </div>
             </div>
 
