@@ -26,13 +26,14 @@ import StepSelectVariant from './steps/StepSelectVariant.vue'
 
 const store  = useCarVariantStore()
 const router = useRouter()
+const route  = useRoute()
 
 const currentStep       = ref(1)
 const selectedSeries    = ref('')
 const selectedModel     = ref<CarModel | null>(null)
 const selectedVariantId = ref<string | null>(null)
 
-const showStepper = computed(() => !store.selectedVariant)
+const showStepper = computed(() => !store.selectedVariant && !store.selectedModel)
 
 const steps = [
   { step: 1, title: 'Serie',      description: 'Kies jouw BMW serie'  },
@@ -78,13 +79,22 @@ function handleStepperChange(step: number) {
 
 function handleVariantSelect(variant: CarVariant) {
   store.setVariant(variant)
+  store.closeDialog()
   resetStepperState()
   router.push({ path: '/products', query: { car: variant.id } })
 }
 
+function handleSearchByModel() {
+  const model = selectedModel.value
+  if (!model) return
+  store.setModel(model)
+  resetStepperState()
+  router.push({ path: '/products', query: { car_model: String(model.id) } })
+}
+
 function handleChangeVariant() {
   store.clearVariant()
-  const { car: _removed, ...rest } = route.query
+  const { car: _c, car_model: _m, ...rest } = route.query
   router.replace({ query: rest })
   resetStepperState()
 }
@@ -116,7 +126,7 @@ function handleVariantResolved(variant: CarVariant) {
     <DialogContent class="max-w-[800px] w-full p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]" :close-class="!showStepper ? 'text-white' : ''">
 
       <!-- ════════════════════════════════════════════════════════
-           SELECTED CAR VIEW
+           SELECTED CAR VIEW  
       ═════════════════════════════════════════════════════════ -->
       <template v-if="!showStepper">
         <div class="flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
@@ -124,38 +134,42 @@ function handleVariantResolved(variant: CarVariant) {
           <!-- Hero: gradient backdrop + big car image -->
           <div class="relative w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
 
-            <!-- Subtle radial glow behind the car -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div class="w-[480px] h-[480px] rounded-full bg-orange-500/10 blur-3xl" />
             </div>
 
-            <!-- Series label top-left -->
             <div class="absolute top-5 left-6 animate-in fade-in-0 slide-in-from-left-3 duration-500 delay-100">
               <span class="text-xs font-semibold tracking-widest text-orange-400 uppercase">
-                BMW {{ getSeriesLabel(store.selectedVariant!.car_model?.series) }}
+                BMW {{ store.selectedVariant ? getSeriesLabel(store.selectedVariant.car_model?.series) : getSeriesLabel(store.selectedModel!.series) }}
               </span>
             </div>
 
-            <!-- Car image -->
             <div class="relative flex items-center justify-center px-8 pt-14 pb-6 animate-in fade-in-0 zoom-in-95 duration-500 delay-75">
               <NuxtImg
-                :src="`/car-models/${store.selectedVariant!.car_model?.code}.png`"
-                :alt="store.selectedVariant!.full_name"
+                :src="store.selectedVariant ? `/car-models/${store.selectedVariant.car_model?.code}.png` : `/car-models/${store.selectedModel!.code}.png`"
+                :alt="store.selectedVariant ? store.selectedVariant.full_name : store.selectedModel!.name"
                 width="520"
                 height="280"
                 class="object-contain w-full max-w-[520px] h-auto drop-shadow-2xl"
               />
             </div>
 
-            <!-- Name + meta overlay at the bottom of the hero -->
             <div class="relative px-6 pb-6 flex flex-col gap-1 animate-in fade-in-0 slide-in-from-bottom-3 duration-500 delay-100">
               <h2 class="text-2xl font-bold tracking-tight text-white leading-tight">
-                {{ store.selectedVariant!.full_name }}
+                {{ store.selectedVariant ? store.selectedVariant.full_name : store.selectedModel!.name }}
               </h2>
               <p class="text-sm text-gray-400">
-                {{ store.selectedVariant!.car_model?.name }}
-                <template v-if="store.selectedVariant!.car_model?.generation">
-                  &middot; {{ store.selectedVariant!.car_model?.generation }}
+                <template v-if="store.selectedVariant">
+                  {{ store.selectedVariant.car_model?.name }}
+                  <template v-if="store.selectedVariant.car_model?.generation">
+                    &middot; {{ store.selectedVariant.car_model.generation }}
+                  </template>
+                </template>
+                <template v-else>
+                  Alle uitvoeringen
+                  <template v-if="store.selectedModel!.generation">
+                    &middot; {{ store.selectedModel!.generation }}
+                  </template>
                 </template>
               </p>
             </div>
@@ -163,29 +177,52 @@ function handleVariantResolved(variant: CarVariant) {
 
           <!-- Details row -->
           <div class="px-6 py-5 flex items-center gap-6 border-b border-gray-100 animate-in fade-in-0 slide-in-from-bottom-2 duration-500 delay-150">
-            <div v-if="store.selectedVariant!.car_model?.code" class="flex flex-col gap-0.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Motor</span>
-              <span class="text-sm font-semibold text-gray-900 uppercase">{{ store.selectedVariant!.car_engine?.code }}</span>
-            </div>
-            <div v-if="store.selectedVariant!.car_model?.type" class="flex flex-col gap-0.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Type</span>
-              <span class="text-sm font-semibold text-gray-900">{{ store.selectedVariant!.car_model?.type }}</span>
-            </div>
-            <div class="flex flex-col gap-0.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Serie</span>
-              <span class="text-sm font-semibold text-gray-900">{{ getSeriesLabel(store.selectedVariant!.car_model?.series) }}</span>
-            </div>
-            <div v-if="store.selectedVariant!.car_model?.generation" class="flex flex-col gap-0.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Generatie</span>
-              <span class="text-sm font-semibold text-gray-900">{{ store.selectedVariant!.car_model?.generation }}</span>
-            </div>
-            <div v-if="store.selectedVariant!.start_year" class="flex flex-col gap-0.5">
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Bouwjaar</span>
-              <span class="text-sm font-semibold text-gray-900">
-                {{ store.selectedVariant!.start_year }}
-                <template v-if="store.selectedVariant!.end_year">– {{ store.selectedVariant!.end_year }}</template>
-              </span>
-            </div>
+            <template v-if="store.selectedVariant">
+              <div v-if="store.selectedVariant.car_model?.code" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Motor</span>
+                <span class="text-sm font-semibold text-gray-900 uppercase">{{ store.selectedVariant.car_engine?.code }}</span>
+              </div>
+              <div v-if="store.selectedVariant.car_model?.type" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Type</span>
+                <span class="text-sm font-semibold text-gray-900">{{ store.selectedVariant.car_model.type }}</span>
+              </div>
+              <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Serie</span>
+                <span class="text-sm font-semibold text-gray-900">{{ getSeriesLabel(store.selectedVariant.car_model?.series) }}</span>
+              </div>
+              <div v-if="store.selectedVariant.car_model?.generation" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Generatie</span>
+                <span class="text-sm font-semibold text-gray-900">{{ store.selectedVariant.car_model.generation }}</span>
+              </div>
+              <div v-if="store.selectedVariant.start_year" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Bouwjaar</span>
+                <span class="text-sm font-semibold text-gray-900">
+                  {{ store.selectedVariant.start_year }}
+                  <template v-if="store.selectedVariant.end_year">– {{ store.selectedVariant.end_year }}</template>
+                </span>
+              </div>
+            </template>
+            <template v-else>
+              <div v-if="store.selectedModel!.type" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Type</span>
+                <span class="text-sm font-semibold text-gray-900">{{ store.selectedModel!.type }}</span>
+              </div>
+              <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Serie</span>
+                <span class="text-sm font-semibold text-gray-900">{{ getSeriesLabel(store.selectedModel!.series) }}</span>
+              </div>
+              <div v-if="store.selectedModel!.generation" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Generatie</span>
+                <span class="text-sm font-semibold text-gray-900">{{ store.selectedModel!.generation }}</span>
+              </div>
+              <div v-if="store.selectedModel!.start_year" class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Bouwjaar</span>
+                <span class="text-sm font-semibold text-gray-900">
+                  {{ store.selectedModel!.start_year }}
+                  <template v-if="store.selectedModel!.end_year">– {{ store.selectedModel!.end_year }}</template>
+                </span>
+              </div>
+            </template>
           </div>
 
           <!-- Footer -->
@@ -301,8 +338,8 @@ function handleVariantResolved(variant: CarVariant) {
           </Button>
           <Button
             class="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white"
-            :disabled="!canGoNext || isLastStep"
-            @click="nextStep"
+            :disabled="!canGoNext && !isLastStep"
+            @click="isLastStep ? handleSearchByModel() : nextStep()"
           >
             Volgende
           </Button>

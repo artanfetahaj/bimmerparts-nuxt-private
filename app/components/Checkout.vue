@@ -551,6 +551,49 @@ const handleOrderNow = async () => {
               </div>
             </div>
 
+            <!-- Pickup info -->
+            <Transition
+              enter-active-class="transition-all duration-300 ease-out overflow-hidden"
+              enter-from-class="opacity-0 max-h-0"
+              enter-to-class="opacity-100 max-h-64"
+              leave-active-class="transition-all duration-200 ease-in overflow-hidden"
+              leave-from-class="opacity-100 max-h-64"
+              leave-to-class="opacity-0 max-h-0"
+            >
+              <div v-if="selectedShippingMethod === 'store'" class="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <p class="text-sm font-semibold text-orange-700 mb-3">Afhaaladres</p>
+                <div class="flex gap-3 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
+                  <div class="text-sm text-gray-700 leading-relaxed">
+                    Noorddammerweg 35, Unit 11<br />
+                    1424NW De Kwakel
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  <div class="text-sm text-gray-700 leading-relaxed space-y-0.5">
+                    <div class="flex justify-between gap-6">
+                      <span>Maandag t/m vrijdag</span>
+                      <span class="font-medium">09:00 – 17:00</span>
+                    </div>
+                    <div class="flex justify-between gap-6">
+                      <span>Zaterdag</span>
+                      <span class="font-medium">10:00 – 14:00</span>
+                    </div>
+                    <div class="flex justify-between gap-6">
+                      <span>Zondag</span>
+                      <span class="font-medium text-gray-400">Gesloten</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+
             <!-- Select Payment Method -->
             <div class="mb-6">
               <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.paymentMethod') }}</h4>

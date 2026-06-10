@@ -3,7 +3,7 @@ import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { Search, Loader2 } from 'lucide-vue-next'
 import { Input } from '../ui/input'
 import { useLocale } from '../../stores/locale'
-import productService from '../../services/product'
+import { Product } from '@/models/Product'
 
 const { t } = useLocale()
 const router = useRouter()
@@ -29,18 +29,18 @@ async function fetchResults(query: string) {
   isOpen.value = true
 
   try {
-    const response = await productService.getAllProducts({
-      search: query.trim(),
-      per_page: 6,
-    })
-    const items = response?.data ?? []
+    const response = await new Product()
+      .filter({ search: query.trim() })
+      .limit(6)
+      .all()
+    const items: any[] = Array.isArray(response) ? response : (response as any)?.data ?? []
     results.value = items.map((p: any) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
       price: p.discounted_price ?? p.price,
       originalPrice: p.has_discount ? p.price : null,
-      image: p.image?.thumbnail ?? p.image?.original ?? null,
+      image: p.image?.thumbnail_url ?? p.image?.original_url ?? p.image?.thumbnail ?? p.image?.original ?? null,
     }))
   } catch {
     results.value = []
