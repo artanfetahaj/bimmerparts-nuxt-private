@@ -90,6 +90,17 @@ class ProductService {
     }
   }
 
+  async getRelatedByProduct(productId: string, limit = 8): Promise<any[]> {
+    try {
+      const response = await api.get(`/products/${productId}/related`, { params: { limit } })
+      const data = response.data?.data ?? response.data ?? []
+      return Array.isArray(data) ? data : []
+    } catch (error) {
+      console.error('Error fetching related products:', error)
+      return []
+    }
+  }
+
   async getProductBySlug(slug: string) {
     try {
       const response = await api.get(`/products/slug/${slug}`, {

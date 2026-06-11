@@ -69,8 +69,9 @@ const productImages = computed<string[]>(() => {
     )
   }
   // single image relation
-  if (imgs.length === 0 && p.image?.original_url) {
-    imgs.push(p.image.original_url)
+  if (imgs.length === 0 && p.image) {
+    const src = p.image.url || p.image.original || p.image.original_url
+    if (src) imgs.push(src)
   }
   if (imgs.length === 0 && p.image_url) {
     imgs.push(p.image_url)
@@ -146,7 +147,7 @@ const stockStatusClass = computed(() => {
 
 const productCode = computed(() => {
   if (!product.value) return ''
-  return product.value.sku || product.value.id?.slice(0, 8) || ''
+  return product.value.product_number || product.value.id?.slice(0, 8) || ''
 })
 
 const deliveryLabel = computed(() => {
@@ -185,17 +186,7 @@ const loadSimilarProducts = async () => {
   if (!product.value) { similarProducts.value = []; return }
   isLoadingSimilarProducts.value = true
   try {
-    const p = product.value
-    const categoryId = p.category_id || p.category?.id || null
-    if (!categoryId) { similarProducts.value = []; return }
-
-    const related = await productService.getRelatedProducts({
-      categoryIds: categoryId ? [categoryId] : [],
-      excludeIds: [p.id],
-      limit: 5,
-    })
-    console.log("🚀 ~ loadSimilarProducts ~ related:", related)
-    similarProducts.value = related
+    similarProducts.value = await productService.getRelatedByProduct(product.value.id, 8)
   } catch {
     similarProducts.value = []
   } finally {
@@ -427,9 +418,13 @@ watch(() => route.params.slug, (newSlug) => {
                   <span class="text-sm text-gray-900 break-words">{{ t('productDetail.brandOrigin') }}</span>
                   <img src="/images/Margin.png" alt="Flag" class="h-4 mx-1 flex-shrink-0" />
                 </div>
-                <div class="flex items-center min-w-0">
+                <div v-if="productCode" class=" flex items-center min-w-0">
                   <span class="text-sm text-gray-900 mx-1 sm:mx-1 flex-shrink-0">&bull;</span>
                   <span class="text-sm text-gray-900 font-bold underline ml-2 sm:ml-0 break-words">{{ t('productDetail.code') }}: #{{ productCode }}</span>
+                </div>
+                <div v-if="product.is_oem && product.sku" class="flex items-center min-w-0 ml-4">
+                  <span class="text-sm text-gray-900 mx-1 sm:mx-1 flex-shrink-0">&bull;</span>
+                  <span class="text-sm text-gray-500 ml-2 sm:ml-0 break-words">OEM: {{ product.sku }}</span>
                 </div>
               </div>
             </div>
@@ -552,8 +547,12 @@ watch(() => route.params.slug, (newSlug) => {
           <!-- Details / Specifications -->
           <div v-if="activeTab === 'details'" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
-              <div v-if="product.sku" class="flex justify-between py-2 border-b border-gray-100 gap-2">
-                <span class="font-medium text-gray-600">SKU:</span>
+              <div v-if="product.product_number" class="flex justify-between py-2 border-b border-gray-100 gap-2">
+                <span class="font-medium text-gray-600">{{ t('productDetail.articleNumber') }}:</span>
+                <span class="text-gray-900 text-right">{{ product.product_number }}</span>
+              </div>
+              <div v-if="product.is_oem && product.sku" class="flex justify-between py-2 border-b border-gray-100 gap-2">
+                <span class="font-medium text-gray-600">OEM:</span>
                 <span class="text-gray-900 text-right">{{ product.sku }}</span>
               </div>
               <div v-if="brandName" class="flex justify-between py-2 border-b border-gray-100 gap-2">
@@ -582,7 +581,7 @@ watch(() => route.params.slug, (newSlug) => {
               </div>
             </div>
             <div
-              v-if="!product.sku && !brandName && !product.weight && !product.packaging && !product.sold_unit && !deliveryLabel"
+              v-if="!product.product_number && !brandName && !product.weight && !product.packaging && !product.sold_unit && !deliveryLabel"
               class="text-gray-500 italic"
             >
               {{ t('productDetail.noDetails') }}
@@ -599,12 +598,14 @@ watch(() => route.params.slug, (newSlug) => {
       <!-- ════════════════════════════════════════════════════════════════════════
            Similar Products
            ════════════════════════════════════════════════════════════════════════ -->
-      <div class="mb-16">
-        <h2 class="text-2xl font-bold text-gray-900 mb-8">{{ t('productDetail.relatedProducts') }}</h2>
+      <div v-if="similarProducts.length > 0 || isLoadingSimilarProducts" class="mb-16 pt-10 border-t border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">{{ t('productDetail.relatedProducts') }}</h2>
+        </div>
         <div v-if="isLoadingSimilarProducts" class="text-center py-8">
           <p class="text-gray-600">{{ t('products.loading') }}</p>
         </div>
-        <div v-else-if="similarProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <NuxtLink
             v-for="sp in similarProducts"
             :key="sp.id"
@@ -613,9 +614,6 @@ watch(() => route.params.slug, (newSlug) => {
           >
             <ProductCard :product="sp" />
           </NuxtLink>
-        </div>
-        <div v-else class="text-center py-8">
-          <p class="text-gray-600">{{ t('productDetail.noRelatedProducts') || 'Geen gerelateerde producten gevonden' }}</p>
         </div>
       </div>
 
