@@ -193,13 +193,16 @@ class ProductService {
     } else if (product.image_url) {
       imageUrl = product.image_url
     } else if (product.image) {
-      // Fallback to legacy image field
-      const base = (api.defaults.baseURL || '').replace(/\/$/, '')
-      const apiOriginMatch = base.match(/^https?:\/\/[^/]+/)
-      const apiOrigin = apiOriginMatch ? apiOriginMatch[0] : 'http://localhost:8000'
-      imageUrl = product.image.startsWith('http')
-        ? product.image
-        : `${apiOrigin}/storage/${product.image.replace(/^\//, '')}`
+      if (typeof product.image === 'string') {
+        const base = (api.defaults.baseURL || '').replace(/\/$/, '')
+        const apiOriginMatch = base.match(/^https?:\/\/[^/]+/)
+        const apiOrigin = apiOriginMatch ? apiOriginMatch[0] : 'http://localhost:8000'
+        imageUrl = product.image.startsWith('http')
+          ? product.image
+          : `${apiOrigin}/storage/${product.image.replace(/^\//, '')}`
+      } else {
+        imageUrl = product.image.url || product.image.original || product.image.thumbnail_url || product.image.thumbnail || imageUrl
+      }
     }
 
     // Extract all images for product detail view

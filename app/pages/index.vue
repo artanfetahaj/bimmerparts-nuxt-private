@@ -3,26 +3,8 @@ import { onMounted, ref } from 'vue'
 import productService from '../services/product'
 import type { Product as ApiProduct } from '../services/product'
 
-interface UiProduct {
-  id: string
-  slug?: string
-  title: string
-  price: number
-  oldPrice?: number
-  discountPercent?: number
-  image: string
-  badge?: string
-  brand?: string
-  part_number?: string
-  stock: number
-  lowStock?: boolean
-  outOfStock?: boolean
-  description?: string
-  category?: string
-}
-
-const onSale = ref<UiProduct[]>([])
-const allProducts = ref<UiProduct[]>([])
+const onSale = ref<ApiProduct[]>([])
+const allProducts = ref<ApiProduct[]>([])
 const isLoadingProducts = ref(false)
 const productsError = ref<string | null>(null)
 
@@ -32,15 +14,14 @@ const loadProducts = async () => {
   try {
     const response = await productService.getAllProducts({ per_page: 20 })
     if (response && response.data) {
-      const transformedProducts: UiProduct[] = response.data.map((product: ApiProduct) =>
-        productService.transformProductForFrontend(product) as UiProduct
-      )
-      const discountedProducts = transformedProducts
-        .filter((product) => typeof product.discountPercent === 'number' && product.discountPercent > 0)
-        .sort((a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0))
+      const products: ApiProduct[] = response.data
+
+      const discountedProducts = products
+        .filter((p) => p.has_discount)
+        .sort((a, b) => (Number(b.sale_percentage) ?? 0) - (Number(a.sale_percentage) ?? 0))
 
       onSale.value = discountedProducts.slice(0, 6)
-      allProducts.value = transformedProducts
+      allProducts.value = products
     }
   } catch (error) {
     console.error('Failed to load products:', error)
