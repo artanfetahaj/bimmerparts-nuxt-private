@@ -28,7 +28,8 @@ export const BMW_SERIES: BmwSeriesItem[] = [
 ]
 
 /** Resolve the series image from the collection by series string (case-insensitive). */
-export function getSeriesImage(series: string): string {
+export function getSeriesImage(series: string | undefined | null): string {
+  if (!series) return '/images/bmw-1-series.png'
   const match = BMW_SERIES.find(
     s => s.series.toLowerCase() === series.toLowerCase(),
   )
@@ -36,7 +37,8 @@ export function getSeriesImage(series: string): string {
 }
 
 /** Resolve the Dutch label for a series string. */
-export function getSeriesLabel(series: string): string {
+export function getSeriesLabel(series: string | undefined | null): string {
+  if (!series) return ''
   const match = BMW_SERIES.find(
     s => s.series.toLowerCase() === series.toLowerCase(),
   )

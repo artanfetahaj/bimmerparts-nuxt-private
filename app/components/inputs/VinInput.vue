@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Search, Loader2, AlertCircle } from 'lucide-vue-next'
 import { CarVariant } from '@/models/CarVariant'
+import { CarModel } from '@/models/CarModel'
 import { useCarVariantStore } from '@/stores/car-variant.store'
 import { useRouter } from 'vue-router'
 
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'success', variant: CarVariant): void
+  (e: 'model-found', model: CarModel): void
   (e: 'error', message: string): void
 }>()
 
@@ -44,10 +46,14 @@ async function handleSearch() {
   error.value = null
   loading.value = true
   try {
-    const variant = await new CarVariant().lookupCarVariant({ vin_number: vinNumber.value })
-    store.setVariant(variant)
-    router.push({ path: '/products', query: { car: variant.id } })
-    emit('success', variant)
+    const result = await new CarVariant().lookupCarVariant({ vin_number: vinNumber.value })
+    if (result instanceof CarModel) {
+      emit('model-found', result)
+    } else {
+      store.setVariant(result)
+      router.push({ path: '/products', query: { car: result.id } })
+      emit('success', result)
+    }
   } catch (err: any) {
     const msg = err?.response?.data?.message ?? 'Chassisnummer niet gevonden. Controleer uw invoer.'
     error.value = msg

@@ -252,7 +252,6 @@ const handleOrderNow = async () => {
       <!-- Page Title -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">{{ t('checkout.title') }}</h1>
-        <h2 class="text-2xl font-bold text-orange-500 mt-2">BIMMERParts</h2>
       </div>
 
       <!-- Checkout Content -->

@@ -59,28 +59,30 @@ export default defineNuxtConfig({
   site: {
     url: 'https://bimmerparts.nl',
     name: 'bimmerparts.nl',
-    description: 'Welcome to my awesome site!',
+    description: 'Originele en aftermarket BMW onderdelen voor alle modellen. Snel geleverd vanuit eigen voorraad.',
     defaultLocale: 'nl',
   },
   seo: {
     meta: {
-      description: 'Welcome to my awesome site!',
+      description: 'Originele en aftermarket BMW onderdelen voor alle modellen. Snel geleverd vanuit eigen voorraad.',
       themeColor: [
         { content: '#18181b', media: '(prefers-color-scheme: dark)' },
         { content: 'white', media: '(prefers-color-scheme: light)' },
       ],
-      twitterCreator: '@mytwitter',
-      twitterSite: '@mysite',
-      author: 'bimmerparts',
+      twitterCreator: '@bimmerpartsnl',
+      twitterSite: '@bimmerpartsnl',
+      author: 'BimmerParts',
       colorScheme: 'dark light',
-      applicationName: 'bimmerparts.nl',
+      applicationName: 'BimmerParts',
 
       // Nuxt SEO Utils already sets the below tags for you
-      ogSiteName: 'bimmerparts.nl',
+      ogSiteName: 'BimmerParts',
       ogLocale: 'nl_NL',
       ogType: 'website',
       ogUrl: 'https://bimmerparts.nl',
-      ogTitle: 'bimmerparts.nl',
+      ogTitle: 'BimmerParts — Originele BMW Onderdelen',
+      ogImage: '/images/hero.jpg',
+      twitterImage: '/images/hero.jpg',
 
       robots: 'index, follow',
     }

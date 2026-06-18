@@ -1,6 +1,6 @@
 import { Model } from './Model'
 import api from '@/services/api'
-import type { CarModel } from './CarModel'
+import { CarModel } from './CarModel'
 import { getSeriesImage, getSeriesLabel } from '@/collections/bmw-series'
 
 // ─── Model ────────────────────────────────────────────────────────────────────
@@ -23,9 +23,15 @@ export class CarVariant extends Model {
 
   // ─── Lookup by license plate or VIN ────────────────────────────────────────
 
-  async lookupCarVariant(payload: { plate: string } | { vin: string }): Promise<CarVariant> {
+  async lookupCarVariant(payload: { plate: string } | { vin: string }): Promise<CarVariant | CarModel> {
     const response = await api.post('/lookup-car-variant', payload)
-    return this.rowToModel(response.data)
+    const data = response.data
+    if (data.variant_match === false) {
+      const model = Object.create(CarModel.prototype) as CarModel
+      model.hydrate(data)
+      return model
+    }
+    return this.rowToModel(data)
   }
 }
 

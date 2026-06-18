@@ -21,7 +21,7 @@ const handleToggleWishlist = (e: MouseEvent) => {
     slug: props.product.slug,
     title: props.product.name,
     price: displayPrice.value,
-    image: props.product.image?.url ?? '',
+    image: props.product.image?.thumbnail ?? props.product.image?.url ?? '',
   })
 }
 
@@ -91,6 +91,11 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
       </span>
     </div> -->
 
+    <!-- OEM badge -->
+    <div v-if="product.is_oem" class="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+      <span class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-semibold bg-blue-600 text-white tracking-wide">OEM</span>
+    </div>
+
     <!-- Wishlist -->
     <button
       @click="handleToggleWishlist"
@@ -109,10 +114,10 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
     <!-- Image -->
     <div class="relative overflow-hidden rounded-t-lg bg-gray-50 flex items-center justify-center h-32 sm:h-40 lg:h-48">
       <img
-        v-if="product.image?.url || product.image?.thumb_url"
-        :src="product.image.url ?? product.image.thumb_url"
+        v-if="product.image?.thumbnail || product.image?.url"
+        :src="product.image.thumbnail ?? product.image.url"
         :alt="product.name"
-        class="w-full h-full object-contain p-2 sm:p-4"
+        class="w-full h-full object-contain bg-white "
       />
       <div v-else class="flex flex-col items-center justify-center gap-2 text-gray-300">
         <ImageOff class="w-10 h-10" />

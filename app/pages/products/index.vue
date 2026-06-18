@@ -19,6 +19,18 @@ import { useCarVariantStore } from '@/stores/car-variant.store'
 import { useCategoryStore } from '@/stores/category.store'
 import { RouteName } from '@/enums/RouteName'
 
+const requestUrl = useRequestURL()
+const ogImage = `${requestUrl.origin}/images/hero.jpg`
+
+useSeoMeta({
+  title: 'Producten | BimmerParts',
+  description: 'Ontdek ons uitgebreide assortiment originele en aftermarket BMW onderdelen. Filter op model, categorie of merk.',
+  ogTitle: 'Producten | BimmerParts',
+  ogDescription: 'Ontdek ons uitgebreide assortiment originele en aftermarket BMW onderdelen. Filter op model, categorie of merk.',
+  ogImage,
+  twitterImage: ogImage,
+})
+
 // ─── URL query param sync ─────────────────────────────────────────────────────
 const route = useRoute()
 const router = useRouter()
@@ -83,6 +95,7 @@ const getCacheKey = (page: number) =>
   JSON.stringify({
     page,
     variant: carVariantStore.selectedVariant?.id ?? null,
+    model: carVariantStore.selectedModel?.id ?? null,
     search: searchQuery.value || null,
     main_category: mainCategoryFilter.value || null,
     product_category: productCategoryFilter.value || null,
@@ -123,12 +136,12 @@ const fetchProducts = async (page: number, cacheKey: string, silent: boolean) =>
     const model = new Product()
       .filter({
         car_variants: carVariantStore.selectedVariant?.id ? [carVariantStore.selectedVariant.id] : undefined,
+        car_model: carVariantStore.selectedModel?.id || carModelFilter.value || undefined,
         search: searchQuery.value || undefined,
         main_category: mainCategoryFilter.value || undefined,
         product_category: productCategoryFilter.value || undefined,
         subcategory: subcategoryFilter.value || undefined,
         brand: brandFilter.value || undefined,
-        car_model: carModelFilter.value || undefined,
         price_min: priceMinFilter.value ?? undefined,
         price_max: priceMaxFilter.value ?? undefined,
       })
@@ -242,6 +255,12 @@ watch(
 watch(() => carVariantStore.selectedVariant, () => {
   cache.clear()
   router.replace({ query: { ...route.query, page: undefined } })
+  currentPage.value = 1
+  loadProducts(1)
+})
+
+watch(() => carVariantStore.selectedModel, () => {
+  cache.clear()
   currentPage.value = 1
   loadProducts(1)
 })

@@ -3,6 +3,7 @@ import { BMW_SERIES } from '@/collections/bmw-series'
 import LicensePlateInput from '@/components/inputs/LicensePlateInput.vue'
 import VinInput from '@/components/inputs/VinInput.vue'
 import type { CarVariant } from '@/models/CarVariant'
+import type { CarModel } from '@/models/CarModel'
 
 const props = defineProps<{
   selectedSeries: string
@@ -11,10 +12,15 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:selectedSeries', value: string): void
   (e: 'variantResolved', variant: CarVariant): void
+  (e: 'modelResolved', model: CarModel): void
 }>()
 
 function handleSuccess(variant: CarVariant) {
   emit('variantResolved', variant)
+}
+
+function handleModelFound(model: CarModel) {
+  emit('modelResolved', model)
 }
 </script>
 
@@ -27,11 +33,11 @@ function handleSuccess(variant: CarVariant) {
       <div class="flex gap-3 items-start">
         <div class="flex-1">
           <p class="text-xs text-gray-400 mb-1.5">Kenteken</p>
-          <LicensePlateInput theme="light" @success="handleSuccess" />
+          <LicensePlateInput theme="light" @success="handleSuccess" @model-found="handleModelFound" />
         </div>
         <div class="flex-1">
           <p class="text-xs text-gray-400 mb-1.5">Chassisnummer (VIN)</p>
-          <VinInput theme="light" @success="handleSuccess" />
+          <VinInput theme="light" @success="handleSuccess" @model-found="handleModelFound" />
         </div>
       </div>
     </div>
