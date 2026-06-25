@@ -147,7 +147,10 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
                         :to="item.slug ? `/products/${item.slug}` : `/products`"
                         class="text-sm font-medium text-gray-900 mb-1 hover:text-orange-500 transition-colors line-clamp-2"
                       >{{ item.title }}</NuxtLink>
-                      <button @click="removeFromCart(item.id)" class="text-red-500 hover:text-red-700 transition-colors text-xs">
+                      <div v-if="item.attributes && Object.keys(item.attributes).length > 0" class="text-xs text-gray-500 mt-0.5 space-y-0.5">
+                        <span v-for="(val, key) in item.attributes" :key="key" class="block">{{ key }}: {{ val }}</span>
+                      </div>
+                      <button @click="removeFromCart(item.id)" class="text-red-500 hover:text-red-700 transition-colors text-xs mt-1">
                         {{ t('cart.delete') }}
                       </button>
                     </div>

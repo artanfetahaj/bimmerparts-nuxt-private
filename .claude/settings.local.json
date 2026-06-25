@@ -15,7 +15,11 @@
       "Bash(python -c \"import fitz; print\\('pymupdf ok'\\)\")",
       "Bash(pip install *)",
       "Bash(curl -s http://127.0.0.1:8000/api/car-variants)",
-      "Bash(find /c/xampp/htdocs -name \"*.php\" -path \"*CarVariant*\" 2>/dev/null | head -20 *)"
+      "Bash(find /c/xampp/htdocs -name \"*.php\" -path \"*CarVariant*\" 2>/dev/null | head -20 *)",
+      "Bash(grep -v \"//\\\\|Similar\\\\|similar\\\\|total\\\\|promo\\\\|shipping\")",
+      "Bash(xargs grep -l \"shopping_cart\\\\|ShoppingCart\\\\|CartItem\")",
+      "Bash(xargs grep -l \"product_attributes\\\\|product_combinations\")",
+      "Bash(grep -r \"use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductAttribute\\\\|use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductCombination\" \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\" --include=\"*.php\")"
     ]
   }
 }
