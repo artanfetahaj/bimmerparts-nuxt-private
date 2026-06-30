@@ -54,6 +54,48 @@ const quantity = ref(1)
 const similarProducts = ref<any[]>([])
 const isLoadingSimilarProducts = ref(false)
 
+// ─── Product Attributes ───────────────────────────────────────────────────────
+interface AttributeValue {
+  label: string
+  price_adjustment: number
+}
+interface ProductAttribute {
+  name: string
+  values: AttributeValue[]
+}
+
+const attributes = ref<ProductAttribute[]>([])
+// keyed by attribute name
+const selectedAttributeValues = ref<Record<string, AttributeValue | null>>({})
+
+const attributeSurcharge = computed(() =>
+  Object.values(selectedAttributeValues.value).reduce(
+    (sum, v) => sum + (v?.price_adjustment ?? 0),
+    0,
+  ),
+)
+
+const selectAttributeValue = (attr: ProductAttribute, e: Event) => {
+  const label = (e.target as HTMLSelectElement).value
+  const val = attr.values.find(v => v.label === label)
+  selectedAttributeValues.value[attr.name] = val ?? null
+}
+
+const fetchAttributes = async () => {
+  if (!product.value?.id) return
+  try {
+    const res = await productService.getProductAttributes(product.value.id)
+    attributes.value = res ?? []
+    for (const attr of attributes.value) {
+      if (attr.values.length > 0) {
+        selectedAttributeValues.value[attr.name] = attr.values[0]
+      }
+    }
+  } catch {
+    attributes.value = []
+  }
+}
+
 // ─── Computed from raw API data ───────────────────────────────────────────────
 const productImages = computed<string[]>(() => {
   if (!product.value) return []
@@ -92,13 +134,14 @@ const brandName = computed(() => {
   return ''
 })
 
-const price = computed(() => {
+const basePrice = computed(() => {
   if (!product.value) return 0
   const p = product.value
-  // If has_discount and discounted_price exists, that's the selling price
   if (p.has_discount && p.discounted_price != null) return parseFloat(p.discounted_price)
   return parseFloat(p.price) || 0
 })
+
+const price = computed(() => basePrice.value + attributeSurcharge.value)
 
 const originalPrice = computed(() => {
   if (!product.value) return 0
@@ -216,6 +259,15 @@ const decrementQuantity = () => {
 }
 
 // ─── Cart actions ─────────────────────────────────────────────────────────────
+const selectedAttributeLabels = computed<Record<string, string>>(() => {
+  const result: Record<string, string> = {}
+  for (const attr of attributes.value) {
+    const val = selectedAttributeValues.value[attr.name]
+    if (val) result[attr.name] = val.label
+  }
+  return result
+})
+
 const cartItem = computed(() => {
   if (!product.value) return null
   return {
@@ -224,6 +276,8 @@ const cartItem = computed(() => {
     price: price.value,
     oldPrice: hasDiscount.value ? originalPrice.value : price.value,
     image: productImages.value[0],
+    attributes: selectedAttributeLabels.value,
+    price_adjustment: attributeSurcharge.value,
   }
 })
 
@@ -238,7 +292,7 @@ const confirmAddToCart = () => {
   if (!cartItem.value) return
   const qty = Math.max(1, quantity.value)
   quantity.value = qty
-  addToCart(cartItem.value, qty)
+  addToCart(cartItem.value, qty, cartItem.value.attributes, cartItem.value.price_adjustment)
   showCartDialog.value = false
 }
 
@@ -246,7 +300,7 @@ const handleBuyNow = () => {
   if (!cartItem.value) return
   const qty = Math.max(1, quantity.value)
   quantity.value = qty
-  addToCart(cartItem.value, qty)
+  addToCart(cartItem.value, qty, cartItem.value.attributes, cartItem.value.price_adjustment)
   router.push('/cart')
 }
 
@@ -284,7 +338,10 @@ watch(product, (p) => {
   if (p) {
     currentImageIndex.value = 0
     quantity.value = 1
+    attributes.value = []
+    selectedAttributeValues.value = {}
     loadSimilarProducts()
+    fetchAttributes()
   }
 })
 
@@ -440,6 +497,25 @@ watch(() => route.params.slug, (newSlug) => {
                 <span>{{ t('price.youPay') }} {{ formatPrice(price) }} &euro;</span>
                 <span class="border border-orange-300 rounded-lg px-2 py-1 bg-orange-50 whitespace-nowrap">-{{ discountPercent }}%</span>
               </p>
+            </div>
+
+            <!-- Product Attributes -->
+            <div v-if="attributes.length > 0" class="space-y-4">
+              <div v-for="attr in attributes" :key="attr.name" class="space-y-1">
+                <div class="flex items-center min-w-0">
+                  <p class="text-sm text-gray-600 flex-shrink-0">{{ attr.name }}</p>
+                  <div class="flex-1 border-t border-gray-200 ml-4 min-w-0"></div>
+                </div>
+                <select
+                  :value="selectedAttributeValues[attr.name]?.label"
+                  @change="(e) => selectAttributeValue(attr, e)"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option v-for="val in attr.values" :key="val.label" :value="val.label">
+                    {{ val.price_adjustment > 0 ? `${val.label} (+€${val.price_adjustment.toFixed(2)})` : val.label }}
+                  </option>
+                </select>
+              </div>
             </div>
 
             <!-- Quantity & Stock -->

@@ -101,6 +101,16 @@ class ProductService {
     }
   }
 
+  async getProductAttributes(productId: string | number): Promise<any[]> {
+    try {
+      const response = await api.get(`/products/${productId}/attributes`)
+      return response.data?.data ?? []
+    } catch (error) {
+      console.error('Error fetching product attributes:', error)
+      return []
+    }
+  }
+
   async getProductBySlug(slug: string) {
     try {
       const response = await api.get(`/products/slug/${slug}`, {

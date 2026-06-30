@@ -59,8 +59,8 @@ function openSearchDialog() { carVariantStore.openDialog() }
   <header class="relative z-50 w-full text-gray-900 bg-white border-b shadow-sm">
     <div class="flex items-center h-16 gap-6 px-6 mx-auto outer-container md:px-10">
       <!-- Brand -->
-      <NuxtLink to="/" class="flex items-center min-w-[160px]">
-        <img src="/images/bimmerparts-logo-new.png" alt="BIMMERParts" class="h-auto w-[180px] object-contain" />
+      <NuxtLink to="/" class="flex items-center min-w-[260px]">
+        <img src="/bimmerparts-logo-new.png" alt="BIMMERParts" class="h-auto w-[270px] object-contain" />
       </NuxtLink>
 
       <!-- Desktop Nav -->
