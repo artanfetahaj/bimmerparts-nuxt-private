@@ -115,9 +115,14 @@ function handleOpenChange(open: boolean) {
 
 function handleVariantResolved(variant: CarVariant) {
   // store.setVariant + router already handled inside LicensePlateInput / VinInput
-  // Just close the dialog and reset
   store.closeDialog()
   resetStepperState()
+}
+
+function handleModelResolved(model: CarModel) {
+  store.setModel(model)
+  resetStepperState()
+  router.push({ path: '/products', query: { car_model: String(model.id) } })
 }
 </script>
 
@@ -311,6 +316,7 @@ function handleVariantResolved(variant: CarVariant) {
               :selected-series="selectedSeries"
               @update:selected-series="selectedSeries = $event"
               @variant-resolved="handleVariantResolved"
+              @model-resolved="handleModelResolved"
             />
             <StepSelectModel
               v-else-if="currentStep === 2"

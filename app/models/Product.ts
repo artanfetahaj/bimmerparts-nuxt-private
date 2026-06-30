@@ -29,6 +29,7 @@ export class Product extends Model {
   sold_unit?: string
   popularity?: number
   status!: string
+  is_oem?: boolean
 
   weight?: number
   dimensions?: Record<string, any>
@@ -120,8 +121,15 @@ export interface ProductSupplier {
 
 export interface ProductImage {
   id: string
+  name?: string
+  order?: number
+  original?: string
+  thumbnail?: string
   url: string
   thumb_url?: string
+  alt_text?: string | null
+  original_path?: string
+  thumbnail_path?: string
 }
 
 export interface ProductCompatibility {
