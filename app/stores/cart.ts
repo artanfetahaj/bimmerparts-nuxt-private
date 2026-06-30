@@ -12,6 +12,8 @@ export interface CartItem {
   image: string
   quantity: number
   max_quantity?: number
+  attributes?: Record<string, string>
+  price_adjustment?: number
 }
 
 const cartItems = ref<CartItem[]>([])
@@ -46,6 +48,8 @@ const loadCart = async () => {
         image: item.image || '/images/placeholder.png',
         quantity: parseInt(item.quantity),
         max_quantity: item.max_quantity || 999,
+        attributes: item.attributes ?? {},
+        price_adjustment: parseFloat(item.price_adjustment ?? 0),
       }))
     } else {
       cartItems.value = []
@@ -89,7 +93,7 @@ export const useCart = () => {
     })
   }
 
-  const addToCart = async (product: any, quantity: number = 1) => {
+  const addToCart = async (product: any, quantity: number = 1, attributes?: Record<string, string>, priceAdjustment?: number) => {
     // Extract product_id from product object
     // Product can have either 'id' or 'product_id' field
     const productId = product.product_id || product.id
@@ -125,7 +129,9 @@ export const useCart = () => {
     try {
       const response = await api.post('/cart', {
         product_id: String(productId),
-        quantity: quantity
+        quantity: quantity,
+        ...(attributes && Object.keys(attributes).length > 0 ? { attributes } : {}),
+        ...(priceAdjustment != null && priceAdjustment > 0 ? { price_adjustment: priceAdjustment } : {}),
       })
       
       if (response.data?.success) {
