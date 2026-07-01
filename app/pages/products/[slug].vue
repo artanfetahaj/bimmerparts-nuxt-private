@@ -250,6 +250,17 @@ const prevImage = () => {
 }
 const selectImage = (index: number) => { currentImageIndex.value = index }
 
+// Fullscreen image slider — click the main image to browse all product images full screen
+const lightboxOpen = ref(false)
+const openLightbox = () => { lightboxOpen.value = true }
+const closeLightbox = () => { lightboxOpen.value = false }
+const handleLightboxKeydown = (event: KeyboardEvent) => {
+  if (!lightboxOpen.value) return
+  if (event.key === 'Escape') closeLightbox()
+  else if (event.key === 'ArrowRight') nextImage()
+  else if (event.key === 'ArrowLeft') prevImage()
+}
+
 // ─── Quantity ─────────────────────────────────────────────────────────────────
 const incrementQuantity = () => {
   quantity.value++
@@ -325,12 +336,14 @@ const handleToggleWishlist = async (e?: Event) => {
 onMounted(() => {
   window.addEventListener('auth-changed', handleAuthChanged as EventListener)
   window.addEventListener('storage', handleAuthChanged as EventListener)
+  window.addEventListener('keydown', handleLightboxKeydown)
   fetchProduct()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('auth-changed', handleAuthChanged as EventListener)
   window.removeEventListener('storage', handleAuthChanged as EventListener)
+  window.removeEventListener('keydown', handleLightboxKeydown)
 })
 
 // When product loads, fetch similar products and reset UI
@@ -452,9 +465,19 @@ watch(() => route.params.slug, (newSlug) => {
             </div>
 
             <!-- Main Image -->
-            <div class="relative aspect-square bg-gray-50 rounded-lg overflow-hidden flex-1">
+            <button
+              type="button"
+              @click="openLightbox"
+              class="relative aspect-square bg-gray-50 rounded-lg overflow-hidden flex-1 cursor-zoom-in group"
+              :title="t('productDetail.viewFullscreen') || 'View fullscreen'"
+            >
               <img :src="currentImage" :alt="product.name" class="w-full h-full object-contain p-4 sm:p-6 md:p-8" />
-            </div>
+              <span class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/80 group-hover:bg-white flex items-center justify-center shadow-sm transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-gray-700">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+              </span>
+            </button>
           </div>
 
           <!-- ── Product Info ── -->
@@ -733,6 +756,54 @@ watch(() => route.params.slug, (newSlug) => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <Teleport to="body">
+      <div
+        v-if="lightboxOpen"
+        class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+        @click.self="closeLightbox"
+      >
+        <button
+          type="button"
+          @click="closeLightbox"
+          class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          :aria-label="t('common.close') || 'Close'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        <button
+          v-if="productImages.length > 1"
+          type="button"
+          @click="prevImage"
+          class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          :aria-label="t('common.previous') || 'Previous'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 sm:w-7 sm:h-7">
+            <path d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <div class="flex flex-col items-center gap-4 max-w-3xl w-full px-16 sm:px-24">
+          <img :src="currentImage" :alt="product?.name" class="max-h-[75vh] w-full object-contain" />
+          <p v-if="productImages.length > 1" class="text-white/60 text-sm">{{ currentImageIndex + 1 }} / {{ productImages.length }}</p>
+        </div>
+
+        <button
+          v-if="productImages.length > 1"
+          type="button"
+          @click="nextImage"
+          class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          :aria-label="t('common.next') || 'Next'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 sm:w-7 sm:h-7">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </Teleport>
 
   </div>
 </template>

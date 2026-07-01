@@ -1,6 +1,15 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import authService from '../services/auth'
+import productService from '../services/product'
+
+// Pull a usable image URL out of either a flat string or the nested
+// { url, thumbnail, original } object the products API returns.
+const extractImageUrl = (image: any): string => {
+  if (!image) return ''
+  if (typeof image === 'string') return image
+  return image.thumbnail || image.url || image.original || image.thumbnail_url || image.original_url || ''
+}
 
 export interface CartItem {
   id: string
@@ -38,18 +47,41 @@ const loadCart = async () => {
   try {
     const response = await api.get('/cart')
     if (response.data?.success && response.data?.data?.items) {
-      cartItems.value = response.data.data.items.map((item: any) => ({
+      const mapped = response.data.data.items.map((item: any) => ({
         id: item.id,
         product_id: item.product_id,
-        slug: item.slug,
-        title: item.title,
+        slug: item.slug || item.product?.slug,
+        title: item.title || item.name || item.product?.name,
         price: parseFloat(item.price),
         oldPrice: item.oldPrice ? parseFloat(item.oldPrice) : parseFloat(item.price),
-        image: item.image || '/images/placeholder.png',
+        image: extractImageUrl(item.image || item.product?.image),
         quantity: parseInt(item.quantity),
         max_quantity: item.max_quantity || 999,
         attributes: item.attributes ?? {},
         price_adjustment: parseFloat(item.price_adjustment ?? 0),
+      }))
+
+      // The cart endpoint only returns price/quantity for some items -
+      // backfill title/image/slug from the product endpoint when missing.
+      await Promise.all(
+        mapped.map(async (item: any) => {
+          if ((item.title && item.image) || !item.product_id) return
+          try {
+            const productRes = await productService.getProduct(String(item.product_id))
+            const p = productRes?.data || productRes
+            if (!item.title) item.title = p?.name || 'Product'
+            if (!item.slug) item.slug = p?.slug
+            if (!item.image) item.image = extractImageUrl(p?.image)
+          } catch (error) {
+            console.error(`Failed to enrich cart item for product ${item.product_id}:`, error)
+          }
+        })
+      )
+
+      cartItems.value = mapped.map((item: any) => ({
+        ...item,
+        title: item.title || 'Product',
+        image: item.image || '/images/placeholder.png',
       }))
     } else {
       cartItems.value = []

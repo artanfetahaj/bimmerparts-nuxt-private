@@ -56,43 +56,29 @@ const loadSimilarProducts = async () => {
     )
     if (uniqueProductIds.length === 0) { similarProducts.value = []; return }
 
-    const categoryIds = new Set<number>()
-    const hauptgruppen = new Set<string>()
-    const modelIds = new Set<number>()
-    const modelCodes = new Set<string>()
+    // Use the same raw /products/{id}/related endpoint as the product detail page,
+    // since ProductCard expects the raw product shape (name, image.thumbnail), not
+    // the transformed shape from productService.getRelatedProducts().
+    const excludeSet = new Set(uniqueProductIds.map(id => String(id)))
+    const collected = new Map<string, any>()
 
     await Promise.all(
       uniqueProductIds.map(async productId => {
         try {
-          const productResponse = await productService.getProduct(String(productId))
-          const productData = productResponse?.data || productResponse
-          if (productData?.category_id) categoryIds.add(Number(productData.category_id))
-          else if (productData?.category?.id) categoryIds.add(Number(productData.category.id))
-          if (typeof productData?.bmw_hauptgruppe === 'string' && productData.bmw_hauptgruppe.trim() !== '') hauptgruppen.add(productData.bmw_hauptgruppe.trim())
-          const compatibleModelIds = Array.isArray(productData?.compatible_models?.model_ids) ? productData.compatible_models.model_ids.map((id: any) => Number(id)).filter((id: number) => Number.isFinite(id)) : []
-          compatibleModelIds.forEach(id => modelIds.add(id))
-          const compatibleCodes = Array.isArray(productData?.compatible_models?.codes) ? productData.compatible_models.codes.map((code: any) => (typeof code === 'string' ? code.trim().toUpperCase() : '')).filter((code: string) => code !== '') : []
-          compatibleCodes.forEach(code => modelCodes.add(code))
+          const related = await productService.getRelatedByProduct(String(productId), 8)
+          related.forEach((product: any) => {
+            const idString = String(product.id)
+            if (!excludeSet.has(idString) && !collected.has(idString)) {
+              collected.set(idString, product)
+            }
+          })
         } catch (error) {
-          console.error(`Failed to load product ${productId}`, error)
+          console.error(`Failed to load related products for ${productId}`, error)
         }
       })
     )
 
-    if (categoryIds.size === 0 && modelIds.size === 0 && modelCodes.size === 0 && hauptgruppen.size === 0) {
-      similarProducts.value = []
-      return
-    }
-
-    const relatedProducts = await productService.getRelatedProducts({
-      categoryIds: Array.from(categoryIds),
-      modelIds: Array.from(modelIds),
-      modelCodes: Array.from(modelCodes),
-      hauptgruppen: Array.from(hauptgruppen),
-      excludeIds: uniqueProductIds,
-      limit: 5
-    })
-    similarProducts.value = relatedProducts
+    similarProducts.value = Array.from(collected.values()).slice(0, 5)
   } catch (error) {
     console.error('Failed to load similar products:', error)
     similarProducts.value = []
@@ -229,11 +215,14 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
           <p class="text-gray-600">{{ t('products.loading') }}</p>
         </div>
         <div v-else-if="similarProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <ProductCard
-            v-for="product in similarProducts"
-            :key="product.id"
-            :product="product"
-          />
+            <NuxtLink
+              v-for="product in similarProducts"
+              :key="product.id"
+              :to="product.slug ? `/products/${product.slug}` : '#'"
+              class="block"
+            >
+              <ProductCard :product="product" />
+            </NuxtLink>
         </div>
         <div v-else class="text-center py-8">
           <p class="text-gray-600">{{ t('productDetail.noRelatedProducts') || 'Geen producten gevonden' }}</p>
