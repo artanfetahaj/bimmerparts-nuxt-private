@@ -24,7 +24,7 @@ const { t } = useLocale()
             <h4 class="font-semibold text-gray-900 mb-4">About</h4>
             <ul class="space-y-3 text-gray-600 text-sm">
               <li><NuxtLink to="/about" class="hover:text-gray-900 transition-colors">About us</NuxtLink></li>
-              <li><a href="#" class="hover:text-gray-900 transition-colors">Features</a></li>
+              <li><NuxtLink to="/bmw-model-codes" class="hover:text-gray-900 transition-colors">BMW Model Codes</NuxtLink></li>
               <li><a href="#" class="hover:text-gray-900 transition-colors">Blog</a></li>
               <li><a href="#" class="hover:text-gray-900 transition-colors">Download</a></li>
             </ul>
