@@ -23,38 +23,54 @@ export default defineNuxtConfig({
     },
   },
   
-  app: {
+   app: {
     head: {
+      htmlAttrs: {
+        lang: 'nl',
+      },
+
       link: [
-        // Favicons
+        // Favicon — SVG first (modern browsers), ICO/PNG as fallback
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/favicon/favicon.svg',
+        },
         {
           rel: 'icon',
           type: 'image/x-icon',
-          href: '/favicon/favicon.ico'
+          href: '/favicon/favicon.ico',
         },
         {
           rel: 'icon',
           type: 'image/png',
           sizes: '16x16',
-          href: '/favicon/favicon-16x16.png'
+          href: '/favicon/favicon-16x16.png',
         },
         {
           rel: 'icon',
           type: 'image/png',
           sizes: '32x32',
-          href: '/favicon/favicon-32x32.png'
+          href: '/favicon/favicon-32x32.png',
         },
         {
           rel: 'apple-touch-icon',
           sizes: '180x180',
-          href: '/favicon/apple-touch-icon.png'
+          href: '/favicon/apple-touch-icon.png',
         },
         {
           rel: 'manifest',
-          href: '/favicon/site.webmanifest'
+          href: '/favicon/site.webmanifest',
         },
-      ]
-    }
+      ],
+
+      meta: [
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1',
+        },
+      ],
+    },
   },
   site: {
     url: 'https://bimmerparts.nl',
@@ -64,6 +80,7 @@ export default defineNuxtConfig({
   },
   seo: {
     meta: {
+      title: 'BimmerParts — Originele BMW Onderdelen',
       description: 'Originele en aftermarket BMW onderdelen voor alle modellen. Snel geleverd vanuit eigen voorraad.',
       themeColor: [
         { content: '#18181b', media: '(prefers-color-scheme: dark)' },
@@ -81,8 +98,8 @@ export default defineNuxtConfig({
       ogType: 'website',
       ogUrl: 'https://bimmerparts.nl',
       ogTitle: 'BimmerParts — Originele BMW Onderdelen',
-      ogImage: '/images/hero.jpg',
-      twitterImage: '/images/hero.jpg',
+      ogImage: '/images/hero2.png',
+      twitterImage: '/images/hero2.png',
 
       robots: 'index, follow',
     }

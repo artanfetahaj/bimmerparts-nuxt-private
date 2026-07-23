@@ -19,7 +19,11 @@
       "Bash(grep -v \"//\\\\|Similar\\\\|similar\\\\|total\\\\|promo\\\\|shipping\")",
       "Bash(xargs grep -l \"shopping_cart\\\\|ShoppingCart\\\\|CartItem\")",
       "Bash(xargs grep -l \"product_attributes\\\\|product_combinations\")",
-      "Bash(grep -r \"use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductAttribute\\\\|use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductCombination\" \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\" --include=\"*.php\")"
+      "Bash(grep -r \"use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductAttribute\\\\|use App\\\\\\\\Models\\\\\\\\Product\\\\\\\\ProductCombination\" \"C:\\\\xampp\\\\htdocs\\\\bimmerparts-api\" --include=\"*.php\")",
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp ok'\\)\")",
+      "Bash(node scripts/generate-favicons.mjs)",
+      "Bash(node --input-type=module)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\" http://localhost:3000/favicon/favicon.svg)"
     ]
   }
 }
