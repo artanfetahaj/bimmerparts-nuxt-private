@@ -30,12 +30,12 @@ function handleModelFound(model: CarModel) {
     <!-- Plate + VIN side by side -->
     <div class="space-y-2">
       <p class="text-sm font-medium text-gray-700">Zoek op kenteken of chassisnummer</p>
-      <div class="flex gap-3 items-start">
-        <div class="flex-1">
+      <div class="flex flex-col sm:flex-row gap-3 items-start">
+        <div class="w-full sm:flex-1">
           <p class="text-xs text-gray-400 mb-1.5">Kenteken</p>
           <LicensePlateInput theme="light" @success="handleSuccess" @model-found="handleModelFound" />
         </div>
-        <div class="flex-1">
+        <div class="w-full sm:flex-1">
           <p class="text-xs text-gray-400 mb-1.5">Chassisnummer (VIN)</p>
           <VinInput theme="light" @success="handleSuccess" @model-found="handleModelFound" />
         </div>

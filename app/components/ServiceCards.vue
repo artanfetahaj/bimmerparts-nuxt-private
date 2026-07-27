@@ -13,40 +13,29 @@ interface ServiceCard {
 // Locale handling
 const { t } = useLocale()
 
-const emit = defineEmits<{
-  navigateToProducts: []
-}>()
-
 const services = computed<ServiceCard[]>(() => [
   {
     icon: 'package',
     title: t('services.qualityParts'),
     description: t('services.qualityPartsDesc'),
     ctaText: t('common.products'),
-    ctaHref: '#products'
+    ctaHref: '/products'
   },
   {
     icon: 'lightning',
     title: t('services.fastShipping'),
     description: t('services.fastShippingDesc'),
     ctaText: t('common.products'),
-    ctaHref: '#products'
+    ctaHref: '/products'
   },
   {
     icon: 'support',
     title: t('services.expertSupport'),
     description: t('services.expertSupportDesc'),
     ctaText: t('footer.contact'),
-    ctaHref: '#contact'
+    ctaHref: '/contact'
   }
 ])
-
-const handleCtaClick = (service: ServiceCard) => {
-  if (service.ctaHref === '#products') {
-    emit('navigateToProducts')
-  }
-  // For other CTAs like "Contact Us", you could add more logic here
-}
 </script>
 
 <template>
@@ -91,15 +80,15 @@ const handleCtaClick = (service: ServiceCard) => {
             <p class="text-sm text-gray-600 leading-relaxed mb-4">{{ service.description }}</p>
 
             <!-- CTA Link -->
-            <button 
-              @click="handleCtaClick(service)" 
-              class="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
+            <NuxtLink
+              :to="service.ctaHref"
+              class="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors"
             >
               <span class="text-sm font-medium">{{ service.ctaText }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
                 <path d="m9 18 6-6-6-6"/>
               </svg>
-            </button>
+            </NuxtLink>
           </div>
         </div>
       </div>

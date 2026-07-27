@@ -9,5 +9,5 @@ if (import.meta.client && authService.isAuthenticated()) {
 </script>
 
 <template>
-  <Login class="pt-20" />
+  <Login />
 </template>

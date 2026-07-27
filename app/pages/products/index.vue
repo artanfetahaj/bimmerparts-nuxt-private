@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
+import { SlidersHorizontal, X } from 'lucide-vue-next'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductFilterSidebar from '@/components/ProductFilterSidebar.vue'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -90,6 +91,7 @@ function clearCategoryFilter() {
 const cache = new Map<string, { products: ProductType[]; meta: typeof meta.value }>()
 
 const carVariantStore = useCarVariantStore()
+const showMobileFilters = ref(false)
 
 const getCacheKey = (page: number) =>
   JSON.stringify({
@@ -295,7 +297,7 @@ onMounted(() => {
             <Skeleton class="h-5 w-16" />
           </div>
         </aside>
-        <main class="flex-1">
+        <main class="flex-1 min-w-0">
           <Skeleton class="h-4 w-40 mb-3" />
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
             <div v-for="n in 12" :key="n" class="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -319,7 +321,7 @@ onMounted(() => {
         </aside>
 
         <!-- ── Product Grid ── -->
-        <main class="flex-1">
+        <main class="flex-1 min-w-0">
           <!-- Search Query Display -->
           <div v-if="searchQuery" class="mb-4 flex items-center gap-2 text-sm">
             <span class="text-gray-600">Zoekresultaten voor:</span>
@@ -342,12 +344,19 @@ onMounted(() => {
               </button>
             </span>
           </div>
-
-          <p class="text-sm text-gray-500 mb-3">
-            {{ meta.total }} resultaten
-            <span v-if="meta.total > meta.per_page">({{ meta.from }}–{{ meta.to }} getoond)</span>
-          </p>
-
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm text-gray-500">
+              {{ meta.total }} resultaten
+              <span v-if="meta.total > meta.per_page">({{ meta.from }}–{{ meta.to }} getoond)</span>
+            </p>
+            <button
+              @click="showMobileFilters = true"
+              class="lg:hidden flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <SlidersHorizontal class="w-4 h-4" />
+              Filters
+            </button>
+          </div>
           <!-- Error -->
           <div v-if="apiError" class="text-center py-12 text-red-500 text-sm">{{ apiError }}</div>
 
@@ -403,5 +412,43 @@ onMounted(() => {
       </div>
 
     </div>
+
+    <!-- Mobile filter drawer -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showMobileFilters"
+          class="fixed inset-0 z-[99] bg-black/40 lg:hidden"
+          @click="showMobileFilters = false"
+        />
+      </Transition>
+      <Transition name="slide-right">
+        <div
+          v-if="showMobileFilters"
+          class="fixed top-0 right-0 bottom-0 z-[100] lg:hidden bg-white w-[85vw] max-w-sm flex flex-col"
+        >
+          <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100">
+            <span class="text-base font-bold text-gray-900">Filters</span>
+            <button
+              @click="showMobileFilters = false"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="overflow-y-auto flex-1 px-2 pb-6">
+            <ProductFilterSidebar />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.slide-right-enter-active, .slide-right-leave-active { transition: transform 0.3s ease; }
+.slide-right-enter-from, .slide-right-leave-to { transform: translateX(100%); }
+</style>

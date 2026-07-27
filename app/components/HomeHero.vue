@@ -138,13 +138,15 @@ onUnmounted(() => stopAutoSlide())
 
             <!-- CTA -->
             <div class="mt-6 lg:mt-8 flex items-center gap-3">
-              <Button
-                variant="outline"
-                class="rounded-full border-white/40 text-white bg-white/10 hover:bg-white/20 gap-2 px-5 h-10"
-              >
-                Bekijk alle onderdelen
-                <ChevronRight class="h-4 w-4" />
-              </Button>
+              <NuxtLink to="/products">
+                <Button
+                  variant="outline"
+                  class="rounded-full border-white/40 text-white bg-white/10 hover:bg-white/20 gap-2 px-5 h-10"
+                >
+                  Bekijk alle onderdelen
+                  <ChevronRight class="h-4 w-4" />
+                </Button>
+              </NuxtLink>
             </div>
           </div>
 

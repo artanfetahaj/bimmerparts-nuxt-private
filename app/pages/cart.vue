@@ -107,11 +107,12 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
       </div>
 
       <!-- Cart Content -->
-      <div v-if="cartItems.length > 0" class="border border-gray-200 rounded-lg p-6">
+      <div v-if="cartItems.length > 0" class="border border-gray-200 rounded-lg p-3 sm:p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Products -->
           <div class="lg:col-span-2">
-            <div class="grid grid-cols-4 text-sm font-medium text-gray-700 mb-4 px-6" style="grid-template-columns: 4fr 0.8fr 0.4fr 0.4fr; gap: 0 2rem;">
+            <!-- Table header — hidden on mobile -->
+            <div class="hidden sm:grid text-sm font-medium text-gray-700 mb-4 px-6" style="grid-template-columns: 4fr 0.8fr 0.4fr 0.4fr; gap: 0 2rem;">
               <div class="text-left">{{ t('cart.product') }}</div>
               <div class="text-right flex justify-end">{{ t('cart.price') }}</div>
               <div class="text-center">{{ t('cart.quantity') }}</div>
@@ -121,9 +122,42 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
               <div
                 v-for="item in cartItems"
                 :key="item.id"
-                class="border-b border-gray-200 last:border-b-0 px-6 py-4"
+                class="border-b border-gray-200 last:border-b-0 px-3 sm:px-6 py-4"
               >
-                <div class="grid grid-cols-4 items-center text-sm" style="grid-template-columns: 4fr 1fr 0.4fr 0.4fr; gap: 0 2rem;">
+                <!-- Mobile layout: stacked -->
+                <div class="flex gap-3 sm:hidden">
+                  <div class="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+                    <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-1" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <NuxtLink
+                      :to="item.slug ? `/products/${item.slug}` : `/products`"
+                      class="text-sm font-medium text-gray-900 hover:text-orange-500 transition-colors line-clamp-2 block"
+                    >{{ item.title }}</NuxtLink>
+                    <div v-if="item.attributes && Object.keys(item.attributes).length > 0" class="text-xs text-gray-500 mt-0.5 space-y-0.5">
+                      <span v-for="(val, key) in item.attributes" :key="key" class="block">{{ key }}: {{ val }}</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                      <input
+                        v-model.number="item.quantity"
+                        @change="handleQuantityChange(item)"
+                        @input="handleQuantityInput(item, $event)"
+                        type="number"
+                        :min="1"
+                        :max="item.max_quantity || 999"
+                        class="border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        style="width: 64px; height: 32px; border-radius: 10px; padding: 0 8px;"
+                      />
+                      <span class="text-sm font-semibold text-gray-900">€{{ (item.price * item.quantity).toFixed(2).replace('.', ',') }}</span>
+                    </div>
+                    <button @click="removeFromCart(item.id)" class="text-red-500 hover:text-red-700 transition-colors text-xs mt-1">
+                      {{ t('cart.delete') }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Desktop layout: table row -->
+                <div class="hidden sm:grid items-center text-sm" style="grid-template-columns: 4fr 1fr 0.4fr 0.4fr; gap: 0 2rem;">
                   <div class="flex items-center space-x-3">
                     <div class="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
                       <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-1" />

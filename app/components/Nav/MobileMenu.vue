@@ -4,9 +4,14 @@ import { X, ChevronDown, Loader2 } from 'lucide-vue-next'
 import { useLocale } from '../../stores/locale'
 import type { SupportedLocale } from '../../stores/locale'
 import { useCategoryStore } from '../../stores/category.store'
+import { useCarVariantStore } from '../../stores/car-variant.store'
+import SelectedCarVariant from './SelectedCarVariant.vue'
 
 const props = defineProps<{ open: boolean }>()
-const emit = defineEmits<{ (e: 'close'): void }>()
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'openCarDialog'): void
+}>()
 
 const { t, currentLocale, setLocale } = useLocale()
 const categoryStore = useCategoryStore()
@@ -58,7 +63,7 @@ watch(() => props.open, (open) => {
         <!-- Header -->
         <div class="flex items-center justify-between px-5 pt-5 pb-4">
           <NuxtLink to="/" @click="navigate">
-            <img src="/bimmerparts-logo-transparent.png" alt="BIMMERParts" class="h-8 w-auto object-contain" />
+            <img src="/images/bimmerparts-logo.png" alt="BIMMERParts" class="h-12 w-auto object-contain" />
           </NuxtLink>
           <button
             @click="emit('close')"
@@ -67,6 +72,11 @@ watch(() => props.open, (open) => {
           >
             <X class="w-6 h-6" />
           </button>
+        </div>
+
+        <!-- Car selector -->
+        <div class="px-5 pb-4 [&>button]:w-full [&>button]:justify-center">
+          <SelectedCarVariant @click="emit('openCarDialog'); emit('close')" />
         </div>
 
         <!-- Navigation Links -->
@@ -183,7 +193,7 @@ watch(() => props.open, (open) => {
 
 <style scoped>
 .mobile-menu-bg {
-  background-image: linear-gradient(180deg, #ffffff 0%, #fff7f1 40%, #ffe9db 100%);
+  background-image: linear-gradient(180deg, #ffffff 0%, #fff7f1 40%, #d3ba74 100%);
 }
 
 .slide-enter-active,

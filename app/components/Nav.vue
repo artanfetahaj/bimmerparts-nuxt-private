@@ -152,6 +152,6 @@ function openSearchDialog() { carVariantStore.openDialog() }
   </header>
 
   <!-- Mobile Menu Drawer -->
-  <MobileMenu :open="isMobileMenuOpen" @close="isMobileMenuOpen = false" />
+  <MobileMenu :open="isMobileMenuOpen" @close="isMobileMenuOpen = false" @open-car-dialog="openSearchDialog" />
   </div>
 </template>

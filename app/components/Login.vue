@@ -64,16 +64,10 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="container mx-auto px-4 md:px-6 py-12">
-    <div class="max-w-md mx-auto">
+  <div class="min-h-screen flex items-center justify-center px-4 md:px-6 py-12">
+    <div class="w-full max-w-md md:max-w-lg mx-auto">
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ t('auth.loginTitle') }}</h1>
-        <p class="text-gray-600 mb-6">
-          {{ t('auth.noAccount') }}
-          <NuxtLink to="/account/register" class="text-orange-500 hover:underline font-medium">
-            {{ t('auth.createAccount') }}
-          </NuxtLink>
-        </p>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ t('auth.loginTitle') }}</h1>
 
         <div v-if="loginError" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p class="text-red-600 text-sm">{{ loginError }}</p>
@@ -142,6 +136,13 @@ const handleLogin = async () => {
             {{ isLoading ? t('auth.loggingIn') : t('auth.login') }}
           </button>
         </form>
+
+        <p class="text-center text-gray-600 text-sm mt-6">
+          {{ t('auth.noAccount') }}
+          <NuxtLink to="/account/register" class="text-orange-500 hover:underline font-medium">
+            {{ t('auth.createAccount') }}
+          </NuxtLink>
+        </p>
       </div>
     </div>
   </div>
