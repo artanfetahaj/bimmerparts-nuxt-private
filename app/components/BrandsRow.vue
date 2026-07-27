@@ -4,6 +4,8 @@ interface Brand {
   logo: string
   brandParam: string
   wide?: boolean
+  href?: string
+  cta?: string
 }
 
 const brands: Brand[] = [
@@ -16,6 +18,7 @@ const brands: Brand[] = [
     name: 'Cobra Suspensions',
     logo: '/images/Cobra-suspensions-logo.png',
     brandParam: 'Cobra',
+    href: 'https://www.bimmerparts.nl/cobra-suspension',
   },
   {
     name: 'Strongflex',
@@ -28,6 +31,8 @@ const brands: Brand[] = [
     logo: '/images/Eventuri-logo.png',
     brandParam: 'Eventuri',
     wide: true,
+    href: 'https://www.bimmerparts.nl/eventuri',
+    cta: 'Wil je kijken welke Eventuri upgrade er voor jouw BMW of MINI is? Klik dan hier',
   },
 ]
 </script>
@@ -37,10 +42,12 @@ const brands: Brand[] = [
     <div class="container mx-auto px-6 md:px-10">
       <h2 class="text-2xl font-normal text-gray-900 mb-6">Partner Brands</h2>
       <div class="flex flex-wrap justify-between gap-6 md:gap-10">
-        <NuxtLink
+        <a
           v-for="brand in brands"
           :key="brand.brandParam"
-          :to="`/products?brand=${encodeURIComponent(brand.brandParam)}`"
+          :href="brand.href ?? `/products?brand=${encodeURIComponent(brand.brandParam)}`"
+          :target="brand.href ? '_blank' : undefined"
+          :rel="brand.href ? 'noopener noreferrer' : undefined"
           :class="[
             brand.wide ? 'max-w-[400px]' : 'max-w-[300px]',
             brand.brandParam === 'Eventuri' ? 'pb-6' : '',
@@ -52,8 +59,19 @@ const brands: Brand[] = [
             :alt="brand.name"
             class="max-h-[500px] w-full object-contain"
           />
-        </NuxtLink>
+        </a>
       </div>
+
+      <!-- Eventuri CTA -->
+      <p class="mt-4 text-sm text-gray-600">
+        Wil je kijken welke Eventuri upgrade er voor jouw BMW of MINI is?
+        <a
+          href="https://www.bimmerparts.nl/eventuri"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-orange-500 hover:underline font-medium"
+        >Klik dan hier</a>
+      </p>
     </div>
   </section>
 </template>

@@ -71,29 +71,28 @@ onUnmounted(() => stopAutoSlide())
 
             <!-- Headline -->
             <h1 class="text-white font-black leading-[1.08] text-4xl sm:text-5xl lg:text-[3.5rem]">
-              Het juiste onderdeel<br>
-              voor <span class="text-orange-500">jouw BMW</span>,<br>
-              binnen 2 minuten.
+              Alles voor jouw<br>
+              <span class="text-orange-500">BMW of MINI</span>.
             </h1>
 
             <!-- Sub-copy -->
             <p class="mt-4 text-white text-base leading-relaxed">
-              Voer je kenteken in en zie direct welke onderdelen passen. Geen giswerk, geen verkeerde bestelling.
+              Vind de juiste onderdelen via kenteken of chassisnummer.
             </p>
 
             <!-- Trust pills -->
             <div class="mt-6 flex flex-wrap gap-2">
               <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-white/80 text-xs font-medium">
                 <span class="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0"></span>
-                Gratis verzending vanaf €75
+                OEM & Premium kwaliteit 
               </span>
               <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-white/80 text-xs font-medium">
                 <span class="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0"></span>
-                Morgen in huis
+                Snelle levering
               </span>
               <span class="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-white/80 text-xs font-medium">
                 <span class="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
-                Tot 35% korting
+                Montage door TOFFER Automotive
               </span>
             </div>
 

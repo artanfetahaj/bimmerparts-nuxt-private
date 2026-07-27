@@ -338,7 +338,7 @@ const handleOrderNow = async () => {
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.address2') }}</label>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('checkout.toevoeging') }}</label>
                   <input
                     v-model="formData.address2"
                     type="text"
