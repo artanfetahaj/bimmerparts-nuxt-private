@@ -569,7 +569,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'checkout.company': 'Bedrijf',
     'checkout.city': 'Stad',
     'checkout.address': 'Adres',
-    'checkout.address2': 'Adres 2',
+    'checkout.toevoeging': 'Toevoeging',
     'checkout.postCode': 'Postcode',
     'checkout.country': 'Land',
     'checkout.email': 'E-mail',
