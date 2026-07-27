@@ -94,8 +94,8 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <SearchBar />
       </div>
 
-      <!-- Spacer on mobile to push icons right -->
-      <div class="flex-1 lg:hidden" />
+      <!-- Spacer -->
+      <div class="flex-1" />
 
       <!-- Right icons -->
       <div class="flex items-center gap-2">
@@ -139,6 +139,11 @@ function openSearchDialog() { carVariantStore.openDialog() }
           <User class="w-5 h-5" />
         </NuxtLink>
       </div>
+    </div>
+
+    <!-- Mobile search bar -->
+    <div class="lg:hidden px-4 pb-3 pt-1">
+      <SearchBar />
     </div>
 
     <!-- Mega Menu Dropdown -->
