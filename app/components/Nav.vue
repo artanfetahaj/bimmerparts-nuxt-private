@@ -94,8 +94,8 @@ function openSearchDialog() { carVariantStore.openDialog() }
         <SearchBar />
       </div>
 
-      <!-- Spacer -->
-      <div class="flex-1" />
+      <!-- Spacer on mobile to push icons right -->
+      <div class="flex-1 lg:hidden" />
 
       <!-- Right icons -->
       <div class="flex items-center gap-2">
