@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/about': { prerender: true },
     '/contact': { prerender: true },
+    '/bmw-model-codes': { swr: 3600 },
     '/products': { swr: 3600 },
     '/product/**': { swr: 600 },
     '/cart': { ssr: false },
@@ -30,37 +31,15 @@ export default defineNuxtConfig({
       },
 
       link: [
-        // Favicon — SVG first (modern browsers), ICO/PNG as fallback
-        {
-          rel: 'icon',
-          type: 'image/svg+xml',
-          href: '/favicon/favicon.svg',
-        },
-        {
-          rel: 'icon',
-          type: 'image/x-icon',
-          href: '/favicon/favicon.ico',
-        },
+        // Favicon
         {
           rel: 'icon',
           type: 'image/png',
-          sizes: '16x16',
-          href: '/favicon/favicon-16x16.png',
-        },
-        {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '32x32',
-          href: '/favicon/favicon-32x32.png',
+          href: '/favicon/favicon1.png',
         },
         {
           rel: 'apple-touch-icon',
-          sizes: '180x180',
-          href: '/favicon/apple-touch-icon.png',
-        },
-        {
-          rel: 'manifest',
-          href: '/favicon/site.webmanifest',
+          href: '/favicon/favicon1.png',
         },
       ],
 

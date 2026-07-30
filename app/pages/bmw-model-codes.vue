@@ -27,9 +27,10 @@ useHead({
   ],
 })
 
-const { data: allModels, pending } = await useAsyncData('bmw-model-codes', async () => {
+const { data: allModels, pending } = useAsyncData('bmw-model-codes', async () => {
   const result = await new CarModel().include(CarModelIncludes.VARIANTS).all()
-  return Array.isArray(result) ? result : (result?.data ?? [])
+  const models = Array.isArray(result) ? result : (result?.data ?? [])
+  return JSON.parse(JSON.stringify(models))
 })
 
 const search = ref('')
