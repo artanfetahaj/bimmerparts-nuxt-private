@@ -23,7 +23,12 @@
       "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp ok'\\)\")",
       "Bash(node scripts/generate-favicons.mjs)",
       "Bash(node --input-type=module)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\" http://localhost:3000/favicon/favicon.svg)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\" http://localhost:3000/favicon/favicon.svg)",
+      "WebFetch(domain:www.bimmerparts.nl)",
+      "PowerShell(Move-Item \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\about.vue\" \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\over-ons.vue\")",
+      "PowerShell(Move-Item \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\products\" \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\producten\")",
+      "PowerShell(Move-Item \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\over-ons.vue\" \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\about.vue\")",
+      "PowerShell(Move-Item \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\producten\" \"C:\\\\Users\\\\admin\\\\bimmerparts-nuxt-private\\\\app\\\\pages\\\\products\")"
     ]
   }
 }

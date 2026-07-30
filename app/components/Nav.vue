@@ -84,8 +84,8 @@ function openSearchDialog() { carVariantStore.openDialog() }
           </button>
         </div>
 
-        <NuxtLink to="/products" class="hover:text-orange-500">Producten</NuxtLink>
-        <NuxtLink to="/about" class="hover:text-orange-500">{{ t('nav.about') }}</NuxtLink>
+        <NuxtLink to="/producten" class="hover:text-orange-500">Producten</NuxtLink>
+        <NuxtLink to="/over-ons" class="hover:text-orange-500">{{ t('nav.about') }}</NuxtLink>
         <NuxtLink to="/contact" class="hover:text-orange-500">{{ t('nav.contact') }}</NuxtLink>
       </nav>
 
@@ -115,7 +115,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
 
         <!-- Cart (desktop only) -->
         <NuxtLink
-          to="/cart"
+          to="/winkelwagen"
           class="relative items-center justify-center hidden w-10 h-10 text-gray-600 transition-colors border border-gray-300 rounded-full lg:flex hover:bg-gray-50"
           aria-label="Cart"
         >

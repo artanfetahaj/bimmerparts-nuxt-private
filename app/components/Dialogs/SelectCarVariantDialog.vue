@@ -81,7 +81,7 @@ function handleVariantSelect(variant: CarVariant) {
   store.setVariant(variant)
   store.closeDialog()
   resetStepperState()
-  router.push({ path: '/products', query: { car: variant.id } })
+  router.push({ path: '/producten', query: { car: variant.id } })
 }
 
 function handleSearchByModel() {
@@ -89,7 +89,7 @@ function handleSearchByModel() {
   if (!model) return
   store.setModel(model)
   resetStepperState()
-  router.push({ path: '/products', query: { car_model: String(model.id) } })
+  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 
 function handleChangeVariant() {
@@ -122,7 +122,7 @@ function handleVariantResolved(variant: CarVariant) {
 function handleModelResolved(model: CarModel) {
   store.setModel(model)
   resetStepperState()
-  router.push({ path: '/products', query: { car_model: String(model.id) } })
+  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 </script>
 

@@ -146,9 +146,9 @@ const handleSubmit = async () => {
             <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex-1">
               <div class="flex flex-col items-start text-left h-full">
                 <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shadow-sm p-2 mb-4">
-                  <img src="/images/Featured icon.png" alt="Email" class="w-8 h-8 object-contain" />
+                  <img src="/images/featured-icon-gold.svg" alt="Email" class="w-8 h-8 object-contain" />
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">info@ipsum.com</h3>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">info@bimmerparts.nl</h3>
                 <p class="text-orange-500 font-medium mb-2">{{ t('contact.generalSupport') }}</p>
                 <p class="text-gray-600 text-base leading-relaxed">{{ t('contact.supportDescription') }}</p>
               </div>
@@ -156,21 +156,21 @@ const handleSubmit = async () => {
             <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex-1">
               <div class="flex flex-col items-start text-left h-full">
                 <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shadow-sm p-2 mb-4">
-                  <img src="/images/Featured icon.png" alt="Email" class="w-8 h-8 object-contain" />
+                  <img src="/images/call-gold.svg" alt="Phone" class="w-8 h-8 object-contain" />
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">info@ipsum.com</h3>
-                <p class="text-orange-500 font-medium mb-2">{{ t('contact.generalSupport') }}</p>
-                <p class="text-gray-600 text-base leading-relaxed">{{ t('contact.supportDescription') }}</p>
-              </div>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex-1">
-              <div class="flex flex-col items-start text-left h-full">
-                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shadow-sm p-2 mb-4">
-                  <img src="/images/call.png" alt="Phone" class="w-8 h-8 object-contain" />
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">+383 49 884 555</h3>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">+31613767946</h3>
                 <p class="text-orange-500 font-medium mb-2">{{ t('contact.anythingElse') }}</p>
                 <p class="text-gray-600 text-base leading-relaxed">{{ t('contact.supportDescription') }}</p>
+              </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex-1">
+              <div class="flex flex-col items-start text-left h-full">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shadow-sm p-2 mb-4">
+                  <img src="/images/featured-icon-gold.svg" alt="Address" class="w-8 h-8 object-contain" />
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Noorddammerweg 35, Unit 11<br>1424NW De Kwakel</h3>
+                <p class="text-orange-500 font-medium mb-2">{{ t('contact.visitUs') }}</p>
+                <p class="text-gray-600 text-base leading-relaxed">Ma–Vr: 09:00–17:00 &nbsp;|&nbsp; Za: 10:00–14:00</p>
               </div>
             </div>
           </div>

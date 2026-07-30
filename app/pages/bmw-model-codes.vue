@@ -27,9 +27,10 @@ useHead({
   ],
 })
 
-const { data: allModels, pending } = await useAsyncData('bmw-model-codes', async () => {
+const { data: allModels, pending } = useAsyncData('bmw-model-codes', async () => {
   const result = await new CarModel().include(CarModelIncludes.VARIANTS).all()
-  return Array.isArray(result) ? result : (result?.data ?? [])
+  const models = Array.isArray(result) ? result : (result?.data ?? [])
+  return JSON.parse(JSON.stringify(models))
 })
 
 const search = ref('')
@@ -65,12 +66,12 @@ function scrollToSeries(series: string) {
 
 function goToVariant(variant: CarVariant) {
   carVariantStore.setVariant(variant)
-  router.push({ path: '/products', query: { car: variant.id } })
+  router.push({ path: '/producten', query: { car: variant.id } })
 }
 
 function goToModel(model: CarModelType) {
   carVariantStore.setModel(model)
-  router.push({ path: '/products', query: { car_model: String(model.id) } })
+  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 
 function seriesId(series: string) {

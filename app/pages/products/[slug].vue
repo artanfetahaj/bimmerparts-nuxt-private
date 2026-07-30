@@ -312,7 +312,7 @@ const handleBuyNow = () => {
   const qty = Math.max(1, quantity.value)
   quantity.value = qty
   addToCart(cartItem.value, qty, cartItem.value.attributes, cartItem.value.price_adjustment)
-  router.push('/cart')
+  router.push('/winkelwagen')
 }
 
 // ─── Wishlist ─────────────────────────────────────────────────────────────────
@@ -404,7 +404,7 @@ watch(() => route.params.slug, (newSlug) => {
     <div v-else-if="loadError || !product" class="container mx-auto px-6 py-8 text-center">
       <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ t('productDetail.productNotFound') }}</h1>
       <p class="text-gray-600 mb-6">{{ t('productDetail.productNotFoundDesc') }}</p>
-      <NuxtLink to="/products" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
+      <NuxtLink to="/producten" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
         {{ t('common.backToProducts') }}
       </NuxtLink>
     </div>
@@ -417,7 +417,7 @@ watch(() => route.params.slug, (newSlug) => {
         <ol class="flex items-center space-x-2 text-sm text-gray-600">
           <li><NuxtLink to="/" class="hover:text-orange-500">{{ t('common.home') }}</NuxtLink></li>
           <li class="text-gray-400">/</li>
-          <li><NuxtLink to="/products" class="hover:text-orange-500">{{ t('common.products') }}</NuxtLink></li>
+          <li><NuxtLink to="/producten" class="hover:text-orange-500">{{ t('common.products') }}</NuxtLink></li>
           <li class="text-gray-400">/</li>
           <li class="text-gray-900 truncate max-w-xs">{{ product.name }}</li>
         </ol>
@@ -839,7 +839,7 @@ watch(() => route.params.slug, (newSlug) => {
 }
 
 .prose :deep(a) {
-  color: #f97316;
+  color: #d3ba74;
   text-decoration: underline;
 }
 

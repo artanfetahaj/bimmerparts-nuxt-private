@@ -58,7 +58,7 @@ const handleWishlistItemClick = (item: { id: string; slug?: string }) => {
       </div>
       <div class="mt-4">
         <NuxtLink
-          to="/cart"
+          to="/winkelwagen"
           class="block w-full py-3 font-medium text-center text-white bg-orange-500 rounded-lg hover:bg-orange-600"
         >
           {{ t('wishlist.checkout') }}

@@ -4,7 +4,7 @@ export enum RouteName {
   ABOUT = "about",
   CONTACT = "contact",
   ACCOUNT = "account",
-  CART    =  "cart",
+  CART    = "cart",
   PRODUCT_DETAILS = "products-slug",
 }
 

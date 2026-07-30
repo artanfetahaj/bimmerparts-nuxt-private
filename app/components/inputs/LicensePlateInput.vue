@@ -65,7 +65,7 @@ async function handleSearch() {
       emit('model-found', result)
     } else {
       store.setVariant(result)
-      router.push({ path: '/products', query: { car: result.id } })
+      router.push({ path: '/producten', query: { car: result.id } })
       emit('success', result)
     }
   } catch (err: any) {

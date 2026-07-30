@@ -1,0 +1,9 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="24" cy="24" r="24" fill="#fdf6e8"/>
+  <!-- Back bubble (smaller, offset right-bottom) -->
+  <rect x="20" y="20" width="14" height="11" rx="3" fill="#d3ba74" opacity="0.6"/>
+  <polygon points="28,31 24,35 24,31" fill="#d3ba74" opacity="0.6"/>
+  <!-- Front bubble -->
+  <rect x="13" y="14" width="16" height="12" rx="3" fill="#d3ba74"/>
+  <polygon points="16,26 13,30 20,26" fill="#d3ba74"/>
+</svg>

@@ -99,7 +99,7 @@ onUnmounted(() => stopAutoSlide())
             <!-- Mobile action icons (Cart, Wishlist, Account) -->
             <div class="mt-6 flex items-center gap-3 lg:hidden">
               <NuxtLink
-                to="/cart"
+                to="/winkelwagen"
                 class="relative flex items-center justify-center w-11 h-11 rounded-full bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors"
                 aria-label="Cart"
               >
@@ -137,7 +137,7 @@ onUnmounted(() => stopAutoSlide())
 
             <!-- CTA -->
             <div class="mt-6 lg:mt-8 flex items-center gap-3">
-              <NuxtLink to="/products">
+              <NuxtLink to="/producten">
                 <Button
                   variant="outline"
                   class="rounded-full border-white/40 text-white bg-white/10 hover:bg-white/20 gap-2 px-5 h-10"

@@ -18,7 +18,7 @@ const showVin = ref(false)
 
 function handleModelFound(model: CarModel) {
   store.setModel(model)
-  router.push({ path: '/products', query: { car_model: String(model.id) } })
+  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 </script>
 
