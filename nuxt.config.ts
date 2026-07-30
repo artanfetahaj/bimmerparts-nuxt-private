@@ -7,14 +7,14 @@ export default defineNuxtConfig({
   //
   routeRules: {
     '/': { prerender: true },
-    '/about': { prerender: true },
+    '/over-ons': { prerender: true },
     '/contact': { prerender: true },
     '/bmw-model-codes': { swr: 3600 },
-    '/products': { swr: 3600 },
-    '/product/**': { swr: 600 },
-    '/cart': { ssr: false },
-    '/checkout': { ssr: false },
-    '/order-thanks': { ssr: false },
+    '/producten': { swr: 3600 },
+    '/producten/**': { swr: 600 },
+    '/winkelwagen': { ssr: false },
+    '/kassa': { ssr: false },
+    '/bestelling-bevestigd': { ssr: false },
     '/account': { ssr: false },
   },
 

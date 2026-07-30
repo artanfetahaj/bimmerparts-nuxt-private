@@ -12,7 +12,7 @@ const { t } = useLocale()
 
     <div v-if="items.length === 0" class="py-16 text-center text-gray-500">
       <p>{{ t('wishlist.empty') }}</p>
-      <NuxtLink to="/products" class="mt-4 inline-block text-orange-500 hover:underline font-medium">
+      <NuxtLink to="/producten" class="mt-4 inline-block text-orange-500 hover:underline font-medium">
         {{ t('nav.autoParts') }}
       </NuxtLink>
     </div>

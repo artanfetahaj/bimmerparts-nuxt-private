@@ -13,7 +13,7 @@ const services: ServiceCard[] = [
     title: 'Originele & Premium onderdelen',
     description: 'OEM, originele BMW en hoogwaardige aftermarket onderdelen — uitsluitend producten waar we zelf volledig achter staan.',
     ctaText: 'Bekijk onderdelen',
-    ctaHref: '/products'
+    ctaHref: '/producten'
   },
   {
     icon: 'check',
@@ -27,7 +27,7 @@ const services: ServiceCard[] = [
     title: 'Montagepartner TOFFER Automotive',
     description: 'Professionele montage door BMW & MINI specialisten. Één aanspreekpunt voor het juiste onderdeel én vakkundige montage.',
     ctaText: 'Meer over TOFFER',
-    ctaHref: '/about'
+    ctaHref: '/over-ons'
   },
   {
     icon: 'star',

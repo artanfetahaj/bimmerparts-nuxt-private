@@ -119,7 +119,7 @@ function onProductCategoryHover(prodCat: ProductCategory) {
                 class="group"
               >
                 <NuxtLink
-                  :to="{ path: '/products', query: { main_category: mainCat.id } }"
+                  :to="{ path: '/producten', query: { main_category: mainCat.id } }"
                   @click="emit('close')"
                   class="w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left"
                   :class="[
@@ -158,7 +158,7 @@ function onProductCategoryHover(prodCat: ProductCategory) {
                   class="group"
                 >
                   <NuxtLink
-                    :to="{ path: '/products', query: { product_category: prodCat.id } }"
+                    :to="{ path: '/producten', query: { product_category: prodCat.id } }"
                     @click="emit('close')"
                     class="w-full flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-colors text-left"
                     :class="[
@@ -203,7 +203,7 @@ function onProductCategoryHover(prodCat: ProductCategory) {
                   :key="subCat.id"
                 >
                   <NuxtLink
-                    :to="{ path: '/products', query: { subcategory: subCat.slug } }"
+                    :to="{ path: '/producten', query: { subcategory: subCat.slug } }"
                     @click="emit('close')"
                     class="block px-3 py-2.5 text-sm rounded-lg transition-colors text-gray-700 hover:bg-orange-50 hover:text-orange-600"
                   >

@@ -123,7 +123,7 @@ watch(() => props.open, (open) => {
                         <NuxtLink
                           v-for="prodCat in mainCat.categories"
                           :key="prodCat.id"
-                          :to="{ path: '/products', query: { product_category: prodCat.id } }"
+                          :to="{ path: '/producten', query: { product_category: prodCat.id } }"
                           class="block text-sm text-gray-600 py-1.5 hover:text-orange-500 transition-colors"
                           @click="navigate"
                         >
@@ -139,7 +139,7 @@ watch(() => props.open, (open) => {
 
           <!-- Producten -->
           <NuxtLink
-            to="/products"
+            to="/producten"
             class="block text-[22px] font-semibold text-gray-900 py-3"
             @click="navigate"
           >
@@ -148,7 +148,7 @@ watch(() => props.open, (open) => {
 
           <!-- Over ons -->
           <NuxtLink
-            to="/about"
+            to="/over-ons"
             class="block text-[22px] font-semibold text-gray-900 py-3"
             @click="navigate"
           >

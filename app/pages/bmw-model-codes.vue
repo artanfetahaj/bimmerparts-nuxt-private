@@ -66,12 +66,12 @@ function scrollToSeries(series: string) {
 
 function goToVariant(variant: CarVariant) {
   carVariantStore.setVariant(variant)
-  router.push({ path: '/products', query: { car: variant.id } })
+  router.push({ path: '/producten', query: { car: variant.id } })
 }
 
 function goToModel(model: CarModelType) {
   carVariantStore.setModel(model)
-  router.push({ path: '/products', query: { car_model: String(model.id) } })
+  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 
 function seriesId(series: string) {

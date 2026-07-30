@@ -130,16 +130,16 @@ const isOrderComplete = ref(false)
 watch(() => cartItems.value.length, (newLength, oldLength) => {
   if (isOrderComplete.value) return
   if (newLength === 0 && oldLength !== undefined && oldLength > 0) {
-    router.push('/products')
+    router.push('/producten')
   }
 })
 
 // Navigation handlers
 const handleHomeClick          = () => router.push('/')
-const handleNavigateToProducts = () => router.push('/products')
+const handleNavigateToProducts = () => router.push('/producten')
 const handleNavigateToProduct  = (productId: string) => router.push(`/products/${productId}`)
-const handleNavigateToCart     = () => router.push('/cart')
-const handleNavigateToAbout    = () => router.push('/about')
+const handleNavigateToCart     = () => router.push('/winkelwagen')
+const handleNavigateToAbout    = () => router.push('/over-ons')
 const handleNavigateToContact  = () => router.push('/contact')
 const handleNavigateToTerms    = () => router.push('/terms')
 const handleNavigateToPrivacy  = () => router.push('/privacy')
@@ -215,7 +215,7 @@ const handleOrderNow = async () => {
 
     const result = await ordersService.initiatePayment({
       items: itemsPayload,
-      redirect_url: `${window.location.origin}/order-thanks`,
+      redirect_url: `${window.location.origin}/bestelling-bevestigd`,
       method: mollieMethodMap[selectedPaymentMethod.value],
     })
 

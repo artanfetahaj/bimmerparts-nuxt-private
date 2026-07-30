@@ -63,7 +63,7 @@ watch(searchQuery, (val) => {
 function goToResults() {
   if (!searchQuery.value.trim()) return
   isOpen.value = false
-  router.push({ path: '/products', query: { search: searchQuery.value.trim() } })
+  router.push({ path: '/producten', query: { search: searchQuery.value.trim() } })
 }
 
 function selectProduct(slug: string) {
