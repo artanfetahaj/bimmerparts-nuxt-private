@@ -40,6 +40,7 @@ onMounted(async () => {
   <div>
     <HomeHero image="/images/hero.jpg" />
     <ServiceCards />
+    <HomeReviews />
     <BrandsRow />
     <ProductSection :title="'On Sale'" :products="onSale" />
     <ProductSection :title="'All Products'" :products="allProducts" />
