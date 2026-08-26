@@ -87,6 +87,7 @@ onMounted(() => {
 const selectedShippingMethod = ref<'store' | 'post'>('post')
 const selectedPaymentMethod = ref<'bank' | 'card' | 'bancontact'>('bank')
 const acceptTerms = ref(false)
+const installationRequested = ref(false)
 
 const showTermsError = ref(false)
 
@@ -210,6 +211,7 @@ const handleOrderNow = async () => {
       billing_address: addressStr,
       payment_method: orderPaymentMethodMap[selectedPaymentMethod.value],
       shipping_method: selectedShippingMethod.value,
+      installation_requested: installationRequested.value,
       items: itemsPayload,
     }))
 
@@ -644,7 +646,26 @@ const handleOrderNow = async () => {
             <div class="mb-6">
               <p class="text-sm text-gray-600 mb-4" v-html="t('checkout.accountCreated')">
               </p>
-              
+
+              <!-- Installation request -->
+              <div class="mb-4 p-4 border border-orange-200 bg-orange-50 rounded-lg">
+                <label class="flex items-start space-x-3 cursor-pointer">
+                  <input
+                    v-model="installationRequested"
+                    type="checkbox"
+                    class="terms-checkbox mt-1 flex-shrink-0"
+                  />
+                  <div>
+                    <span class="text-sm font-semibold text-gray-900 block">
+                      {{ t('checkout.installationRequest') }}
+                    </span>
+                    <span class="text-xs text-gray-500 mt-0.5 block">
+                      {{ t('checkout.installationRequestNote') }}
+                    </span>
+                  </div>
+                </label>
+              </div>
+
               <div>
                 <label class="flex items-start space-x-3 cursor-pointer">
                   <input
