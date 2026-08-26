@@ -556,9 +556,62 @@ class ProductService {
     return Array.from(collected.values()).slice(0, Math.max(1, limit ?? 5))
   }
 
-  /**
-   * Search parts by license plate using RDW API
-   */
+  async getBasketRecommendations(productUuids: string[], limit = 5): Promise<any[]> {
+    if (productUuids.length === 0) return []
+
+    const excludeSet = new Set(productUuids)
+    const collected = new Map<string, any>()
+
+    await Promise.all(
+      productUuids.map(async (uuid) => {
+        try {
+          const response = await api.get('/basket-analysis/recommendations', {
+            params: { product_id: uuid, limit, min_support: 0.001, min_confidence: 0.01, min_lift: 0.1 },
+          })
+          const rules: any[] = response.data?.data ?? []
+          rules.forEach((rule) => {
+            const consequent = rule.consequent
+            if (!consequent?.id) return
+            if (excludeSet.has(consequent.id)) return
+            if (!collected.has(consequent.id)) {
+              collected.set(consequent.id, {
+                id: consequent.id,
+                name: consequent.name,
+                sku: consequent.sku,
+                slug: consequent.slug ?? null,
+                // Used for sorting — strongest association first
+                _lift: rule.lift,
+                _confidence: rule.confidence,
+              })
+            }
+          })
+        } catch (error) {
+          console.error(`Basket analysis failed for product ${uuid}`, error)
+        }
+      })
+    )
+
+    // Sort by lift desc so the strongest associations appear first
+    const sorted = Array.from(collected.values()).sort((a, b) => b._lift - a._lift)
+
+    // Fetch full product details (image, price, etc.) for the top results
+    const topIds = sorted.slice(0, limit).map((p) => p.id)
+    const enriched: any[] = []
+
+    await Promise.all(
+      topIds.map(async (id) => {
+        try {
+          const response = await api.get(`/products/${id}`)
+          const product = response.data?.data ?? response.data
+          if (product) enriched.push(product)
+        } catch {
+        }
+      })
+    )
+
+    return enriched
+  }
+
   async searchPartsByLicensePlate(plate: string) {
     try {
       const response = await api.post('/parts-by-plate', { plate })
