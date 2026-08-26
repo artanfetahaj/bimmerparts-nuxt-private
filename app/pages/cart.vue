@@ -40,54 +40,43 @@ const handleQuantityChange = async (item: any) => {
   }
 }
 
-const similarProducts = ref<any[]>([])
-const isLoadingSimilarProducts = ref(false)
+// Frequently bought together — powered by Apriori / market basket analysis
+const basketRecommendations = ref<any[]>([])
+const isLoadingRecommendations = ref(false)
 
-const loadSimilarProducts = async () => {
+const loadBasketRecommendations = async () => {
   const items = cartItems.value
   if (!Array.isArray(items) || items.length === 0) {
-    similarProducts.value = []
+    basketRecommendations.value = []
     return
   }
-  isLoadingSimilarProducts.value = true
+  isLoadingRecommendations.value = true
   try {
-    const uniqueProductIds = Array.from(
-      new Set(items.map(item => item.product_id).filter(id => id !== null && id !== undefined && id !== ''))
-    )
-    if (uniqueProductIds.length === 0) { similarProducts.value = []; return }
-
-    // Use the same raw /products/{id}/related endpoint as the product detail page,
-    // since ProductCard expects the raw product shape (name, image.thumbnail), not
-    // the transformed shape from productService.getRelatedProducts().
-    const excludeSet = new Set(uniqueProductIds.map(id => String(id)))
-    const collected = new Map<string, any>()
-
-    await Promise.all(
-      uniqueProductIds.map(async productId => {
-        try {
-          const related = await productService.getRelatedByProduct(String(productId), 8)
-          related.forEach((product: any) => {
-            const idString = String(product.id)
-            if (!excludeSet.has(idString) && !collected.has(idString)) {
-              collected.set(idString, product)
-            }
-          })
-        } catch (error) {
-          console.error(`Failed to load related products for ${productId}`, error)
-        }
-      })
+    // The cart API returns product_id as the product UUID (backend always
+    // exposes uuid as id in responses — see CartController).
+    const uniqueUuids: string[] = Array.from(
+      new Set(
+        items
+          .map((item: any) => item.product_id ?? null)
+          .filter((v): v is string => Boolean(v))
+      )
     )
 
-    similarProducts.value = Array.from(collected.values()).slice(0, 5)
+    if (uniqueUuids.length === 0) {
+      basketRecommendations.value = []
+      return
+    }
+
+    basketRecommendations.value = await productService.getBasketRecommendations(uniqueUuids, 5)
   } catch (error) {
-    console.error('Failed to load similar products:', error)
-    similarProducts.value = []
+    console.error('Failed to load basket recommendations:', error)
+    basketRecommendations.value = []
   } finally {
-    isLoadingSimilarProducts.value = false
+    isLoadingRecommendations.value = false
   }
 }
 
-watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true })
+watch(cartItems, () => { loadBasketRecommendations() }, { immediate: true, deep: true })
 </script>
 
 <template>
@@ -242,24 +231,33 @@ watch(cartItems, () => { loadSimilarProducts() }, { immediate: true, deep: true 
         </div>
       </div>
 
-      <!-- Similar Products -->
+      <!-- Frequently Bought Together (Basket Analysis / Apriori) -->
       <div v-if="cartItems.length > 0" class="mt-16">
-        <h2 class="text-2xl font-bold text-gray-900 mb-8">{{ t('cart.similarProducts') }}</h2>
-        <div v-if="isLoadingSimilarProducts" class="text-center py-8">
-          <p class="text-gray-600">{{ t('products.loading') }}</p>
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold text-gray-900">{{ t('cart.frequentlyBoughtTogether') }}</h2>
+          <p class="text-sm text-gray-500 mt-1">{{ t('cart.frequentlyBoughtTogetherSubtitle') }}</p>
         </div>
-        <div v-else-if="similarProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <NuxtLink
-              v-for="product in similarProducts"
-              :key="product.id"
-              :to="product.slug ? `/products/${product.slug}` : '#'"
-              class="block"
-            >
-              <ProductCard :product="product" />
-            </NuxtLink>
+
+        <!-- Loading skeletons -->
+        <div v-if="isLoadingRecommendations" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div v-for="n in 5" :key="n" class="bg-gray-100 rounded-lg animate-pulse h-64" />
         </div>
+
+        <!-- Results -->
+        <div v-else-if="basketRecommendations.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <NuxtLink
+            v-for="product in basketRecommendations"
+            :key="product.id"
+            :to="product.slug ? `/producten/${product.slug}` : '#'"
+            class="block"
+          >
+            <ProductCard :product="product" />
+          </NuxtLink>
+        </div>
+
+        <!-- Empty state — only show when not loading -->
         <div v-else class="text-center py-8">
-          <p class="text-gray-600">{{ t('productDetail.noRelatedProducts') || 'Geen producten gevonden' }}</p>
+          <p class="text-gray-400 text-sm">{{ t('productDetail.noRelatedProducts') || 'Geen aanbevelingen gevonden' }}</p>
         </div>
       </div>
 

@@ -154,6 +154,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'cart.promoCode': 'Promo code',
     'cart.continue': 'Continue',
     'cart.similarProducts': 'Similar Products',
+    'cart.frequentlyBoughtTogether': 'Frequently Bought Together',
+    'cart.frequentlyBoughtTogetherSubtitle': 'Customers who bought items in your cart also purchased these',
     'cart.emptyMessage': 'Looks like you haven\'t added any items to your cart yet.',
     'cart.startShopping': 'Start Shopping',
     
@@ -633,6 +635,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'cart.promoCode': 'Promocode',
     'cart.continue': 'Doorgaan',
     'cart.similarProducts': 'Vergelijkbare Producten',
+    'cart.frequentlyBoughtTogether': 'Vaak Samen Gekocht',
+    'cart.frequentlyBoughtTogetherSubtitle': 'Klanten die artikelen in jouw winkelwagen kochten, kochten ook deze producten',
     'cart.emptyMessage': 'Het lijkt erop dat je nog geen items aan je winkelwagen hebt toegevoegd.',
     'cart.startShopping': 'Begin met Winkelen',
     
