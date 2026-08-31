@@ -18,7 +18,7 @@ const brands: Brand[] = [
     name: 'Cobra Suspensions',
     logo: '/images/Cobra-suspensions-logo.png',
     brandParam: 'Cobra',
-    href: 'https://www.bimmerparts.nl/cobra-suspension',
+    href: '/cobra-suspension',
   },
   {
     name: 'Strongflex',
@@ -31,7 +31,7 @@ const brands: Brand[] = [
     logo: '/images/Eventuri-logo.png',
     brandParam: 'Eventuri',
     wide: true,
-    href: 'https://www.bimmerparts.nl/eventuri',
+    href: '/eventuri',
     cta: 'Wil je kijken welke Eventuri upgrade er voor jouw BMW of MINI is? Klik dan hier',
   },
 ]
@@ -40,14 +40,12 @@ const brands: Brand[] = [
 <template>
   <section class="w-full bg-white py-8 border-t border-b border-gray-100">
     <div class="container mx-auto px-6 md:px-10">
-      <h2 class="text-2xl font-normal text-gray-900 mb-6">Partner Brands</h2>
+      <h2 class="text-2xl font-normal text-gray-900 mb-6">Partnermerken</h2>
       <div class="flex flex-wrap justify-between gap-6 md:gap-10">
-        <a
+        <NuxtLink
           v-for="brand in brands"
           :key="brand.brandParam"
-          :href="brand.href ?? `/products?brand=${encodeURIComponent(brand.brandParam)}`"
-          :target="brand.href ? '_blank' : undefined"
-          :rel="brand.href ? 'noopener noreferrer' : undefined"
+          :to="brand.href ?? `/products?brand=${encodeURIComponent(brand.brandParam)}`"
           :class="[
             brand.wide ? 'max-w-[400px]' : 'max-w-[300px]',
             brand.brandParam === 'Eventuri' ? 'pb-6' : '',
@@ -59,18 +57,16 @@ const brands: Brand[] = [
             :alt="brand.name"
             class="max-h-[500px] w-full object-contain"
           />
-        </a>
+        </NuxtLink>
       </div>
 
       <!-- Eventuri CTA -->
       <p class="mt-4 text-sm text-gray-600">
         Wil je kijken welke Eventuri upgrade er voor jouw BMW of MINI is?
-        <a
-          href="https://www.bimmerparts.nl/eventuri"
-          target="_blank"
-          rel="noopener noreferrer"
+        <NuxtLink
+          to="/eventuri"
           class="text-orange-500 hover:underline font-medium"
-        >Klik dan hier</a>
+        >Klik dan hier</NuxtLink>
       </p>
     </div>
   </section>
