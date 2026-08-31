@@ -87,7 +87,43 @@ onMounted(() => {
 const selectedShippingMethod = ref<'store' | 'post'>('post')
 const selectedPaymentMethod = ref<'bank' | 'card' | 'bancontact'>('bank')
 const acceptTerms = ref(false)
-const installationRequested = ref(false)
+const installationRequested = ref(true)
+
+// Per-item installation opt-out map (true = install this item, false = ship it)
+const itemInstallMap = ref<Record<string, boolean>>({})
+
+// When installation is toggled on, reset all items to "install"
+watch(installationRequested, (val) => {
+  if (val) {
+    cartItems.value.forEach(item => {
+      itemInstallMap.value[item.id] = true
+    })
+  }
+})
+
+// Initialise map when cart loads
+watch(() => cartItems.value, (items) => {
+  items.forEach(item => {
+    if (!(item.id in itemInstallMap.value)) {
+      itemInstallMap.value[item.id] = true
+    }
+  })
+}, { immediate: true })
+
+const itemsBeingInstalled = computed(() =>
+  installationRequested.value
+    ? cartItems.value.filter(item => itemInstallMap.value[item.id] !== false)
+    : []
+)
+
+const itemsNeedingShipping = computed(() =>
+  installationRequested.value
+    ? cartItems.value.filter(item => itemInstallMap.value[item.id] === false)
+    : cartItems.value
+)
+
+const needsShipping = computed(() => itemsNeedingShipping.value.length > 0)
+const reservationFee = computed(() => itemsBeingInstalled.value.length > 0 ? 20 : 0)
 
 const showTermsError = ref(false)
 
@@ -122,8 +158,8 @@ const countries = [
 
 // Computed values
 const subtotal = computed(() => totalPrice.value)
-const deliveryFee = computed(() => selectedShippingMethod.value === 'post' ? 20 : 0)
-const orderTotal = computed(() => subtotal.value + deliveryFee.value)
+const deliveryFee = computed(() => needsShipping.value && selectedShippingMethod.value === 'post' ? 20 : 0)
+const orderTotal = computed(() => subtotal.value + deliveryFee.value + reservationFee.value)
 
 // Watch for empty cart and redirect to products
 // Guard: don't redirect when we just completed an order
@@ -179,9 +215,10 @@ const handleOrderNow = async () => {
   orderError.value = ''
   isSubmitting.value = true
 
-  const itemsPayload: { product_id: string; quantity: number }[] = cartItems.value.map(ci => ({
+  const itemsPayload: { product_id: string; quantity: number; install?: boolean }[] = cartItems.value.map(ci => ({
     product_id: ci.product_id,
     quantity: ci.quantity,
+    ...(installationRequested.value ? { install: itemInstallMap.value[ci.id] !== false } : {}),
   }))
 
   const customerEmail = authService.isAuthenticated()
@@ -209,6 +246,12 @@ const handleOrderNow = async () => {
       customer_phone: formData.value.phone,
       shipping_address: addressStr,
       billing_address: addressStr,
+      address_street: formData.value.address,
+      address_house_number: formData.value.houseNumber,
+      address_house_number_addition: formData.value.address2 || null,
+      address_postcode: formData.value.postCode,
+      address_city: formData.value.city,
+      address_country_code: formData.value.country,
       payment_method: orderPaymentMethodMap[selectedPaymentMethod.value],
       shipping_method: selectedShippingMethod.value,
       installation_requested: installationRequested.value,
@@ -471,202 +514,312 @@ const handleOrderNow = async () => {
                   </div>
                 </div>
                 
-                <!-- Quantity Controls -->
+                <!-- Quantity Controls + install toggle -->
                 <div class="flex flex-col items-start space-y-2 mr-1 flex-1 justify-center">
                   <span class="text-lg font-medium text-gray-900">{{ t('cart.quantity') }}</span>
                   <div class="flex items-center bg-white border border-gray-200 rounded-lg">
-                    <button 
+                    <button
                       @click="updateQuantity(item.id, item.quantity - 1)"
                       class="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-50 rounded-l-lg"
                     >
                       <span class="text-sm font-medium">-</span>
                     </button>
                     <span class="w-8 h-8 flex items-center justify-center text-sm font-bold text-gray-900">{{ item.quantity }}</span>
-                    <button 
+                    <button
                       @click="updateQuantity(item.id, item.quantity + 1)"
                       class="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-50 rounded-r-lg"
                     >
                       <span class="text-sm font-medium">+</span>
                     </button>
                   </div>
+
+                  <!-- Per-item install toggle (only when service is on) -->
+                  <Transition
+                    enter-active-class="transition-all duration-150 ease-out overflow-hidden"
+                    enter-from-class="opacity-0 max-h-0"
+                    enter-to-class="opacity-100 max-h-16"
+                    leave-active-class="transition-all duration-100 ease-in overflow-hidden"
+                    leave-from-class="opacity-100 max-h-16"
+                    leave-to-class="opacity-0 max-h-0"
+                  >
+                    <div v-if="installationRequested" class="flex items-center gap-1.5">
+                      <span class="text-[10.5px] font-semibold text-gray-400 uppercase tracking-wider">Montage:</span>
+                      <label
+                        class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border cursor-pointer transition-colors duration-150 select-none"
+                        :class="itemInstallMap[item.id] !== false
+                          ? 'bg-orange-50 border-orange-300 text-orange-700'
+                          : 'bg-gray-100 border-gray-300 text-gray-500'"
+                      >
+                        <input
+                          type="checkbox"
+                          class="sr-only"
+                          :checked="itemInstallMap[item.id] !== false"
+                          @change="itemInstallMap[item.id] = ($event.target as HTMLInputElement).checked"
+                        />
+                        <span
+                          class="w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors"
+                          :class="itemInstallMap[item.id] !== false ? 'bg-orange-500' : 'bg-gray-400'"
+                        ></span>
+                        {{ itemInstallMap[item.id] !== false ? 'Wordt geïnstalleerd' : 'Wordt verzonden' }}
+                      </label>
+                    </div>
+                  </Transition>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Column: Order Summary & Payment -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <!-- Order Summary -->
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-6">{{ t('checkout.orderSummary') }}</h3>
-            
-            <div class="space-y-3 mb-2">
-              <div class="flex justify-between">
-                <span class="text-gray-600">{{ t('checkout.bagTotal') }}</span>
-                <span class="font-medium">€{{ subtotal.toFixed(2).replace('.', ',') }}</span>
+        <!-- Right Column: Install hero + Order Summary + Payment -->
+        <div class="space-y-5">
+
+          <!-- ─── Installation service hero card ─── -->
+          <div
+            class="rounded-xl overflow-hidden transition-all duration-200"
+            :class="installationRequested
+              ? 'border border-orange-300 shadow-[0_4px_20px_rgba(234,88,12,0.12)]'
+              : 'border border-gray-200 shadow-sm'"
+          >
+            <!-- Top band -->
+            <div
+              class="px-5 py-5 transition-colors duration-200"
+              :class="installationRequested ? 'bg-gradient-to-br from-orange-50 to-white' : 'bg-gray-50'"
+            >
+              <!-- Eyebrow -->
+              <div
+                class="inline-flex items-center gap-1.5 text-[10.5px] font-bold tracking-widest uppercase rounded-full px-2.5 py-1 mb-4 border transition-colors duration-200"
+                :class="installationRequested
+                  ? 'text-orange-700 bg-orange-100 border-orange-200'
+                  : 'text-gray-400 bg-transparent border-gray-200'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-200"
+                  :class="installationRequested ? 'bg-orange-500' : 'bg-gray-300'"
+                ></span>
+                Installatieservice
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">{{ t('checkout.deliveryFee') }}</span>
-                <span class="font-medium">€{{ deliveryFee.toFixed(2).replace('.', ',') }}</span>
+
+              <!-- Main row: icon + text + toggle -->
+              <div class="flex items-start gap-4">
+                <div
+                  class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
+                  :class="installationRequested ? 'bg-orange-500 shadow-md text-white' : 'bg-gray-200 text-gray-400'"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-bold text-gray-900 text-[17px] leading-tight">Laat het ons installeren</h3>
+                  <p class="text-sm text-gray-500 mt-1 leading-snug">Onze BMW-monteurs monteren je onderdelen vakkundig — geen gedoe.</p>
+                </div>
+                <!-- Toggle -->
+                <label class="relative inline-block w-12 h-6 flex-shrink-0 mt-0.5 cursor-pointer">
+                  <input v-model="installationRequested" type="checkbox" class="sr-only" />
+                  <span
+                    class="absolute inset-0 rounded-full transition-colors duration-200"
+                    :class="installationRequested ? 'bg-orange-500' : 'bg-gray-300'"
+                  ></span>
+                  <span
+                    class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+                    :class="installationRequested ? 'translate-x-6' : 'translate-x-0'"
+                  ></span>
+                </label>
               </div>
-              <div class="flex justify-between text-lg font-bold text-orange-500">
-                <span>{{ t('checkout.orderTotal') }}</span>
-                <span class="text-orange-500">€{{ orderTotal.toFixed(2).replace('.', ',') }}</span>
-              </div>
+            </div>
+
+            <!-- Benefits list -->
+            <ul
+              class="px-5 py-4 flex flex-col gap-2.5 transition-all duration-200"
+              :class="installationRequested
+                ? 'border-t border-orange-100 bg-white'
+                : 'border-t border-gray-100 bg-white opacity-40'"
+            >
+              <li v-for="benefit in [
+                'Geen verzendkosten voor geïnstalleerde onderdelen',
+                'Vakkundige montage door onze specialisten',
+                'Wij bellen je om een afspraak in te plannen',
+              ]" :key="benefit" class="flex items-start gap-2.5 text-sm text-gray-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                  class="w-3.5 h-3.5 text-orange-500 flex-shrink-0 mt-0.5">
+                  <path d="M20 6 9 17l-5-5"/>
+                </svg>
+                {{ benefit }}
+              </li>
+            </ul>
+
+            <!-- Status footer -->
+            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex flex-col gap-2">
+              <p
+                class="text-[12.5px] font-semibold"
+                :class="installationRequested ? 'text-orange-700' : 'text-gray-400'"
+              >
+                <template v-if="!installationRequested">
+                  Alle producten worden verzonden — geen installatie.
+                </template>
+                <template v-else-if="itemsBeingInstalled.length === cartItems.length">
+                  ✓ Alle {{ cartItems.length }} producten worden bij ons geïnstalleerd.
+                </template>
+                <template v-else-if="itemsBeingInstalled.length === 0">
+                  Geen producten geselecteerd voor installatie — alles wordt verzonden.
+                </template>
+                <template v-else>
+                  {{ itemsBeingInstalled.length }} van {{ cartItems.length }} producten wordt geïnstalleerd, de rest verzonden.
+                </template>
+              </p>
+              <p v-if="itemsBeingInstalled.length > 0" class="text-xs text-gray-400 flex gap-1.5 items-start">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                €20,- reserveringskosten voor montage. Dit bedrag gaat af van de rekening bij montage.
+              </p>
             </div>
           </div>
 
-          <!-- Divider between Order Summary and Shipping & Payment Method -->
-          <div class="border-t border-gray-200 my-4"></div>
+          <!-- ─── Order summary + payment card ─── -->
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <!-- Order Summary -->
+            <h3 class="text-xl font-bold text-gray-900 mb-4">{{ t('checkout.orderSummary') }}</h3>
 
-          <!-- Shipping & Payment Method -->
-          <div>
-            <h3 class="text-lg font-medium text-gray-600 mb-6">{{ t('checkout.shippingPayment') }}</h3>
-            
-            <!-- Select Shipping Method -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.selectShippingMethod') }}</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button
-                  @click="selectedShippingMethod = 'post'"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedShippingMethod === 'post' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <img src="/images/box-time.png" :alt="t('checkout.viaPost')" class="w-6 h-6" />
-                  </div>
-                  <span class="text-sm font-medium">{{ t('checkout.viaPost') }}</span>
-                </button>
+            <div class="space-y-2 mb-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">{{ t('checkout.bagTotal') }}</span>
+                <span class="font-medium">€{{ subtotal.toFixed(2).replace('.', ',') }}</span>
+              </div>
+              <!-- Reservation fee row -->
+              <div v-if="reservationFee > 0" class="flex justify-between text-sm">
+                <span class="text-gray-600">Reserveringskosten montage</span>
+                <span class="font-medium">€{{ reservationFee.toFixed(2).replace('.', ',') }}</span>
+              </div>
+              <p v-if="reservationFee > 0" class="text-xs text-gray-400 -mt-1">Wordt verrekend bij montage in de winkel.</p>
+              <!-- Shipping row -->
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">{{ t('checkout.deliveryFee') }}</span>
+                <span class="font-medium">
+                  <template v-if="!needsShipping && installationRequested">Gratis</template>
+                  <template v-else>€{{ deliveryFee.toFixed(2).replace('.', ',') }}</template>
+                </span>
+              </div>
+              <p v-if="!needsShipping && installationRequested" class="text-xs text-gray-400 -mt-1">Geen verzendkosten — alles wordt bij ons geïnstalleerd.</p>
 
-                <button
-                  @click="selectedShippingMethod = 'store'"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedShippingMethod === 'store' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <img src="/images/building.png" :alt="t('checkout.atOurStore')" class="w-6 h-6" />
-                  </div>
-                  <span class="text-sm font-medium">{{ t('checkout.atOurStore') }}</span>
-                </button>
+              <div class="flex justify-between text-lg font-bold text-orange-500 pt-2 border-t border-gray-100">
+                <span>{{ t('checkout.orderTotal') }}</span>
+                <span>€{{ orderTotal.toFixed(2).replace('.', ',') }}</span>
               </div>
             </div>
 
-            <!-- Pickup info -->
-            <Transition
-              enter-active-class="transition-all duration-300 ease-out overflow-hidden"
-              enter-from-class="opacity-0 max-h-0"
-              enter-to-class="opacity-100 max-h-64"
-              leave-active-class="transition-all duration-200 ease-in overflow-hidden"
-              leave-from-class="opacity-100 max-h-64"
-              leave-to-class="opacity-0 max-h-0"
-            >
-              <div v-if="selectedShippingMethod === 'store'" class="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4">
-                <p class="text-sm font-semibold text-orange-700 mb-3">Afhaaladres</p>
-                <div class="flex gap-3 mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                  </svg>
-                  <div class="text-sm text-gray-700 leading-relaxed">
-                    Noorddammerweg 35, Unit 11<br />
-                    1424NW De Kwakel
+            <div class="border-t border-gray-200 my-4"></div>
+
+            <!-- Shipping & Payment Method -->
+            <div>
+              <h3 class="text-lg font-medium text-gray-600 mb-5">{{ t('checkout.shippingPayment') }}</h3>
+
+              <!-- Shipping method — only shown when some items need shipping -->
+              <Transition
+                enter-active-class="transition-all duration-200 ease-out overflow-hidden"
+                enter-from-class="opacity-0 max-h-0"
+                enter-to-class="opacity-100 max-h-96"
+                leave-active-class="transition-all duration-150 ease-in overflow-hidden"
+                leave-from-class="opacity-100 max-h-96"
+                leave-to-class="opacity-0 max-h-0"
+              >
+                <div v-if="needsShipping" class="mb-6">
+                  <h4 class="text-sm font-medium text-gray-700 mb-1">{{ t('checkout.selectShippingMethod') }}</h4>
+                  <p v-if="installationRequested && itemsBeingInstalled.length > 0" class="text-xs text-gray-400 mb-3">
+                    Alleen voor producten die niet geïnstalleerd worden.
+                  </p>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button
+                      @click="selectedShippingMethod = 'post'"
+                      class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                      :class="selectedShippingMethod === 'post' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                    >
+                      <div class="w-8 h-8 flex items-center justify-center">
+                        <img src="/images/box-time.png" :alt="t('checkout.viaPost')" class="w-6 h-6" />
+                      </div>
+                      <span class="text-sm font-medium">{{ t('checkout.viaPost') }}</span>
+                    </button>
+                    <button
+                      @click="selectedShippingMethod = 'store'"
+                      class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                      :class="selectedShippingMethod === 'store' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
+                    >
+                      <div class="w-8 h-8 flex items-center justify-center">
+                        <img src="/images/building.png" :alt="t('checkout.atOurStore')" class="w-6 h-6" />
+                      </div>
+                      <span class="text-sm font-medium">{{ t('checkout.atOurStore') }}</span>
+                    </button>
                   </div>
+
+                  <!-- Pickup address info -->
+                  <Transition
+                    enter-active-class="transition-all duration-300 ease-out overflow-hidden"
+                    enter-from-class="opacity-0 max-h-0"
+                    enter-to-class="opacity-100 max-h-64"
+                    leave-active-class="transition-all duration-200 ease-in overflow-hidden"
+                    leave-from-class="opacity-100 max-h-64"
+                    leave-to-class="opacity-0 max-h-0"
+                  >
+                    <div v-if="selectedShippingMethod === 'store'" class="mt-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                      <p class="text-sm font-semibold text-orange-700 mb-3">Afhaaladres</p>
+                      <div class="flex gap-3 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                        </svg>
+                        <div class="text-sm text-gray-700 leading-relaxed">
+                          Noorddammerweg 35, Unit 11<br />1424NW De Kwakel
+                        </div>
+                      </div>
+                      <div class="flex gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <div class="text-sm text-gray-700 leading-relaxed space-y-0.5">
+                          <div class="flex justify-between gap-6"><span>Maandag t/m vrijdag</span><span class="font-medium">09:00 – 17:00</span></div>
+                          <div class="flex justify-between gap-6"><span>Zaterdag</span><span class="font-medium">10:00 – 14:00</span></div>
+                          <div class="flex justify-between gap-6"><span>Zondag</span><span class="font-medium text-gray-400">Gesloten</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </Transition>
                 </div>
-                <div class="flex gap-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="w-5 h-5 text-orange-500 shrink-0 mt-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
-                  <div class="text-sm text-gray-700 leading-relaxed space-y-0.5">
-                    <div class="flex justify-between gap-6">
-                      <span>Maandag t/m vrijdag</span>
-                      <span class="font-medium">09:00 – 17:00</span>
+              </Transition>
+
+              <!-- Payment method -->
+              <div class="mb-6">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.paymentMethod') }}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <button @click="selectedPaymentMethod = 'bank'" type="button"
+                    class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                    :class="selectedPaymentMethod === 'bank' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'">
+                    <img src="/images/ideal.png" alt="iDEAL" class="h-10 w-10 object-contain" />
+                    <span class="text-sm font-medium">iDEAL</span>
+                  </button>
+                  <button @click="selectedPaymentMethod = 'card'" type="button"
+                    class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                    :class="selectedPaymentMethod === 'card' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'">
+                    <div class="flex items-center gap-1">
+                      <img src="/images/mastercard.png" alt="Mastercard" class="h-7 w-auto" />
+                      <img src="/images/visa.png" alt="Visa" class="h-5 w-auto" />
                     </div>
-                    <div class="flex justify-between gap-6">
-                      <span>Zaterdag</span>
-                      <span class="font-medium">10:00 – 14:00</span>
+                    <span class="text-sm font-medium">{{ t('checkout.payment.card') }}</span>
+                  </button>
+                  <button @click="selectedPaymentMethod = 'bancontact'" type="button"
+                    class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
+                    :class="selectedPaymentMethod === 'bancontact' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-md bg-[#005498]">
+                      <span class="text-[10px] font-bold text-white leading-none text-center">Bancon<br>tact</span>
                     </div>
-                    <div class="flex justify-between gap-6">
-                      <span>Zondag</span>
-                      <span class="font-medium text-gray-400">Gesloten</span>
-                    </div>
-                  </div>
+                    <span class="text-sm font-medium">Bancontact</span>
+                  </button>
                 </div>
               </div>
-            </Transition>
 
-            <!-- Select Payment Method -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">{{ t('checkout.paymentMethod') }}</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <!-- iDEAL -->
-                <button
-                  @click="selectedPaymentMethod = 'bank'"
-                  type="button"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedPaymentMethod === 'bank' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <img src="/images/ideal.png" alt="iDEAL" class="h-10 w-10 object-contain" />
-                  <span class="text-sm font-medium">iDEAL</span>
-                </button>
+              <!-- Fine print & terms -->
+              <div class="mb-6">
+                <p class="text-sm text-gray-600 mb-4" v-html="t('checkout.accountCreated')"></p>
 
-                <!-- Credit / Debit Card -->
-                <button
-                  @click="selectedPaymentMethod = 'card'"
-                  type="button"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedPaymentMethod === 'card' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <div class="flex items-center gap-1">
-                    <img src="/images/mastercard.png" alt="Mastercard" class="h-7 w-auto" />
-                    <img src="/images/visa.png" alt="Visa" class="h-5 w-auto" />
-                  </div>
-                  <span class="text-sm font-medium">{{ t('checkout.payment.card') }}</span>
-                </button>
-
-                <!-- Bancontact -->
-                <button
-                  @click="selectedPaymentMethod = 'bancontact'"
-                  type="button"
-                  class="flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-colors"
-                  :class="selectedPaymentMethod === 'bancontact' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'"
-                >
-                  <div class="flex items-center justify-center w-10 h-10 rounded-md bg-[#005498]">
-                    <span class="text-[10px] font-bold text-white leading-none text-center">Bancon<br>tact</span>
-                  </div>
-                  <span class="text-sm font-medium">Bancontact</span>
-                </button>
-
-              </div>
-            </div>
-
-
-
-            <!-- Additional Information -->
-            <div class="mb-6">
-              <p class="text-sm text-gray-600 mb-4" v-html="t('checkout.accountCreated')">
-              </p>
-
-              <!-- Installation request -->
-              <div class="mb-4 p-4 border border-orange-200 bg-orange-50 rounded-lg">
-                <label class="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    v-model="installationRequested"
-                    type="checkbox"
-                    class="terms-checkbox mt-1 flex-shrink-0"
-                  />
-                  <div>
-                    <span class="text-sm font-semibold text-gray-900 block">
-                      {{ t('checkout.installationRequest') }}
-                    </span>
-                    <span class="text-xs text-gray-500 mt-0.5 block">
-                      {{ t('checkout.installationRequestNote') }}
-                    </span>
-                  </div>
-                </label>
-              </div>
-
-              <div>
                 <label class="flex items-start space-x-3 cursor-pointer">
                   <input
                     v-model="acceptTerms"
@@ -682,30 +835,25 @@ const handleOrderNow = async () => {
                     <span class="text-red-500 ml-1">*</span>
                   </span>
                 </label>
-                <p v-if="showTermsError" class="text-red-500 text-sm mt-2">
-                  {{ t('checkout.termsError') }}
-                </p>
+                <p v-if="showTermsError" class="text-red-500 text-sm mt-2">{{ t('checkout.termsError') }}</p>
               </div>
-            </div>
 
-            <!-- Order Error Display -->
-            <div v-if="orderError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p class="text-sm text-red-600">{{ orderError }}</p>
-            </div>
+              <!-- Error -->
+              <div v-if="orderError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-600">{{ orderError }}</p>
+              </div>
 
-            <!-- Order Now Button -->
-            <button
-              @click="handleOrderNow"
-              :disabled="isSubmitting"
-              class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span v-if="isSubmitting" class="text-lg font-medium text-orange-500">
-                {{ t('checkout.redirectingToPayment') }}
-              </span>
-              <span v-else class="text-lg font-medium text-orange-500">
-                {{ t('checkout.orderNow') }}
-              </span>
-            </button>
+              <!-- Submit -->
+              <button
+                @click="handleOrderNow"
+                :disabled="isSubmitting"
+                class="w-full flex items-center justify-center p-4 border-2 hover:border-orange-500 rounded-lg transition-colors hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="text-lg font-medium text-orange-500">
+                  {{ isSubmitting ? t('checkout.redirectingToPayment') : t('checkout.orderNow') }}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
