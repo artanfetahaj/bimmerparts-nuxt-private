@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ShoppingCart, Heart } from 'lucide-vue-next'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductReviews from '@/components/ProductReviews/ProductReviews.vue'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { useCart } from '@/stores/cart'
 import { useWishlist } from '@/stores/wishlist'
 import { useLocale } from '@/stores/locale'
@@ -292,21 +285,6 @@ const cartItem = computed(() => {
   }
 })
 
-const showCartDialog = ref(false)
-
-const handleAddToCart = () => {
-  if (!cartItem.value) return
-  showCartDialog.value = true
-}
-
-const confirmAddToCart = () => {
-  if (!cartItem.value) return
-  const qty = Math.max(1, quantity.value)
-  quantity.value = qty
-  addToCart(cartItem.value, qty, cartItem.value.attributes, cartItem.value.price_adjustment)
-  showCartDialog.value = false
-}
-
 const handleBuyNow = () => {
   if (!cartItem.value) return
   const qty = Math.max(1, quantity.value)
@@ -572,21 +550,11 @@ watch(() => route.params.slug, (newSlug) => {
             <div class="flex flex-wrap gap-2 sm:gap-4">
               <button
                 @click="handleBuyNow"
-                class="flex-1 min-w-0 bg-orange-500 text-white py-3 px-3 sm:px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
+                class="flex-1 min-w-0 bg-orange-500 text-white py-2 px-3 sm:px-4 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1.5"
               >
-                <img src="/images/shopping-bag.svg" alt="Shopping bag" class="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span class="text-xs sm:text-base whitespace-nowrap">{{ t('button.buyNow') }}</span>
+                <ShoppingCart class="h-4 w-4 flex-shrink-0" />
+                <span class="whitespace-nowrap">{{ t('productDetail.addToCart') }}</span>
               </button>
-              <button
-                @click="handleAddToCart"
-                class="px-3 sm:px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 flex-shrink-0">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-                <span class="text-xs sm:text-base whitespace-nowrap hidden min-[375px]:inline">{{ t('productDetail.addToCart') }}</span>
-              </button>
-              <!-- Wishlist -->
               <button
                 @click="handleToggleWishlist($event)"
                 type="button"
@@ -594,15 +562,10 @@ watch(() => route.params.slug, (newSlug) => {
                 :class="isInWishlist(product.id) ? 'border-orange-500 bg-orange-50 text-orange-600' : 'hover:border-orange-300'"
                 :title="isInWishlist(product.id) ? t('productDetail.removeFromWishlist') : t('productDetail.addToWishlist')"
               >
-                <svg v-if="!isInWishlist(product.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 flex-shrink-0">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 flex-shrink-0">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.22 2.53C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                <span class="text-xs sm:text-base whitespace-nowrap hidden min-[375px]:inline">
-                  {{  t('productDetail.addToWishlist') }}
-                </span>
+                <Heart
+                  class="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
+                  :fill="isInWishlist(product.id) ? 'currentColor' : 'none'"
+                />
               </button>
             </div>
 
@@ -717,45 +680,6 @@ watch(() => route.params.slug, (newSlug) => {
       </div>
 
     </div>
-
-    <!-- ── Add to Cart Confirmation Dialog ── -->
-    <Dialog :open="showCartDialog" @update:open="showCartDialog = $event">
-      <DialogContent class="sm:max-w-md p-4">
-        <DialogHeader>
-          <DialogTitle>Toevoegen aan winkelwagen</DialogTitle>
-          <DialogDescription>
-            Weet je zeker dat je dit product wilt toevoegen aan je winkelwagen?
-          </DialogDescription>
-        </DialogHeader>
-
-        <!-- Product summary -->
-        <div class="flex items-center gap-4 py-2">
-          <div class="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
-            <img :src="productImages[0]" :alt="product?.name" class="w-full h-full object-contain p-1" />
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate">{{ product?.name }}</p>
-            <p class="text-sm text-gray-500 mt-0.5">Aantal: {{ quantity }}</p>
-            <p class="text-sm font-semibold text-gray-900 mt-0.5">&euro;{{ formatPrice(price * quantity) }}</p>
-          </div>
-        </div>
-
-        <DialogFooter class="flex gap-2 sm:gap-2">
-          <button
-            @click="showCartDialog = false"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Annuleren
-          </button>
-          <button
-            @click="confirmAddToCart"
-            class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors"
-          >
-            Toevoegen
-          </button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
 
     <Teleport to="body">
       <div

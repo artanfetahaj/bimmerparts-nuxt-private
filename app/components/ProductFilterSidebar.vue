@@ -17,10 +17,10 @@ const categoryStore = useCategoryStore()
 
 // ─── Price range ─────────────────────────────────────────────────────────────
 const PRICE_FLOOR = 0
-const PRICE_CEILING = 20000
+const priceCeiling = ref(0) // updated from API on mount
 
 const priceMin = ref(Number(route.query.price_min) || PRICE_FLOOR)
-const priceMax = ref(Number(route.query.price_max) || PRICE_CEILING)
+const priceMax = ref(Number(route.query.price_max) || priceCeiling.value)
 
 let priceDebounce: ReturnType<typeof setTimeout> | null = null
 
@@ -43,7 +43,7 @@ function commitPriceFilter() {
     } else {
       delete query.price_min
     }
-    if (priceMax.value < PRICE_CEILING) {
+    if (priceMax.value < priceCeiling.value) {
       query.price_max = String(priceMax.value)
     } else {
       delete query.price_max
@@ -55,8 +55,8 @@ function commitPriceFilter() {
 
 watch([priceMin, priceMax], commitPriceFilter)
 
-const minPercent = computed(() => ((priceMin.value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100)
-const maxPercent = computed(() => ((priceMax.value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100)
+const minPercent = computed(() => ((priceMin.value - PRICE_FLOOR) / (priceCeiling.value - PRICE_FLOOR)) * 100)
+const maxPercent = computed(() => ((priceMax.value - PRICE_FLOOR) / (priceCeiling.value - PRICE_FLOOR)) * 100)
 
 // ─── Brands ──────────────────────────────────────────────────────────────────
 const brands = ref<ProductBrand[]>([])
@@ -167,14 +167,45 @@ watch(
     selectedProductCategory.value = (q.product_category as string) || ''
     selectedSubcategory.value     = (q.subcategory as string) || ''
     selectedCarModel.value        = (q.car_model as string) || ''
-    priceMin.value                = Number(q.price_min) || PRICE_FLOOR
-    priceMax.value                = Number(q.price_max) || PRICE_CEILING
+    priceMin.value = Number(q.price_min) || PRICE_FLOOR
+    priceMax.value = Number(q.price_max) || priceCeiling.value
   },
   { deep: true },
 )
 
+// ─── Price ceiling: fetch max price for the current non-price filters ─────────
+function fetchPriceCeiling() {
+  // Forward all active filters except price_min / price_max
+  const { price_min, price_max, page, ...filterParams } = route.query as Record<string, string>
+
+  api.get('/products/price-range', { params: filterParams })
+    .then((res) => {
+      const max = res.data?.data?.max
+      if (max && max > 0) {
+        const rounded = Math.ceil(max / 100) * 100 // round up to nearest €100
+        priceCeiling.value = rounded
+        // Clamp priceMax if it now exceeds the new ceiling
+        if (!route.query.price_max || priceMax.value > rounded) {
+          priceMax.value = rounded
+        }
+      }
+    })
+    .catch(() => {})
+}
+
+// Re-fetch the ceiling whenever a non-price filter changes
+watch(
+  () => {
+    const { price_min, price_max, page, ...rest } = route.query as Record<string, string>
+    return JSON.stringify(rest)
+  },
+  fetchPriceCeiling,
+)
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 onMounted(() => {
+  fetchPriceCeiling()
+
   getProductBrands()
     .then((b) => { brands.value = b })
     .catch(() => {})
@@ -213,7 +244,7 @@ const openSections = ref(['price'])
               <input
                 type="range"
                 :min="PRICE_FLOOR"
-                :max="PRICE_CEILING"
+                :max="priceCeiling.value"
                 :value="priceMin"
                 @input="onPriceMinInput"
                 class="range-thumb absolute top-0 left-0 w-full h-full appearance-none bg-transparent pointer-events-none z-[3]"
@@ -221,7 +252,7 @@ const openSections = ref(['price'])
               <input
                 type="range"
                 :min="PRICE_FLOOR"
-                :max="PRICE_CEILING"
+                :max="priceCeiling.value"
                 :value="priceMax"
                 @input="onPriceMaxInput"
                 class="range-thumb absolute top-0 left-0 w-full h-full appearance-none bg-transparent pointer-events-none z-[4]"
@@ -234,46 +265,6 @@ const openSections = ref(['price'])
           </div>
         </AccordionContent>
       </AccordionItem>
-
-      <!-- ── Car Models ── -->
-      <AccordionItem value="group">
-        <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
-          Model
-        </AccordionTrigger>
-        <AccordionContent>
-          <div v-if="carModels.length === 0" class="text-sm text-gray-400 py-1">
-            Geen modellen beschikbaar
-          </div>
-          <div v-else class="max-h-52 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
-            <template v-for="[series, models] in carModelsBySeries" :key="series">
-              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-2 first:mt-0">{{ series }}</p>
-              <label
-                v-for="model in models"
-                :key="model.id"
-                class="flex items-center gap-2 py-1 px-1 rounded cursor-pointer hover:bg-gray-50 transition-colors"
-              >
-                <input
-                  type="radio"
-                  name="car_model"
-                  :value="model.id"
-                  :checked="selectedCarModel === model.id"
-                  @click="selectCarModel(model.id)"
-                  class="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
-                />
-                <span class="text-sm text-gray-700">{{ model.name }}</span>
-              </label>
-            </template>
-            <button
-              v-if="selectedCarModel"
-              @click="selectCarModel(selectedCarModel)"
-              class="text-xs text-orange-600 hover:text-orange-700 mt-1"
-            >
-              Wis selectie
-            </button>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-
       <!-- ── Category (from store) ── -->
       <AccordionItem value="category">
         <AccordionTrigger class="text-base font-semibold text-gray-900 hover:no-underline">
