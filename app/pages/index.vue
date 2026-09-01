@@ -43,7 +43,7 @@ onMounted(async () => {
     <HomeReviews />
     <HomeInstallation />
     <BrandsRow />
-    <ProductSection :title="'On Sale'" :products="onSale" />
-    <ProductSection :title="'All Products'" :products="allProducts" />
+    <ProductSection :title="'In de aanbieding'" :products="onSale" />
+    <ProductSection :title="'Alle producten'" :products="allProducts" />
   </div>
 </template>

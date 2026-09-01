@@ -60,7 +60,7 @@ const services = [
           <!-- Key points -->
           <ul class="space-y-3 mb-10">
             <li
-              v-for="point in ['BMW & MINI gecertificeerde monteurs', 'Montage binnen 1–2 werkdagen mogelijk', 'Volledig gegarandeerd vakmanschap', 'Geen extra zoekwerk — wij leveren het onderdeel']"
+              v-for="point in ['BMW & MINI gecertificeerde monteurs', 'Volledig gegarandeerd vakmanschap', 'Geen extra zoekwerk — wij leveren het onderdeel']"
               :key="point"
               class="flex items-start gap-3 text-sm text-gray-600"
             >
