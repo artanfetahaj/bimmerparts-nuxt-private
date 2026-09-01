@@ -244,7 +244,7 @@ const openSections = ref(['price'])
               <input
                 type="range"
                 :min="PRICE_FLOOR"
-                :max="priceCeiling.value"
+                :max="priceCeiling"
                 :value="priceMin"
                 @input="onPriceMinInput"
                 class="range-thumb absolute top-0 left-0 w-full h-full appearance-none bg-transparent pointer-events-none z-[3]"
@@ -252,7 +252,7 @@ const openSections = ref(['price'])
               <input
                 type="range"
                 :min="PRICE_FLOOR"
-                :max="priceCeiling.value"
+                :max="priceCeiling"
                 :value="priceMax"
                 @input="onPriceMaxInput"
                 class="range-thumb absolute top-0 left-0 w-full h-full appearance-none bg-transparent pointer-events-none z-[4]"

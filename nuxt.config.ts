@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     '/over-ons': { prerender: true },
     '/contact': { prerender: true },
     '/bmw-model-codes': { swr: 3600 },
+    '/mini-model-codes': { swr: 3600 },
     '/producten': { swr: 3600 },
     '/producten/**': { swr: 600 },
     '/winkelwagen': { ssr: false },

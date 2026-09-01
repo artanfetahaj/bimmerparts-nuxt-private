@@ -34,7 +34,7 @@ const services = [
 </script>
 
 <template>
-  <section class="w-full bg-white py-20 overflow-hidden">
+  <section class="w-full  py-20 overflow-hidden">
     <div class="outer-container">
 
       <!-- Two-column layout: copy left, visual right -->
@@ -105,7 +105,7 @@ const services = [
             <div
               v-for="service in services"
               :key="service.title"
-              class="flex items-start gap-3 bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:border-orange-200 hover:shadow-md transition-all duration-200"
+              class="flex items-start gap-3  border border-gray-100 rounded-xl p-4 shadow-sm hover:border-orange-200 hover:shadow-md transition-all duration-200"
             >
               <!-- Icon -->
               <div class="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">

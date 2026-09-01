@@ -66,9 +66,11 @@ class OrdersService {
   }
 
   async initiatePayment(payload: {
-    items: { product_id: string; quantity: number }[]
+    items: { product_id: string; quantity: number; install?: boolean }[]
     redirect_url: string
     method?: string
+    shipping_method?: string
+    installation_requested?: boolean
   }): Promise<{ checkout_url: string; payment_id: string }> {
     const res = await api.post('/payments/initiate', payload)
     return res.data || { checkout_url: '', payment_id: '' }

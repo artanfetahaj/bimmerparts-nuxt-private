@@ -1,8 +1,29 @@
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { getProductBrands } from '~/services/productBrand'
+
 useSeoMeta({
   title: 'Eventuri | BimmerParts',
   description: 'Eventuri performance carbon luchtinlaatsystemen, turbo-inlaten en motorkappen voor BMW en MINI. Engineered for maximum airflow.',
 })
+
+const eventuriId = ref<string | null>(null)
+
+onMounted(async () => {
+  try {
+    const brands = await getProductBrands()
+    const found = brands.find(
+      (b) => b.slug?.toLowerCase().includes('eventuri') || b.name?.toLowerCase().includes('eventuri')
+    )
+    if (found) eventuriId.value = found.id
+  } catch (e) {
+    console.error('eventuri.vue: failed to resolve brand id', e)
+  }
+})
+
+const eventuriLink = computed(() =>
+  eventuriId.value ? `/products?brand=${encodeURIComponent(eventuriId.value)}` : '/products?brand=Eventuri'
+)
 </script>
 
 <template>
@@ -26,7 +47,7 @@ useSeoMeta({
             </p>
             <div class="flex flex-wrap gap-3">
               <NuxtLink
-                to="/products?brand=Eventuri"
+                :to="eventuriLink"
                 class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-6 py-3 rounded-lg text-sm"
               >
                 Bekijk alle Eventuri producten
@@ -135,7 +156,7 @@ useSeoMeta({
         <h2 class="text-3xl font-bold text-gray-900">Welke Eventuri upgrade past bij jouw BMW of MINI?</h2>
         <p class="text-gray-600 max-w-xl mx-auto">Bekijk ons volledige Eventuri assortiment en vind de upgrade die past bij jouw model.</p>
         <NuxtLink
-          to="/products?brand=Eventuri"
+          :to="eventuriLink"
           class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-8 py-4 rounded-lg"
         >
           Bekijk alle Eventuri producten

@@ -1,8 +1,29 @@
 <script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { getProductBrands } from '~/services/productBrand'
+
 useSeoMeta({
   title: 'Cobra Suspension | BimmerParts',
   description: 'Cobra Suspension verlagingsveren en schroefsets voor BMW en MINI. Meer dan 30 jaar ervaring, TüV gecertificeerd en gemaakt van de hoogste kwaliteit materialen.',
 })
+
+const cobraId = ref<string | null>(null)
+
+onMounted(async () => {
+  try {
+    const brands = await getProductBrands()
+    const found = brands.find(
+      (b) => b.slug?.toLowerCase().includes('cobra') || b.name?.toLowerCase().includes('cobra')
+    )
+    if (found) cobraId.value = found.id
+  } catch (e) {
+    console.error('cobra-suspension.vue: failed to resolve brand id', e)
+  }
+})
+
+const cobraLink = computed(() =>
+  cobraId.value ? `/products?brand=${encodeURIComponent(cobraId.value)}` : '/products?brand=Cobra'
+)
 </script>
 
 <template>
@@ -29,7 +50,7 @@ useSeoMeta({
             </p>
             <div class="flex flex-wrap gap-3">
               <NuxtLink
-                to="/products?brand=Cobra"
+                :to="cobraLink"
                 class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-6 py-3 rounded-lg text-sm"
               >
                 Bekijk alle Cobra producten
@@ -122,7 +143,7 @@ useSeoMeta({
                 De EVO S Coilovers zijn ontworpen met duurzaamheid in gedachten. Het innovatieve aanpassingsplatform voor de schokdempers met set-in-schroef, geïnspireerd door onze EVO III en EVO R schroefsets, biedt niet alleen soepele en gemakkelijke aanpassingen, maar zorgt er ook voor dat het product lang meegaat.
               </p>
               <NuxtLink
-                to="/products?brand=Cobra"
+                :to="cobraLink"
                 class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-5 py-2.5 rounded-lg text-sm mt-2"
               >
                 Bekijk alle EVO-S schroefsets
@@ -140,7 +161,7 @@ useSeoMeta({
         <h2 class="text-3xl font-bold text-gray-900">Klaar om uw rijervaring te verbeteren?</h2>
         <p class="text-gray-600 max-w-xl mx-auto">Bekijk ons volledige assortiment Cobra Suspension producten en vind de perfecte set voor uw BMW of MINI.</p>
         <NuxtLink
-          to="/products?brand=Cobra"
+          :to="cobraLink"
           class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-8 py-4 rounded-lg"
         >
           Bekijk alle Cobra Suspension producten

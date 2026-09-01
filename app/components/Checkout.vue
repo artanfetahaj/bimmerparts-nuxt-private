@@ -158,8 +158,13 @@ const countries = [
 
 // Computed values
 const subtotal = computed(() => totalPrice.value)
-const deliveryFee = computed(() => needsShipping.value && selectedShippingMethod.value === 'post' ? 20 : 0)
-const orderTotal = computed(() => subtotal.value + deliveryFee.value + reservationFee.value)
+const deliveryFee = computed(() => {
+  if (!needsShipping.value) return 0
+  if (selectedShippingMethod.value !== 'post') return 0
+  return subtotal.value > 100 ? 0 : 10
+})
+const btwAmount = computed(() => subtotal.value * 0.21)
+const orderTotal = computed(() => subtotal.value + btwAmount.value + deliveryFee.value + reservationFee.value)
 
 // Watch for empty cart and redirect to products
 // Guard: don't redirect when we just completed an order
@@ -262,6 +267,8 @@ const handleOrderNow = async () => {
       items: itemsPayload,
       redirect_url: `${window.location.origin}/bestelling-bevestigd`,
       method: mollieMethodMap[selectedPaymentMethod.value],
+      shipping_method: selectedShippingMethod.value,
+      installation_requested: installationRequested.value,
     })
 
     sessionStorage.setItem('pending_payment_id', result.payment_id)
@@ -504,33 +511,24 @@ const handleOrderNow = async () => {
                 <div class="w-20 h-20 bg-white border border-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                   <img :src="item.image" :alt="item.title" class="w-full h-full object-contain p-2" />
                 </div>
-                
-                <!-- Product Info -->
-                <div class="flex-1 min-w-0 pr-1">
-                  <h4 class="text-lg font-semibold text-gray-900 mb-2 truncate">{{ item.title }}</h4>
-                  <div class="space-y-1">
-                    <div class="text-xl font-bold text-gray-900">€ {{ item.price.toFixed(2).replace('.', ',') }}</div>
-                    <div v-if="item.oldPrice < item.price" class="text-lg text-gray-500 line-through">€ {{ item.oldPrice.toFixed(2).replace('.', ',') }}</div>
-                  </div>
-                </div>
-                
-                <!-- Quantity Controls + install toggle -->
-                <div class="flex flex-col items-start space-y-2 mr-1 flex-1 justify-center">
-                  <span class="text-lg font-medium text-gray-900">{{ t('cart.quantity') }}</span>
-                  <div class="flex items-center bg-white border border-gray-200 rounded-lg">
+
+                <!-- All product info stacked, like the HTML example -->
+                <div class="flex-1 min-w-0 pr-6">
+                  <h4 class="text-sm font-bold text-gray-900 leading-snug">{{ item.title }}</h4>
+                  <div class="text-sm font-bold text-gray-900 mt-1.5">€ {{ item.price.toFixed(2).replace('.', ',') }}</div>
+                  <div v-if="item.oldPrice < item.price" class="text-sm text-gray-400 line-through">€ {{ item.oldPrice.toFixed(2).replace('.', ',') }}</div>
+
+                  <!-- Qty stepper -->
+                  <div class="inline-flex items-center border border-gray-300 rounded-full mt-2.5">
                     <button
                       @click="updateQuantity(item.id, item.quantity - 1)"
-                      class="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-50 rounded-l-lg"
-                    >
-                      <span class="text-sm font-medium">-</span>
-                    </button>
-                    <span class="w-8 h-8 flex items-center justify-center text-sm font-bold text-gray-900">{{ item.quantity }}</span>
+                      class="w-[26px] h-[26px] flex items-center justify-center text-gray-500 hover:text-gray-800 text-sm"
+                    >−</button>
+                    <span class="w-[22px] text-center text-[13px] font-semibold text-gray-900">{{ item.quantity }}</span>
                     <button
                       @click="updateQuantity(item.id, item.quantity + 1)"
-                      class="w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-50 rounded-r-lg"
-                    >
-                      <span class="text-sm font-medium">+</span>
-                    </button>
+                      class="w-[26px] h-[26px] flex items-center justify-center text-gray-500 hover:text-gray-800 text-sm"
+                    >+</button>
                   </div>
 
                   <!-- Per-item install toggle (only when service is on) -->
@@ -542,10 +540,10 @@ const handleOrderNow = async () => {
                     leave-from-class="opacity-100 max-h-16"
                     leave-to-class="opacity-0 max-h-0"
                   >
-                    <div v-if="installationRequested" class="flex items-center gap-1.5">
-                      <span class="text-[10.5px] font-semibold text-gray-400 uppercase tracking-wider">Montage:</span>
+                    <div v-if="installationRequested" class="flex items-center gap-1.5 mt-2.5">
+                      <span class="text-[10.5px] font-semibold text-gray-400 uppercase tracking-[0.04em]">Montage:</span>
                       <label
-                        class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border cursor-pointer transition-colors duration-150 select-none"
+                        class="inline-flex items-center gap-1.5 text-[12px] font-bold pl-[7px] pr-[11px] py-[5px] rounded-full border-[1.5px] cursor-pointer transition-[background,border-color,color] duration-150 select-none"
                         :class="itemInstallMap[item.id] !== false
                           ? 'bg-orange-50 border-orange-300 text-orange-700'
                           : 'bg-gray-100 border-gray-300 text-gray-500'"
@@ -557,7 +555,7 @@ const handleOrderNow = async () => {
                           @change="itemInstallMap[item.id] = ($event.target as HTMLInputElement).checked"
                         />
                         <span
-                          class="w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors"
+                          class="w-[7px] h-[7px] rounded-full flex-shrink-0 transition-colors"
                           :class="itemInstallMap[item.id] !== false ? 'bg-orange-500' : 'bg-gray-400'"
                         ></span>
                         {{ itemInstallMap[item.id] !== false ? 'Wordt geïnstalleerd' : 'Wordt verzonden' }}
@@ -701,6 +699,12 @@ const handleOrderNow = async () => {
                 </span>
               </div>
               <p v-if="!needsShipping && installationRequested" class="text-xs text-gray-400 -mt-1">Geen verzendkosten — alles wordt bij ons geïnstalleerd.</p>
+
+              <!-- BTW row -->
+              <div class="flex justify-between text-sm pt-1">
+                <span class="text-gray-400">Waarvan BTW (21%)</span>
+                <span class="text-dark">€{{ btwAmount.toFixed(2).replace('.', ',') }}</span>
+              </div>
 
               <div class="flex justify-between text-lg font-bold text-orange-500 pt-2 border-t border-gray-100">
                 <span>{{ t('checkout.orderTotal') }}</span>
