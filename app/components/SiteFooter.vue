@@ -25,6 +25,7 @@ const { t } = useLocale()
             <ul class="space-y-3 text-gray-600 text-sm">
               <li><NuxtLink to="/over-ons" class="hover:text-gray-900 transition-colors">Over ons</NuxtLink></li>
               <li><NuxtLink to="/bmw-model-codes" class="hover:text-gray-900 transition-colors">BMW Modelcodes</NuxtLink></li>
+              <li><NuxtLink to="/mini-model-codes" class="hover:text-gray-900 transition-colors">MINI Modelcodes</NuxtLink></li>
             </ul>
           </div>
 

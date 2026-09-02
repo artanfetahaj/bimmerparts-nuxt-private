@@ -19,6 +19,7 @@ import type { Product as ProductType } from '@/models/Product'
 import { useCarVariantStore } from '@/stores/car-variant.store'
 import { useCategoryStore } from '@/stores/category.store'
 import { RouteName } from '@/enums/RouteName'
+import { getProductBrands } from '@/services/productBrand'
 
 const requestUrl = useRequestURL()
 const ogImage = `${requestUrl.origin}/images/hero.jpg`
@@ -232,7 +233,7 @@ watch(
 
 watch(
   () => [route.query.brand, route.query.car_model, route.query.price_min, route.query.price_max],
-  ([newBrand, newCarModel, newPriceMin, newPriceMax]) => {
+  async ([newBrand, newCarModel, newPriceMin, newPriceMax]) => {
     const b = (newBrand as string) || ''
     const cm = (newCarModel as string) || ''
     const pMin = newPriceMin ? Number(newPriceMin) : null
@@ -247,6 +248,7 @@ watch(
       carModelFilter.value = cm
       priceMinFilter.value = pMin
       priceMaxFilter.value = pMax
+      await resolveBrandFilter()
       cache.clear()
       currentPage.value = 1
       loadProducts(1)
@@ -271,7 +273,28 @@ watch(products, () => {
   if (!isLoading.value) prefetchAdjacentPages()
 })
 
-onMounted(() => {
+// ─── Brand name → UUID resolution ────────────────────────────────────────────
+// Marketing pages (e.g. /eventuri) link with ?brand=BrandName. The API filter
+// expects a UUID, so we resolve the name/slug to an id before the first load.
+const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function resolveBrandFilter(): Promise<void> {
+  const raw = brandFilter.value
+  if (!raw || ID_RE.test(raw)) return
+
+  try {
+    const brands = await getProductBrands()
+    const match = brands.find(
+      b => b.name.toLowerCase() === raw.toLowerCase() || b.slug.toLowerCase() === raw.toLowerCase(),
+    )
+    if (match) brandFilter.value = match.id
+  } catch {
+    // silently fall through — filter stays as-is and API will return nothing
+  }
+}
+
+onMounted(async () => {
+  await resolveBrandFilter()
   loadProducts(currentPage.value)
 })
 </script>

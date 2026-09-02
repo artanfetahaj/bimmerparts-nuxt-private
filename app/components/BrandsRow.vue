@@ -1,40 +1,81 @@
 <script setup lang="ts">
-interface Brand {
-  name: string
+import { ref, onMounted, computed } from 'vue'
+import { getProductBrands, type ProductBrand } from '~/services/productBrand'
+
+// ─── Static partner config (logos, hrefs, CTAs) ───────────────────────────────
+// `slugMatch` is tried first; `nameMatch` is the fallback (case-insensitive contains).
+interface PartnerConfig {
+  slugMatch: string
+  nameMatch: string
   logo: string
-  brandParam: string
   wide?: boolean
   href?: string
-  cta?: string
 }
 
-const brands: Brand[] = [
+const PARTNER_CONFIG: PartnerConfig[] = [
   {
-    name: 'K&N Performance Filters',
+    slugMatch: 'kn',
+    nameMatch: 'k&n',
     logo: '/images/K&N-Performance filters-logo.png',
-    brandParam: 'K&N',
   },
   {
-    name: 'Cobra Suspensions',
+    slugMatch: 'cobra',
+    nameMatch: 'cobra',
     logo: '/images/Cobra-suspensions-logo.png',
-    brandParam: 'Cobra',
     href: '/cobra-suspension',
   },
   {
-    name: 'Strongflex',
+    slugMatch: 'strongflex',
+    nameMatch: 'strongflex',
     logo: '/images/Strongflex-logo.png',
-    brandParam: 'Strongflex',
     wide: true,
   },
   {
-    name: 'Eventuri',
+    slugMatch: 'eventuri',
+    nameMatch: 'eventuri',
     logo: '/images/Eventuri-logo.png',
-    brandParam: 'Eventuri',
     wide: true,
     href: '/eventuri',
-    cta: 'Wil je kijken welke Eventuri upgrade er voor jouw BMW of MINI is? Klik dan hier',
   },
 ]
+
+// ─── State ────────────────────────────────────────────────────────────────────
+interface ResolvedBrand {
+  id: string       // UUID — used as ?brand= filter param
+  name: string
+  logo: string
+  wide?: boolean
+  href?: string
+}
+
+const resolvedBrands = ref<ResolvedBrand[]>([])
+
+// ─── Resolve brands from API ──────────────────────────────────────────────────
+function matchBrand(apiBrand: ProductBrand, cfg: PartnerConfig): boolean {
+  const slug = (apiBrand.slug ?? '').toLowerCase()
+  const name = (apiBrand.name ?? '').toLowerCase()
+  return slug.includes(cfg.slugMatch) || name.includes(cfg.nameMatch)
+}
+
+onMounted(async () => {
+  try {
+    const allBrands = await getProductBrands()
+
+    resolvedBrands.value = PARTNER_CONFIG.flatMap((cfg) => {
+      const found = allBrands.find((b) => matchBrand(b, cfg))
+      if (!found) return []
+      return [{
+        id: found.id,
+        name: found.name,
+        logo: cfg.logo,
+        wide: cfg.wide,
+        href: cfg.href,
+      }]
+    })
+  } catch (e) {
+    console.error('BrandsRow: failed to load partner brands', e)
+  }
+})
 </script>
 
 <template>
@@ -43,12 +84,12 @@ const brands: Brand[] = [
       <h2 class="text-2xl font-normal text-gray-900 mb-6">Partnermerken</h2>
       <div class="flex flex-wrap justify-between gap-6 md:gap-10">
         <NuxtLink
-          v-for="brand in brands"
-          :key="brand.brandParam"
-          :to="brand.href ?? `/products?brand=${encodeURIComponent(brand.brandParam)}`"
+          v-for="brand in resolvedBrands"
+          :key="brand.id"
+          :to="brand.href ?? `/products?brand=${encodeURIComponent(brand.id)}`"
           :class="[
             brand.wide ? 'max-w-[400px]' : 'max-w-[300px]',
-            brand.brandParam === 'Eventuri' ? 'pb-6' : '',
+            brand.name.toLowerCase().includes('eventuri') ? 'pb-6' : '',
             'flex w-[calc(50%-12px)] md:w-auto md:flex-1 group'
           ]"
         >
