@@ -100,33 +100,37 @@ const fetchAttributes = async () => {
 }
 
 // ─── Computed from raw API data ───────────────────────────────────────────────
-const productImages = computed<string[]>(() => {
-  if (!product.value) return []
+// One entry per image: full-size url, small thumbnail and the backend alt text (falls back to the product name)
+const productGallery = computed<{ url: string; thumb: string; alt: string }[]>(() => {
   const p = product.value
-  const imgs: string[] = []
+  if (!p) return []
+  const name = p.name || ''
+  const items: { url: string; thumb: string; alt: string }[] = []
 
   // images.all array (morphMany)
-  if (p.images?.all && Array.isArray(p.images.all)) {
-    imgs.push(
-      ...p.images.all
-        .map((i: any) => i.original_url || i.thumbnail_url || i.original || '')
-        .filter(Boolean),
-    )
+  if (Array.isArray(p.images?.all)) {
+    for (const [i, img] of p.images.all.entries()) {
+      const url = img.original_url || img.thumbnail_url || img.original || ''
+      if (!url) continue
+      items.push({
+        url,
+        thumb: img.thumbnail_url || img.thumbnail || url,
+        alt: img.alt_text || (p.images.all.length > 1 ? `${name} ${i + 1}` : name),
+      })
+    }
   }
   // single image relation
-  if (imgs.length === 0 && p.image) {
-    const src = p.image.url || p.image.original || p.image.original_url
-    if (src) imgs.push(src)
+  if (items.length === 0 && p.image) {
+    const url = p.image.url || p.image.original || p.image.original_url
+    if (url) items.push({ url, thumb: p.image.thumbnail || p.image.thumb_url || url, alt: p.image.alt_text || name })
   }
-  if (imgs.length === 0 && p.image_url) {
-    imgs.push(p.image_url)
-  }
+  if (items.length === 0 && p.image_url) items.push({ url: p.image_url, thumb: p.image_url, alt: name })
   // fallback placeholder
-  if (imgs.length === 0) {
-    imgs.push('/images/placeholder-product.svg')
-  }
-  return imgs
+  if (items.length === 0) items.push({ url: '/images/placeholder-product.svg', thumb: '/images/placeholder-product.svg', alt: name })
+  return items
 })
+
+const productImages = computed<string[]>(() => productGallery.value.map(i => i.url))
 
 const currentImage = computed(() => productImages.value[currentImageIndex.value] || '')
 
@@ -343,7 +347,8 @@ useSchemaOrg([
     name: () => product.value?.name,
     description: () => (product.value?.short_description || product.value?.description || '').toString().replace(/<[^>]*>/g, '').slice(0, 5000) || undefined,
     image: () => productImages.value,
-    sku: () => product.value?.sku,
+    sku: () => product.value?.product_number || product.value?.sku,
+    mpn: () => (product.value?.is_oem ? product.value?.sku : undefined),
     brand: () => (brandName.value ? { '@type': 'Brand', name: brandName.value } : undefined),
     offers: () => ({
       price: basePrice.value.toFixed(2),
@@ -448,7 +453,7 @@ useSeoMeta({
                   class="w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors flex-shrink-0"
                   :class="currentImageIndex === index ? 'border-orange-500' : 'border-gray-200 hover:border-gray-300'"
                 >
-                  <img :src="img" :alt="`${product.name} ${index + 1}`" class="w-full h-full object-contain p-2" />
+                  <img :src="productGallery[index]?.thumb || img" :alt="productGallery[index]?.alt || `${product.name} ${index + 1}`" loading="lazy" decoding="async" class="w-full h-full object-contain p-2" />
                 </button>
               </div>
               <button
@@ -469,7 +474,7 @@ useSeoMeta({
               class="relative aspect-square bg-gray-50 rounded-lg overflow-hidden flex-1 cursor-zoom-in group"
               :title="t('productDetail.viewFullscreen') || 'View fullscreen'"
             >
-              <img :src="currentImage" :alt="product.name" class="w-full h-full object-contain p-4 sm:p-6 md:p-8" />
+              <img :src="currentImage" :alt="productGallery[currentImageIndex]?.alt || product.name" fetchpriority="high" decoding="async" class="w-full h-full object-contain p-4 sm:p-6 md:p-8" />
               <span class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/80 group-hover:bg-white flex items-center justify-center shadow-sm transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-gray-700">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
@@ -731,7 +736,7 @@ useSeoMeta({
         </button>
 
         <div class="flex flex-col items-center gap-4 max-w-3xl w-full px-16 sm:px-24">
-          <img :src="currentImage" :alt="product?.name" class="max-h-[75vh] w-full object-contain" />
+          <img :src="currentImage" :alt="productGallery[currentImageIndex]?.alt || product?.name" class="max-h-[75vh] w-full object-contain" />
           <p v-if="productImages.length > 1" class="text-white/60 text-sm">{{ currentImageIndex + 1 }} / {{ productImages.length }}</p>
         </div>
 

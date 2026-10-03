@@ -24,6 +24,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: process.env.API_URL || 'http://127.0.0.1:8000/api',
+      // Google Tag Manager container (e.g. GTM-XXXXXXX). Only loaded when set; consent mode gates what fires.
+      gtmId: process.env.NUXT_PUBLIC_GTM_ID || '',
     },
   },
   
@@ -99,38 +101,11 @@ export default defineNuxtConfig({
       robots: 'index, follow',
     }
   },
-  modules: ['shadcn-nuxt', '@nuxtjs/seo', 'nuxt-booster', '@pinia/nuxt'],
+  modules: ['shadcn-nuxt', '@nuxtjs/seo', '@nuxt/image', '@pinia/nuxt'],
   buildModules: ["@nuxtjs/svg"],
   
-  booster: {
-    detection: {
-      performance: true,
-      browserSupport: true
-    },
-
-    performanceMetrics: {
-      device: {
-        hardwareConcurrency: { min: 2, max: 48 },
-        deviceMemory: { min: 2 }
-      },
-      timing: {
-        fcp: 800,
-        dcl: 1200
-      }
-    },
-
-    targetFormats: ['webp', 'avif', 'jpg|jpeg|png|gif'],
-
-    componentAutoImport: false,
-    componentPrefix: undefined,
-
-    lazyOffset: {
-      component: '0%',
-      asset: '0%'
-    }
-  },
-
   image: {
+    format: ['webp'],
     screens: {
       default: 320,
       xxs: 480,

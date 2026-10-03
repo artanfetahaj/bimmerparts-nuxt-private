@@ -143,7 +143,7 @@ function yearRange(start?: number, end?: number) {
         <!-- Model header -->
         <div class="flex items-center gap-4 p-5 border-b border-gray-100">
           <NuxtImg
-            :src="`/car-models/${model.code}.png`"
+            :src="`/car-models/${model.code}.webp`"
             :alt="model.name"
             width="160"
             height="90"

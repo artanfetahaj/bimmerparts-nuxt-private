@@ -41,7 +41,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'wishlist.checkout': 'Checkout',
     
     // Search & Filters
-    'search.placeholder': 'Search products',
+    'search.placeholder': 'Search by product name or part number',
     'search.noResults': 'No products found',
     'search.viewAll': 'View all results',
     'filters.title': 'Filters',
@@ -522,7 +522,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'wishlist.checkout': 'Afrekenen',
     
     // Search & Filters
-    'search.placeholder': 'Zoek producten',
+    'search.placeholder': 'Zoek op productnaam of artikelnummer',
     'search.noResults': 'Geen producten gevonden',
     'search.viewAll': 'Bekijk alle resultaten',
     'filters.title': 'Filters',

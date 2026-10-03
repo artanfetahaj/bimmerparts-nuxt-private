@@ -65,7 +65,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
       </NuxtLink>
 
       <!-- Desktop Nav -->
-      <nav class="hidden lg:flex items-center gap-6 text-[15px] font-heading font-medium tracking-wide text-gray-700">
+      <nav class="hidden lg:flex items-center gap-6 text-[15px] font-heading font-semibold tracking-wide whitespace-nowrap text-gray-700">
         <!-- BMW Series trigger -->
         <div
           class="relative"

@@ -33,11 +33,7 @@ useSeoMeta({
             </NuxtLink>
           </div>
           <div class="relative pb-8">
-            <img
-              src="/images/New/1000130641.jpg"
-              alt="BMW Z4 en BMW M3 bij TOFFER Automotive"
-              class="w-full h-auto object-cover rounded-t-2xl lg:rounded-tl-2xl lg:rounded-tr-none shadow-xl"
-            />
+            <NuxtImg src="/images/New/1000130641.jpg" alt="BMW Z4 en BMW M3 bij TOFFER Automotive" width="900" densities="1x 2x" format="webp" quality="75" loading="eager" fetchpriority="high" class="w-full h-auto object-cover rounded-t-2xl lg:rounded-tl-2xl lg:rounded-tr-none shadow-xl" />
           </div>
         </div>
       </div>
@@ -76,24 +72,9 @@ useSeoMeta({
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Waar vakmanschap en passie samenkomen</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <img
-            src="/images/New/Toffer-Automotive_Elin-de-Wilde-10.2-scaled.jpg"
-            alt="De werkplaats van TOFFER Automotive met een BMW M3 op de brug"
-            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-2"
-            loading="lazy"
-          />
-          <img
-            src="/images/New/DIV05625-scaled.jpg"
-            alt="Monteur van TOFFER Automotive aan het werk onder een BMW"
-            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md"
-            loading="lazy"
-          />
-          <img
-            src="/images/New/Toffer-Automotive_Elin-de-Wilde-14-scaled.jpg"
-            alt="BMW M3 Cabrio in de werkplaats van TOFFER Automotive"
-            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-3"
-            loading="lazy"
-          />
+          <NuxtImg src="/images/New/Toffer-Automotive_Elin-de-Wilde-10.2-scaled.jpg" alt="De werkplaats van TOFFER Automotive met een BMW M3 op de brug" width="1200" densities="1x" format="webp" quality="75" loading="lazy" class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-2" />
+          <NuxtImg src="/images/New/DIV05625-scaled.jpg" alt="Monteur van TOFFER Automotive aan het werk onder een BMW" width="600" densities="1x" format="webp" quality="75" loading="lazy" class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md" />
+          <NuxtImg src="/images/New/Toffer-Automotive_Elin-de-Wilde-14-scaled.jpg" alt="BMW M3 Cabrio in de werkplaats van TOFFER Automotive" width="1600" densities="1x" format="webp" quality="75" loading="lazy" class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-3" />
         </div>
       </div>
     </section>

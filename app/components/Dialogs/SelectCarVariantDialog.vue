@@ -151,7 +151,7 @@ function handleModelResolved(model: CarModel) {
 
             <div class="relative flex items-center justify-center px-8 pt-14 pb-6 animate-in fade-in-0 zoom-in-95 duration-500 delay-75">
               <NuxtImg
-                :src="store.selectedVariant ? `/car-models/${store.selectedVariant.car_model?.code}.png` : `/car-models/${store.selectedModel!.code}.png`"
+                :src="store.selectedVariant ? `/car-models/${store.selectedVariant.car_model?.code}.webp` : `/car-models/${store.selectedModel!.code}.webp`"
                 :alt="store.selectedVariant ? store.selectedVariant.full_name : store.selectedModel!.name"
                 width="520"
                 height="280"

@@ -38,6 +38,8 @@ async function fetchResults(query: string) {
       id: p.id,
       name: p.name,
       slug: p.slug,
+      oemNumber: p.is_oem ? (p.sku ?? null) : null,
+      productNumber: p.product_number ?? null,
       price: p.discounted_price ?? p.price,
       originalPrice: p.has_discount ? p.price : null,
       image: p.image?.thumbnail_url ?? p.image?.original_url ?? p.image?.thumbnail ?? p.image?.original ?? null,
@@ -70,7 +72,7 @@ function selectProduct(slug: string) {
   isOpen.value = false
   searchQuery.value = ''
   results.value = []
-  router.push(`/products/${slug}`)
+  router.push(`/producten/${slug}`)
 }
 
 function onSubmit() {
@@ -201,6 +203,14 @@ onBeforeUnmount(() => {
             />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate">{{ product.name }}</p>
+              <p v-if="product.oemNumber" class="flex items-center gap-1.5 text-xs text-gray-500 truncate">
+                <span :class="skuMatchesQuery(product.oemNumber, searchQuery) ? 'rounded bg-orange-100 px-1.5 py-0.5 font-semibold text-zinc-900' : ''">OEM: {{ product.oemNumber }}</span>
+                <span v-if="skuMatchesQuery(product.oemNumber, searchQuery)" class="text-[11px] font-medium text-orange-700">OEM-nummer gevonden</span>
+              </p>
+              <p v-else-if="skuMatchesQuery(product.productNumber, searchQuery)" class="flex items-center gap-1.5 text-xs text-gray-500 truncate">
+                <span class="rounded bg-orange-100 px-1.5 py-0.5 font-semibold text-zinc-900">Art.nr. {{ product.productNumber }}</span>
+                <span class="text-[11px] font-medium text-orange-700">Artikelnummer gevonden</span>
+              </p>
               <div class="flex items-center gap-2">
                 <span class="text-sm font-semibold text-orange-600">{{ formatPrice(product.price) }}</span>
                 <span v-if="product.originalPrice" class="text-xs text-gray-400 line-through">

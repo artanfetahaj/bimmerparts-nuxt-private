@@ -2,11 +2,17 @@
   <NuxtLayout>
     <NuxtPage />
     <SelectCarVariantDialog />
+    <ClientOnly><CookieBanner /></ClientOnly>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 import SelectCarVariantDialog from '@/components/Dialogs/SelectCarVariantDialog.vue'
+import CookieBanner from '@/components/cookie/CookieBanner.vue'
+
+// Show the cookie banner on first visit (client only)
+const { init: initCookieConsent } = useCookieConsent()
+onMounted(initCookieConsent)
 
 // Site-wide structured data (Organization / LocalBusiness / WebSite)
 useSchemaOrg([

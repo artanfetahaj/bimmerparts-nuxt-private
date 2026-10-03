@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-/* Oswald (self-hosted) — same heading font as tofferautomotive.nl */
-@import "@fontsource-variable/oswald";
+/* Self-hosted fonts. Saira (wide) echoes the Eurostile-style BimmerParts wordmark; Inter is the neutral, highly legible body face */
+@import "@fontsource-variable/saira/wdth.css";
+@import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -11,9 +12,9 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* Font families — mirrors tofferautomotive.nl: Oswald headings, system-font body */
-  --font-heading: 'Oswald Variable', 'Oswald', sans-serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  /* Font families — headings: Saira (wordmark-style, widened); body: Inter */
+  --font-heading: 'Saira Variable', 'Saira', sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   /* Legacy aliases used by ui components (the old fonts were never loaded) */
   --font-roboto: var(--font-sans);
   --font-anek-latin: var(--font-sans);
@@ -21,6 +22,11 @@
   --font-comma-sans: var(--font-sans);
   --font-comma: var(--font-sans);
   --font-inter: var(--font-sans);
+
+  /* Colours sampled from the logo stripes (favicon) */
+  --color-stripe-dark: #293339;
+  --color-stripe-red: #ed4416;
+  --color-stripe-blue: #3ca9e6;
 
   /* Colors */
   --color-background: var(--background);
@@ -124,6 +130,8 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
+    font-stretch: 108%;
+    letter-spacing: 0.005em;
   }
 }
 

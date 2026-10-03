@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { CarFront, X } from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 import { useCarVariantStore } from '@/stores/car-variant.store'
 import { getSeriesLabel } from '@/collections/bmw-series'
 
@@ -38,7 +38,7 @@ function handleClear(e: MouseEvent) {
   >
     <div class="w-10 h-7 flex items-center justify-center shrink-0">
       <NuxtImg
-        :src="`/car-models/${variant.car_model?.code}.png`"
+        :src="`/car-models/${variant.car_model?.code}.webp`"
         :alt="variantSeriesLabel!"
         width="40"
         height="28"
@@ -71,7 +71,7 @@ function handleClear(e: MouseEvent) {
   >
     <div class="w-10 h-7 flex items-center justify-center shrink-0">
       <NuxtImg
-        :src="`/car-models/${model.code}.png`"
+        :src="`/car-models/${model.code}.webp`"
         :alt="modelSeriesLabel!"
         width="40"
         height="28"
@@ -96,13 +96,18 @@ function handleClear(e: MouseEvent) {
     </span>
   </button>
 
-  <!-- ── Empty state pill ── -->
+  <!-- ── Empty state pill: dark logo-stripe colour, white text, the three logo stripes as icon ── -->
   <button
     v-else
-    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm font-heading font-medium tracking-wide focus:outline-none text-zinc-900 bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
+    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2.5 whitespace-nowrap text-sm font-heading font-medium tracking-wide text-white bg-stripe-dark hover:bg-[#3a464d] shadow-md shadow-black/20 ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-stripe-blue transition-colors cursor-pointer"
     @click="$emit('click')"
   >
-    <CarFront class="w-5 h-5 shrink-0" />
+    <!-- The three stripes from the BimmerParts logo (centre stripe white so it stays visible on the dark button) -->
+    <svg class="w-6 h-4 shrink-0" viewBox="130 296 1000 650" aria-hidden="true">
+      <path fill="#ed4416" d="M140 813 L378 419 H548 L318 813 Z" />
+      <path fill="#ffffff" d="M330 935 L720 306 H930 L545 935 Z" />
+      <path fill="#3ca9e6" d="M713 813 L950 419 H1121 L890 813 Z" />
+    </svg>
     Kies jouw BMW
   </button>
 </template>

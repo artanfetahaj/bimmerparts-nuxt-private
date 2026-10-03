@@ -414,6 +414,7 @@ onMounted(() => {
           <div v-if="searchQuery" class="mb-4 flex items-center gap-2 text-sm">
             <span class="text-gray-600">Zoekresultaten voor:</span>
             <span class="font-medium text-gray-900">"{{ searchQuery }}"</span>
+            <span class="text-gray-500">&middot; {{ meta.total }} {{ meta.total === 1 ? 'resultaat' : 'resultaten' }}</span>
             <button
               @click="router.push({ name: RouteName.PRODUCTS })"
               class="text-orange-600 hover:text-orange-700 underline"
@@ -450,7 +451,12 @@ onMounted(() => {
 
           <!-- Empty -->
           <div v-else-if="!isLoading && products.length === 0" class="text-center py-16 text-gray-500 text-sm">
-            Geen producten gevonden.
+            <template v-if="searchQuery">
+              <p class="font-medium text-gray-700">Geen producten gevonden voor "{{ searchQuery }}".</p>
+              <p class="mt-1">Controleer de spelling of het artikelnummer, of zoek op een deel ervan.</p>
+              <NuxtLink to="/contact" class="mt-3 inline-block text-orange-700 underline">Niet gevonden wat u zoekt? Neem contact met ons op</NuxtLink>
+            </template>
+            <template v-else>Geen producten gevonden.</template>
           </div>
 
           <!-- Cards -->

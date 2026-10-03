@@ -4,6 +4,7 @@ import { useCategoryStore } from '../stores/category.store'
 
 const { t } = useLocale()
 const categoryStore = useCategoryStore()
+const { openSettings: openCookieSettings } = useCookieConsent()
 </script>
 
 <template>
@@ -92,7 +93,8 @@ const categoryStore = useCategoryStore()
     <div class="border-t py-4 text-center text-sm text-gray-500">
       Copyright © 2025 BimmerParts |
       <NuxtLink to="/terms" class="hover:text-gray-700 transition-colors">{{ t('footer.terms') }}</NuxtLink> |
-      <NuxtLink to="/privacy" class="hover:text-gray-700 transition-colors">{{ t('footer.privacy') }}</NuxtLink>
+      <NuxtLink to="/privacy" class="hover:text-gray-700 transition-colors">{{ t('footer.privacy') }}</NuxtLink> |
+      <button type="button" class="hover:text-gray-700 transition-colors" @click="openCookieSettings">Cookie-instellingen</button>
     </div>
   </footer>
 </template>

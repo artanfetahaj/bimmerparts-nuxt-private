@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const route = useRoute()
 import { computed } from 'vue'
 import { ImageOff } from 'lucide-vue-next'
 import { useWishlist } from '../stores/wishlist'
@@ -6,6 +7,11 @@ import { useLocale } from '../stores/locale'
 import type { Product } from '@/models/Product'
 
 const props = defineProps<{ product: Product }>()
+
+// Highlight the part number when it is what the visitor searched for
+const showOem = computed(() => !!(props.product.is_oem && props.product.sku))
+const oemMatched = computed(() => showOem.value && skuMatchesQuery(props.product.sku, route.query.search))
+const productNumberMatched = computed(() => !showOem.value && skuMatchesQuery(props.product.product_number, route.query.search))
 
 const { toggleWishlist, items: wishlistItems } = useWishlist()
 const { t, currentLocale } = useLocale()
@@ -116,7 +122,7 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
       <img
         v-if="product.image?.thumbnail || product.image?.url"
         :src="product.image.thumbnail ?? product.image.url"
-        :alt="product.name"
+        :alt="product.image?.alt_text || product.name"
         loading="lazy"
         decoding="async"
         class="w-full h-full object-contain bg-white "
@@ -131,6 +137,16 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
       <h3 class="text-xs sm:text-sm text-gray-900 font-medium mb-2 sm:mb-3 line-clamp-2 min-h-[32px] sm:min-h-[40px]">
         {{ product.name }}
       </h3>
+      <!-- OEM part number: OEM parts only. Our own article number only when it is what was searched for. -->
+      <p
+        v-if="showOem || productNumberMatched"
+        class="mb-2 truncate text-[11px] sm:text-xs"
+        :class="oemMatched || productNumberMatched ? 'inline-block max-w-full rounded bg-orange-100 px-1.5 py-0.5 font-semibold text-zinc-900' : 'text-gray-500'"
+      >
+        <template v-if="showOem">OEM: {{ product.sku }}</template>
+        <template v-else>Art.nr. {{ product.product_number }}</template>
+        <span v-if="oemMatched || productNumberMatched" class="sr-only"> (komt overeen met uw zoekopdracht)</span>
+      </p>
       <div class="mt-auto flex items-baseline gap-1 sm:gap-2">
         <span class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">€ {{ formatPrice(displayPrice) }}</span>
         <span v-if="showOldPrice" class="text-xs sm:text-sm text-gray-500 line-through">
