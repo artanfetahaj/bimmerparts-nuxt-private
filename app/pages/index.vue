@@ -43,7 +43,7 @@ onMounted(async () => {
     <HomeReviews />
     <HomeInstallation />
     <BrandsRow />
-    <ProductSection :title="'In de aanbieding'" :products="onSale" />
+    <ProductSection v-if="onSale.length > 0" :title="'In de aanbieding'" :products="onSale" />
     <ProductSection :title="'Alle producten'" :products="allProducts" />
   </div>
 </template>

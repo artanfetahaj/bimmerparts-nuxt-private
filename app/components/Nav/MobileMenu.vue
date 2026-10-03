@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import { X, ChevronDown, Loader2 } from 'lucide-vue-next'
 import { useLocale } from '../../stores/locale'
-import type { SupportedLocale } from '../../stores/locale'
 import { useCategoryStore } from '../../stores/category.store'
 import { useCarVariantStore } from '../../stores/car-variant.store'
 import SelectedCarVariant from './SelectedCarVariant.vue'
@@ -13,7 +12,7 @@ const emit = defineEmits<{
   (e: 'openCarDialog'): void
 }>()
 
-const { t, currentLocale, setLocale } = useLocale()
+const { t } = useLocale()
 const categoryStore = useCategoryStore()
 
 // ─── Accordion state ──────────────────────────────────────────────────────────
@@ -26,10 +25,6 @@ function toggleCategoriesMenu() {
 
 function toggleMainCat(id: string) {
   expandedMainCat.value = expandedMainCat.value === id ? null : id
-}
-
-function switchLocale(locale: SupportedLocale) {
-  setLocale(locale)
 }
 
 function navigate() {
@@ -49,7 +44,7 @@ watch(() => props.open, (open) => {
     <Transition name="fade">
       <div
         v-if="open"
-        class="fixed inset-0 z-[99] bg-black/40"
+        class="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm"
         @click="emit('close')"
       />
     </Transition>
@@ -86,7 +81,7 @@ watch(() => props.open, (open) => {
           <div>
             <button
               @click="toggleCategoriesMenu"
-              class="flex items-center gap-2 w-full text-left text-[22px] font-semibold text-gray-900 py-3"
+              class="flex items-center justify-between w-full text-left text-[22px] font-semibold text-gray-900 py-4 border-b border-gray-200/70"
             >
               Categorieën
               <ChevronDown
@@ -140,7 +135,7 @@ watch(() => props.open, (open) => {
           <!-- Producten -->
           <NuxtLink
             to="/producten"
-            class="block text-[22px] font-semibold text-gray-900 py-3"
+            class="block text-[22px] font-semibold text-gray-900 py-4 border-b border-gray-200/70"
             @click="navigate"
           >
             {{ t('nav.autoParts') }}
@@ -149,7 +144,7 @@ watch(() => props.open, (open) => {
           <!-- Over ons -->
           <NuxtLink
             to="/over-ons"
-            class="block text-[22px] font-semibold text-gray-900 py-3"
+            class="block text-[22px] font-semibold text-gray-900 py-4 border-b border-gray-200/70"
             @click="navigate"
           >
             {{ t('nav.about') }}
@@ -158,34 +153,13 @@ watch(() => props.open, (open) => {
           <!-- Contact -->
           <NuxtLink
             to="/contact"
-            class="block text-[22px] font-semibold text-gray-900 py-3"
+            class="block text-[22px] font-semibold text-gray-900 py-4 border-b border-gray-200/70"
             @click="navigate"
           >
             {{ t('nav.contact') }}
           </NuxtLink>
         </nav>
 
-        <!-- Language Selector -->
-        <div class="px-5 pb-6 pt-4 flex items-center gap-3">
-          <button
-            @click="switchLocale('en')"
-            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            :class="currentLocale === 'en'
-              ? 'border border-orange-400 text-orange-600 bg-orange-50'
-              : 'text-gray-500 hover:text-gray-700'"
-          >
-            EN
-          </button>
-          <button
-            @click="switchLocale('nl')"
-            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
-            :class="currentLocale === 'nl'
-              ? 'border border-orange-400 text-orange-600 bg-orange-50'
-              : 'text-gray-500 hover:text-gray-700'"
-          >
-            ND
-          </button>
-        </div>
       </div>
     </Transition>
   </Teleport>
@@ -193,7 +167,10 @@ watch(() => props.open, (open) => {
 
 <style scoped>
 .mobile-menu-bg {
-  background-image: linear-gradient(180deg, #ffffff 0%, #fff7f1 40%, #d3ba74 100%);
+  background-color: #fafafa;
+  background-image:
+    radial-gradient(120% 60% at 100% 0%, rgba(249, 115, 22, 0.12) 0%, rgba(249, 115, 22, 0) 60%),
+    radial-gradient(100% 50% at 0% 100%, rgba(249, 115, 22, 0.07) 0%, rgba(249, 115, 22, 0) 60%);
 }
 
 .slide-enter-active,

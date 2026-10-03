@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { NuxtLink } from '#components'
+
 interface ServiceCard {
   icon: string
   title: string
   description: string
   ctaText: string
   ctaHref: string
+  external?: boolean
 }
 
 const services: ServiceCard[] = [
@@ -30,18 +33,19 @@ const services: ServiceCard[] = [
     ctaHref: '/over-ons'
   },
   {
-    icon: 'star',
+    icon: 'trustpilot',
     title: '4.9 op Trustpilot',
     description: 'Klanten beoordelen ons met een 4.9 op Trustpilot. Kwaliteit en service die voor zichzelf spreken.',
-    ctaText: 'Meer informatie',
-    ctaHref: '/contact'
+    ctaText: 'Lees onze reviews op Trustpilot',
+    ctaHref: 'https://nl.trustpilot.com/review/bimmerparts.nl',
+    external: true
   }
 ]
 </script>
 
 <template>
   <section class="w-full bg-white py-8">
-    <div class="container mx-auto px-6 md:px-10">
+    <div class="outer-container">
       <div class="flex flex-col lg:flex-row gap-4 items-stretch">
         <div
           v-for="service in services"
@@ -50,9 +54,16 @@ const services: ServiceCard[] = [
         >
           <!-- Icon + Content wrapper -->
           <div class="flex items-start gap-4 flex-1">
-          <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+            :class="service.icon === 'trustpilot' ? 'bg-[#00b67a]' : 'bg-orange-500'"
+          >
+            <!-- Trustpilot star -->
+            <svg v-if="service.icon === 'trustpilot'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff" class="w-7 h-7" aria-label="Trustpilot">
+              <path d="M12 1.5l2.76 8.49h8.93l-7.22 5.25 2.76 8.49L12 18.48l-7.23 5.25 2.76-8.49L.31 9.99h8.93z"/>
+            </svg>
             <!-- Package -->
-            <svg v-if="service.icon === 'package'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-white">
+            <svg v-else-if="service.icon === 'package'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-white">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
               <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
               <line x1="12" y1="22.08" x2="12" y2="12"/>
@@ -77,13 +88,16 @@ const services: ServiceCard[] = [
             <h3 class="text-lg font-bold text-gray-900 mb-2">{{ service.title }}</h3>
             <p class="text-sm text-gray-600 leading-relaxed mb-4 flex-1">{{ service.description }}</p>
 
-            <NuxtLink
-              :to="service.ctaHref"
+            <component
+              :is="service.external ? 'a' : NuxtLink"
+              v-bind="service.external
+                ? { href: service.ctaHref, target: '_blank', rel: 'noopener noreferrer' }
+                : { to: service.ctaHref }"
               class="inline-flex items-center gap-1 text-orange-500 hover:text-orange-600 transition-colors mt-auto"
             >
               <span class="text-sm font-medium">{{ service.ctaText }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
-            </NuxtLink>
+            </component>
           </div>
           </div>
         </div>

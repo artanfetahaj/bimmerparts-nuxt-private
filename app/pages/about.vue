@@ -34,8 +34,8 @@ useSeoMeta({
           </div>
           <div class="relative pb-8">
             <img
-              src="/images/about-us-banner.png"
-              alt="BimmerParts — BMW & MINI onderdelen"
+              src="/images/New/1000130641.jpg"
+              alt="BMW Z4 en BMW M3 bij TOFFER Automotive"
               class="w-full h-auto object-cover rounded-t-2xl lg:rounded-tl-2xl lg:rounded-tr-none shadow-xl"
             />
           </div>
@@ -56,6 +56,36 @@ useSeoMeta({
             <p>BimmerParts werkt nauw samen met <strong class="text-white">TOFFER Automotive</strong>, een gespecialiseerde BMW & MINI werkplaats. Daardoor beschikken we over praktijkervaring die verder gaat dan alleen het verkopen van onderdelen. We sleutelen dagelijks aan BMW's en MINI's en weten uit eigen ervaring welke producten goed functioneren en welke oplossingen het beste resultaat bieden.</p>
             <p>Wilt u uw bestelling liever professioneel laten monteren? Ook dat is mogelijk via TOFFER Automotive. Zo heeft u één aanspreekpunt voor zowel het juiste onderdeel als de vakkundige montage.</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Werkplaats gallery ── -->
+    <section class="py-16 bg-white">
+      <div class="container mx-auto px-6 md:px-10">
+        <div class="text-center mb-10 space-y-3">
+          <span class="inline-block text-xs font-semibold uppercase tracking-[0.18em] text-orange-500">De werkplaats</span>
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Waar vakmanschap en passie samenkomen</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <img
+            src="/images/New/Toffer-Automotive_Elin-de-Wilde-10.2-scaled.jpg"
+            alt="De werkplaats van TOFFER Automotive met een BMW M3 op de brug"
+            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-2"
+            loading="lazy"
+          />
+          <img
+            src="/images/New/DIV05625-scaled.jpg"
+            alt="Monteur van TOFFER Automotive aan het werk onder een BMW"
+            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md"
+            loading="lazy"
+          />
+          <img
+            src="/images/New/Toffer-Automotive_Elin-de-Wilde-14-scaled.jpg"
+            alt="BMW M3 Cabrio in de werkplaats van TOFFER Automotive"
+            class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-md md:col-span-3"
+            loading="lazy"
+          />
         </div>
       </div>
     </section>

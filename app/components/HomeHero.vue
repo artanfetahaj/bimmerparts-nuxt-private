@@ -16,10 +16,10 @@ defineProps({
 const currentSlide = ref(0)
 
 const carouselImages = [
-  '/images/hero.jpg',
-  '/images/2025bmwm2coupe13.jpg',
-  '/images/BMW_M2_2025_Lifestyle_v7.jpg',
-  '/images/P90439365_lowRes_bmw-i4-m50-9-2021.jpg',
+  '/images/New/1000130641.jpg',
+  '/images/New/Toffer-Automotive_Elin-de-Wilde-10.2-scaled.jpg',
+  '/images/New/DIV05625-scaled.jpg',
+  '/images/New/Toffer-Automotive_Elin-de-Wilde-14-scaled.jpg',
 ]
 
 let autoSlideInterval: ReturnType<typeof setInterval> | null = null

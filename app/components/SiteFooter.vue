@@ -6,7 +6,7 @@ const { t } = useLocale()
 
 <template>
   <footer class="mt-10 bg-white">
-    <div class="container mx-auto px-6 md:px-10 py-12">
+    <div class="outer-container py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Left Section: Logo & Description -->
         <div class="md:col-span-1">

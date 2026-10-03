@@ -1009,10 +1009,5 @@ export function useLocale() {
     try { localStorage.setItem('bp_locale', locale) } catch {}
   }
 
-  try {
-    const stored = localStorage.getItem('bp_locale') as SupportedLocale | null
-    if (stored === 'en' || stored === 'nl') currentLocale.value = stored
-  } catch {}
-
   return { currentLocale, setLocale, t, tc }
 }

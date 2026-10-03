@@ -80,7 +80,7 @@ onMounted(async () => {
 
 <template>
   <section class="w-full bg-white py-8 border-t border-b border-gray-100">
-    <div class="container mx-auto px-6 md:px-10">
+    <div class="outer-container">
       <h2 class="text-2xl font-normal text-gray-900 mb-6">Partnermerken</h2>
       <div class="flex flex-wrap justify-between gap-6 md:gap-10">
         <NuxtLink

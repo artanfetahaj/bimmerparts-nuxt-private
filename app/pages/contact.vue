@@ -181,7 +181,8 @@ const handleSubmit = async () => {
       <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div class="h-96">
           <iframe
-            src="https://www.google.com/maps?q=Noorddammerweg+35,+Unit+11,+1424NW+De+Kwakel,+Netherlands&output=embed"
+            title="Locatie BimmerParts, Noorddammerweg 35, De Kwakel"
+            src="https://www.google.com/maps?q=Noorddammerweg+35,+1424+NW+De+Kwakel,+Netherlands&z=16&output=embed"
             width="100%"
             height="100%"
             style="border:0;"

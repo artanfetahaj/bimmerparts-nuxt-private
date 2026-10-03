@@ -34,7 +34,7 @@ const tabs = computed(() => [
 
 <template>
   <section class="w-full bg-white py-8">
-    <div class="container mx-auto px-6 md:px-10">
+    <div class="outer-container">
       <!-- Title -->
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-2xl font-normal text-gray-900">{{ props.title }}</h2>
