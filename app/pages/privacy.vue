@@ -1,3 +1,11 @@
+<script setup lang="ts">
+useSeoMeta({
+  title: 'Privacybeleid | BimmerParts',
+  description: 'Het privacybeleid van BimmerParts.',
+  robots: 'noindex, follow', // placeholder content until the full policy is published
+})
+</script>
+
 <template>
   <div class="container mx-auto px-4 md:px-6 py-12 max-w-3xl">
     <h1 class="text-3xl font-bold text-gray-900 mb-6">Privacybeleid</h1>

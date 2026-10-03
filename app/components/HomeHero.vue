@@ -46,11 +46,19 @@ onUnmounted(() => stopAutoSlide())
         class="absolute inset-0 transition-transform duration-1000 ease-in-out"
         :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
       >
-        <div
+        <NuxtImg
           v-for="(img, index) in carouselImages"
-          :key="index"
-          class="absolute inset-0 w-full h-full bg-cover bg-center"
-          :style="{ backgroundImage: `url(${img})`, left: `${index * 100}%` }"
+          :key="img"
+          :src="img"
+          alt="BMW & MINI bij TOFFER Automotive"
+          :width="1920"
+          densities="1x"
+          format="webp"
+          quality="75"
+          :loading="index === 0 ? 'eager' : 'lazy'"
+          :fetchpriority="index === 0 ? 'high' : 'auto'"
+          class="absolute inset-0 w-full h-full object-cover object-center"
+          :style="{ left: `${index * 100}%` }"
         />
       </div>
 

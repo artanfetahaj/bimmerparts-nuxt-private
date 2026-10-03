@@ -13,10 +13,12 @@ export default defineNuxtConfig({
     '/mini-model-codes': { swr: 3600 },
     '/producten': { swr: 3600 },
     '/producten/**': { swr: 600 },
-    '/winkelwagen': { ssr: false },
-    '/kassa': { ssr: false },
-    '/bestelling-bevestigd': { ssr: false },
-    '/account': { ssr: false },
+    // Private / transactional pages: client-only and kept out of search results
+    '/winkelwagen': { ssr: false, robots: false },
+    '/kassa': { ssr: false, robots: false },
+    '/bestelling-bevestigd': { ssr: false, robots: false },
+    '/account/**': { ssr: false, robots: false },
+    '/wishlist': { robots: false },
   },
 
   runtimeConfig: {
@@ -51,6 +53,19 @@ export default defineNuxtConfig({
         },
       ],
     },
+  },
+  sitemap: {
+    cacheMaxAgeSeconds: 60 * 60, // product sitemap walks the whole catalogue via the API; rebuild hourly at most
+    sources: ['/api/__sitemap__/urls'],
+    // Old English URLs only redirect to the Dutch ones; private pages must not be listed
+    exclude: [
+      '/products/**', '/products', '/about', '/cart', '/checkout', '/order-thanks',
+      '/winkelwagen', '/kassa', '/bestelling-bevestigd', '/account/**', '/wishlist',
+      '/privacy', '/terms', // placeholder pages, noindexed
+    ],
+  },
+  robots: {
+    disallow: ['/winkelwagen', '/kassa', '/bestelling-bevestigd', '/account', '/wishlist'],
   },
   site: {
     url: 'https://bimmerparts.nl',
@@ -150,7 +165,10 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       failOnError: false,
-      crawlLinks: true,
+      // Never crawl: following links from /producten prerendered ~900 product pages per build,
+      // each hitting the API. Only the routes with `prerender: true` in routeRules are built.
+      crawlLinks: false,
+      ignore: ['/producten', '/products', '/winkelwagen', '/kassa', '/bestelling-bevestigd', '/account', '/wishlist'],
     }
   }
 })

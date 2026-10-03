@@ -4,6 +4,11 @@ import { useRouter } from 'vue-router'
 import { useLocale } from '../stores/locale'
 import { submitContactForm } from '../services/contact'
 
+useSeoMeta({
+  title: 'Contact | BimmerParts – BMW & MINI onderdelen in De Kwakel',
+  description: 'Neem contact op met BimmerParts voor advies over BMW en MINI onderdelen. Noorddammerweg 35, De Kwakel. Ma–Vr 09:00–17:00, Za 10:00–14:00.',
+})
+
 const router = useRouter()
 const { t } = useLocale()
 

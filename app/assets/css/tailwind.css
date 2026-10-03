@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Oswald (self-hosted) — same heading font as tofferautomotive.nl */
+@import "@fontsource-variable/oswald";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -9,14 +11,17 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* Font families */
-  --font-roboto: 'Roboto', sans-serif;
-  --font-anek-latin: 'Anek Latin', sans-serif;
-  --font-anek: 'Anek Latin', sans-serif;
-  --font-comma-sans: "comma-sans", sans-serif;
-  --font-comma: "comma-sans", sans-serif;
-  --font-inter: 'Inter', sans-serif;
-  
+  /* Font families — mirrors tofferautomotive.nl: Oswald headings, system-font body */
+  --font-heading: 'Oswald Variable', 'Oswald', sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  /* Legacy aliases used by ui components (the old fonts were never loaded) */
+  --font-roboto: var(--font-sans);
+  --font-anek-latin: var(--font-sans);
+  --font-anek: var(--font-sans);
+  --font-comma-sans: var(--font-sans);
+  --font-comma: var(--font-sans);
+  --font-inter: var(--font-sans);
+
   /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -113,17 +118,12 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Roboto', sans-serif;
+    @apply bg-background text-foreground font-sans;
     font-weight: 400;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Roboto', sans-serif;
+    font-family: var(--font-heading);
     font-weight: 700;
-  }
-  p, span, a, li, ul, ol, div, label, button, input, textarea, select {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
   }
 }
 

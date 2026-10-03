@@ -25,7 +25,8 @@ const showBmwSeriesMenu = ref(false)
 
 // ─── Pre-fetch categories as soon as the nav mounts ──────────────────────────
 const categoryStore = useCategoryStore()
-onMounted(() => categoryStore.fetchCategories())
+// Fetched during SSR so category links are in the initial HTML (state is hydrated via the payload)
+await callOnce('categories', () => categoryStore.fetchCategories())
 
 // ─── Mega-menu hover logic ───────────────────────────────────────────────────
 let closeTimer: ReturnType<typeof setTimeout> | null = null
@@ -64,7 +65,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
       </NuxtLink>
 
       <!-- Desktop Nav -->
-      <nav class="hidden lg:flex items-center gap-6 text-[14px] text-gray-700">
+      <nav class="hidden lg:flex items-center gap-6 text-[15px] font-heading font-medium tracking-wide text-gray-700">
         <!-- BMW Series trigger -->
         <div
           class="relative"

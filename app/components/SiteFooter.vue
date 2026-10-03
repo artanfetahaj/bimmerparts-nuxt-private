@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useLocale } from '../stores/locale'
+import { useCategoryStore } from '../stores/category.store'
 
 const { t } = useLocale()
+const categoryStore = useCategoryStore()
 </script>
 
 <template>
@@ -18,7 +20,21 @@ const { t } = useLocale()
         </div>
 
         <!-- Middle Section: Navigation Links -->
-        <div class="md:col-span-2 grid grid-cols-2 gap-8">
+        <div class="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <!-- Onderdelen column (crawlable category links) -->
+          <div v-if="categoryStore.mainCategories.length">
+            <h4 class="font-semibold text-gray-900 mb-4">Onderdelen</h4>
+            <ul class="space-y-3 text-gray-600 text-sm">
+              <li v-for="cat in categoryStore.mainCategories.slice(0, 7)" :key="cat.id">
+                <NuxtLink
+                  :to="{ path: '/producten', query: { main_category: cat.id } }"
+                  class="hover:text-gray-900 transition-colors"
+                >{{ cat.name }}</NuxtLink>
+              </li>
+              <li><NuxtLink to="/producten" class="hover:text-gray-900 transition-colors font-medium">Alle onderdelen</NuxtLink></li>
+            </ul>
+          </div>
+
           <!-- Over ons column -->
           <div>
             <h4 class="font-semibold text-gray-900 mb-4">Over ons</h4>

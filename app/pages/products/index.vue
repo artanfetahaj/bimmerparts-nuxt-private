@@ -21,17 +21,8 @@ import { useCategoryStore } from '@/stores/category.store'
 import { RouteName } from '@/enums/RouteName'
 import { getProductBrands } from '@/services/productBrand'
 
-const requestUrl = useRequestURL()
-const ogImage = `${requestUrl.origin}/images/hero.jpg`
-
-useSeoMeta({
-  title: 'Producten | BimmerParts',
-  description: 'Ontdek ons uitgebreide assortiment originele en aftermarket BMW onderdelen. Filter op model, categorie of merk.',
-  ogTitle: 'Producten | BimmerParts',
-  ogDescription: 'Ontdek ons uitgebreide assortiment originele en aftermarket BMW onderdelen. Filter op model, categorie of merk.',
-  ogImage,
-  twitterImage: ogImage,
-})
+const siteUrl = useSiteConfig().url.replace(/\/$/, '')
+const ogImage = `${siteUrl}/images/hero.jpg`
 
 // ─── URL query param sync ─────────────────────────────────────────────────────
 const route = useRoute()
@@ -87,6 +78,56 @@ function clearCategoryFilter() {
   delete query.page
   router.replace({ query })
 }
+
+// ─── SEO ──────────────────────────────────────────────────────────────────────
+// Category pages are indexable with a canonical that keeps only that single filter (+ page).
+// Search, price and combined-filter URLs are near-duplicates, so they are noindexed.
+await callOnce('categories', () => categoryStore.fetchCategories())
+
+const SINGLE_INDEXABLE_FILTERS = ['main_category', 'product_category', 'subcategory', 'brand', 'car_model'] as const
+
+const seoFilter = computed(() => {
+  const active = SINGLE_INDEXABLE_FILTERS.filter(k => route.query[k])
+  return active.length === 1 ? { key: active[0], value: String(route.query[active[0]]) } : null
+})
+
+const isThinPage = computed(() => {
+  const q = route.query
+  const activeCount = SINGLE_INDEXABLE_FILTERS.filter(k => q[k]).length
+  return !!(q.search || q.price_min || q.price_max || q.car || activeCount > 1)
+})
+
+const canonicalUrl = computed(() => {
+  const params = new URLSearchParams()
+  if (!isThinPage.value && seoFilter.value) params.set(seoFilter.value.key, seoFilter.value.value)
+  if (!isThinPage.value && currentPage.value > 1) params.set('page', String(currentPage.value))
+  const qs = params.toString()
+  return `${siteUrl}/producten${qs ? `?${qs}` : ''}`
+})
+
+const seoTitle = computed(() => {
+  const base = activeCategoryLabel.value
+    ? `${activeCategoryLabel.value} kopen`
+    : 'BMW & MINI onderdelen'
+  return `${base}${currentPage.value > 1 ? ` – pagina ${currentPage.value}` : ''} | BimmerParts`
+})
+
+const seoDescription = computed(() =>
+  activeCategoryLabel.value
+    ? `${activeCategoryLabel.value} voor BMW en MINI. Originele en aftermarket onderdelen, snel geleverd door BimmerParts.`
+    : 'Ontdek ons uitgebreide assortiment originele en aftermarket BMW en MINI onderdelen. Filter op model, categorie of merk.',
+)
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage,
+  twitterImage: ogImage,
+  robots: () => (isThinPage.value ? 'noindex, follow' : 'index, follow'),
+})
+useHead({ link: [{ rel: 'canonical', href: () => canonicalUrl.value, key: 'canonical' }] })
 
 // ─── Cache ────────────────────────────────────────────────────────────────────
 const cache = new Map<string, { products: ProductType[]; meta: typeof meta.value }>()
@@ -299,7 +340,8 @@ const initialKey = `products-${route.fullPath}`
 const { data: initial } = await useAsyncData(initialKey, async () => {
   await resolveBrandFilter()
   await fetchProducts(currentPage.value, getCacheKey(currentPage.value), false)
-  return { products: products.value, meta: meta.value, brand: brandFilter.value }
+  // Plain objects only: the payload serializer rejects class instances
+  return JSON.parse(JSON.stringify({ products: products.value, meta: meta.value, brand: brandFilter.value }))
 })
 
 // On hydration the handler doesn't re-run, so restore its result from the payload.
@@ -364,6 +406,10 @@ onMounted(() => {
 
         <!-- ── Product Grid ── -->
         <main class="flex-1 min-w-0">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+            {{ activeCategoryLabel || 'BMW & MINI onderdelen' }}
+          </h1>
+
           <!-- Search Query Display -->
           <div v-if="searchQuery" class="mb-4 flex items-center gap-2 text-sm">
             <span class="text-gray-600">Zoekresultaten voor:</span>
@@ -433,20 +479,21 @@ onMounted(() => {
               @update:page="goToPage"
             >
               <PaginationContent v-slot="{ items }">
-                <PaginationFirst />
-                <PaginationPrevious />
+                <PaginationFirst aria-label="Eerste pagina" />
+                <PaginationPrevious aria-label="Vorige pagina" />
                 <template v-for="item in items" :key="item.type === 'page' ? item.value : `ellipsis-${item.key}`">
                   <PaginationItem
                     v-if="item.type === 'page'"
                     :value="item.value"
                     :is-active="item.value === currentPage"
+                    :aria-label="`Pagina ${item.value}`"
                   >
                     {{ item.value }}
                   </PaginationItem>
                   <PaginationEllipsis v-else />
                 </template>
-                <PaginationNext />
-                <PaginationLast />
+                <PaginationNext aria-label="Volgende pagina" />
+                <PaginationLast aria-label="Laatste pagina" />
               </PaginationContent>
             </Pagination>
           </div>

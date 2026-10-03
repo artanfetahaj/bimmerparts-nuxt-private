@@ -2,6 +2,11 @@
 import productService from '../services/product'
 import type { Product as ApiProduct } from '../services/product'
 
+useSeoMeta({
+  title: 'BMW & MINI onderdelen kopen | BimmerParts',
+  description: 'Originele en aftermarket BMW & MINI onderdelen. Zoek op kenteken of chassisnummer, snel geleverd en op wens gemonteerd door TOFFER Automotive.',
+})
+
 // Fetched during SSR so the product sections are in the initial HTML.
 const { data: allProducts } = await useAsyncData<ApiProduct[]>('home-products', async () => {
   try {

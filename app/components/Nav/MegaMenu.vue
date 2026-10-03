@@ -83,7 +83,7 @@ function onProductCategoryHover(prodCat: ProductCategory) {
 </script>
 
 <template>
-  <div class="mega-menu absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-xl z-50">
+  <div class="mega-menu absolute top-full left-0 w-full bg-white border-t border-gray-200 shadow-xl z-50 font-heading tracking-wide">
 
     <!-- Loading state -->
     <div v-if="isLoading" class="flex items-center justify-center py-16">

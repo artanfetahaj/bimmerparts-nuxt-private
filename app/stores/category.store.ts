@@ -4,6 +4,11 @@ import { MainCategory, MainCategoryIncludes } from '@/models/MainCategory'
 import type { ProductCategory } from '@/models/ProductCategory'
 import type { ProductSubcategory } from '@/models/ProductSubcategory'
 
+// Server-only, per-process cache. Without it every uncached SSR render (e.g. a crawler
+// hitting product pages) would also call the API for the full category tree.
+const SERVER_CACHE_TTL = 10 * 60 * 1000
+let serverCategoryCache: { at: number; data: any[] } | null = null
+
 export const useCategoryStore = defineStore('category', () => {
   // ─── State ────────────────────────────────────────────────────────────────
 
@@ -45,6 +50,12 @@ export const useCategoryStore = defineStore('category', () => {
     // Only fetch once — idempotent
     if (loaded.value || loading.value) return
 
+    if (import.meta.server && serverCategoryCache && Date.now() - serverCategoryCache.at < SERVER_CACHE_TTL) {
+      mainCategories.value = JSON.parse(JSON.stringify(serverCategoryCache.data))
+      loaded.value = true
+      return
+    }
+
     loading.value = true
     error.value = false
 
@@ -55,14 +66,22 @@ export const useCategoryStore = defineStore('category', () => {
         .limit(100)
         .all()
 
-      mainCategories.value = Array.isArray(response)
-        ? response
-        : (response.data ?? [])
+      // Plain objects only: store state is serialized into the SSR payload, which rejects class instances
+      mainCategories.value = JSON.parse(JSON.stringify(
+        Array.isArray(response) ? response : (response.data ?? []),
+      ))
 
       loaded.value = true
+      if (import.meta.server) serverCategoryCache = { at: Date.now(), data: mainCategories.value }
     } catch (e) {
       console.error('[CategoryStore] Failed to fetch categories:', e)
-      error.value = true
+      // Serve slightly stale categories rather than an empty menu when the API hiccups
+      if (import.meta.server && serverCategoryCache) {
+        mainCategories.value = JSON.parse(JSON.stringify(serverCategoryCache.data))
+        loaded.value = true
+      } else {
+        error.value = true
+      }
     } finally {
       loading.value = false
     }

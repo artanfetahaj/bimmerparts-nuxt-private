@@ -53,7 +53,7 @@ watch(() => props.open, (open) => {
     <Transition name="slide">
       <div
         v-if="open"
-        class="fixed inset-0 z-[100] flex flex-col mobile-menu-bg"
+        class="fixed inset-0 z-[100] flex flex-col mobile-menu-bg font-heading tracking-wide"
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-5 pt-5 pb-4">

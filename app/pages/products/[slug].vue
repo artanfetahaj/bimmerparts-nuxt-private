@@ -23,7 +23,11 @@ const { data: fetchedProduct, pending: isLoading, error: fetchError } = await us
 )
 const product = computed<Record<string, any> | null>(() => (fetchedProduct.value as any)?.data || fetchedProduct.value || null)
 const loadError = computed(() => !!fetchError.value || (!isLoading.value && !product.value))
-if (import.meta.server && loadError.value) setResponseStatus(useRequestEvent()!, 404)
+if (import.meta.server && loadError.value) {
+  // Only a genuine "not found" is a 404; an API outage must be a 503 so search engines retry instead of dropping the page
+  const status = (fetchError.value as any)?.response?.status
+  setResponseStatus(useRequestEvent()!, !fetchError.value || status === 404 ? 404 : 503)
+}
 
 // Cart & Wishlist
 const { addToCart } = useCart()
@@ -326,6 +330,29 @@ const onProductLoaded = (p: Record<string, any> | null) => {
   }
 }
 watch(product, onProductLoaded)
+
+useSchemaOrg([
+  defineBreadcrumb({
+    itemListElement: [
+      { name: 'Home', item: '/' },
+      { name: 'Producten', item: '/producten' },
+      { name: () => product.value?.name || 'Product' },
+    ],
+  }),
+  defineProduct({
+    name: () => product.value?.name,
+    description: () => (product.value?.short_description || product.value?.description || '').toString().replace(/<[^>]*>/g, '').slice(0, 5000) || undefined,
+    image: () => productImages.value,
+    sku: () => product.value?.sku,
+    brand: () => (brandName.value ? { '@type': 'Brand', name: brandName.value } : undefined),
+    offers: () => ({
+      price: basePrice.value.toFixed(2),
+      priceCurrency: 'EUR',
+      availability: stockCount.value > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `/producten/${route.params.slug}`,
+    }),
+  }),
+])
 
 useSeoMeta({
   title: () => product.value ? `${product.value.name} | BimmerParts` : 'Product | BimmerParts',

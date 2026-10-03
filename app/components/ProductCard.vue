@@ -117,6 +117,8 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
         v-if="product.image?.thumbnail || product.image?.url"
         :src="product.image.thumbnail ?? product.image.url"
         :alt="product.name"
+        loading="lazy"
+        decoding="async"
         class="w-full h-full object-contain bg-white "
       />
       <div v-else class="flex flex-col items-center justify-center gap-2 text-gray-300">

@@ -10,7 +10,7 @@ export const badgeVariants = cva(
       variant: {
         default:
           "transition-colors bg-green text-dark-purple font-comma text-sm rounded-md-none",
-        orange: "bg-orange text-white font-comma border-orange",
+        orange: "bg-orange text-orange-foreground font-comma border-orange",
         "dark-purple-outline":
           "border-dark-purple bg-transparent text-dark-purple font-comma border-2",
         "white-outline":
