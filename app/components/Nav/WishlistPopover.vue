@@ -26,7 +26,7 @@ const handleWishlistItemClick = (item: { id: string; slug?: string }) => {
         aria-label="Wishlist"
       >
         <Heart class="w-5 h-5" />
-        <span v-if="wishlistCount > 0" class="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center text-xs font-medium bg-orange-500 text-white">
+        <span v-if="wishlistCount > 0" class="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center text-xs font-medium bg-orange-500 text-zinc-900">
           {{ wishlistCount }}
         </span>
       </button>
@@ -59,7 +59,7 @@ const handleWishlistItemClick = (item: { id: string; slug?: string }) => {
       <div class="mt-4">
         <NuxtLink
           to="/winkelwagen"
-          class="block w-full py-3 font-medium text-center text-white bg-orange-500 rounded-lg hover:bg-orange-600"
+          class="block w-full py-3 font-medium text-center text-zinc-900 bg-orange-500 rounded-lg hover:bg-orange-600"
         >
           {{ t('wishlist.checkout') }}
         </NuxtLink>

@@ -51,7 +51,7 @@ const cobraLink = computed(() =>
             <div class="flex flex-wrap gap-3">
               <NuxtLink
                 :to="cobraLink"
-                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-6 py-3 rounded-lg text-sm"
+                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-medium px-6 py-3 rounded-lg text-sm"
               >
                 Bekijk alle Cobra producten
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
@@ -144,7 +144,7 @@ const cobraLink = computed(() =>
               </p>
               <NuxtLink
                 :to="cobraLink"
-                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-5 py-2.5 rounded-lg text-sm mt-2"
+                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-medium px-5 py-2.5 rounded-lg text-sm mt-2"
               >
                 Bekijk alle EVO-S schroefsets
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
@@ -162,7 +162,7 @@ const cobraLink = computed(() =>
         <p class="text-gray-600 max-w-xl mx-auto">Bekijk ons volledige assortiment Cobra Suspension producten en vind de perfecte set voor uw BMW of MINI.</p>
         <NuxtLink
           :to="cobraLink"
-          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-8 py-4 rounded-lg"
+          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-semibold px-8 py-4 rounded-lg"
         >
           Bekijk alle Cobra Suspension producten
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>

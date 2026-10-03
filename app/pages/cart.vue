@@ -222,7 +222,7 @@ watch(cartItems, () => { loadBasketRecommendations() }, { immediate: true, deep:
               </div>
               <NuxtLink
                 to="/kassa"
-                class="block w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors text-center"
+                class="block w-full bg-orange-500 text-zinc-900 py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors text-center"
               >
                 {{ t('cart.continue') }}
               </NuxtLink>
@@ -268,7 +268,7 @@ watch(cartItems, () => { loadBasketRecommendations() }, { immediate: true, deep:
         </svg>
         <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ t('cart.empty') }}</h2>
         <p class="text-gray-600 mb-6">{{ t('cart.emptyMessage') }}</p>
-        <NuxtLink to="/producten" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
+        <NuxtLink to="/producten" class="bg-orange-500 text-zinc-900 px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
           {{ t('cart.startShopping') }}
         </NuxtLink>
       </div>

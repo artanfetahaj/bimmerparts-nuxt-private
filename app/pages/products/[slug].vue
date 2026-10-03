@@ -15,9 +15,15 @@ const route = useRoute()
 const router = useRouter()
 
 // ─── State ────────────────────────────────────────────────────────────────────
-const product = ref<Record<string, any> | null>(null)
-const isLoading = ref(true)
-const loadError = ref(false)
+// Fetched during SSR (keyed by slug) so the product content and meta are in the initial HTML.
+const { data: fetchedProduct, pending: isLoading, error: fetchError } = await useAsyncData(
+  () => `product-${route.params.slug}`,
+  () => productService.getProductBySlug(route.params.slug as string),
+  { watch: [() => route.params.slug] },
+)
+const product = computed<Record<string, any> | null>(() => (fetchedProduct.value as any)?.data || fetchedProduct.value || null)
+const loadError = computed(() => !!fetchError.value || (!isLoading.value && !product.value))
+if (import.meta.server && loadError.value) setResponseStatus(useRequestEvent()!, 404)
 
 // Cart & Wishlist
 const { addToCart } = useCart()
@@ -200,23 +206,6 @@ const deliveryLabel = computed(() => {
 // ─── Format helpers ───────────────────────────────────────────────────────────
 const formatPrice = (val: number) => val.toFixed(2).replace('.', ',')
 
-// ─── Fetch product ────────────────────────────────────────────────────────────
-const fetchProduct = async () => {
-  const slug = route.params.slug as string
-  if (!slug) { loadError.value = true; isLoading.value = false; return }
-
-  isLoading.value = true
-  loadError.value = false
-  try {
-    const res = await productService.getProductBySlug(slug)
-    product.value = res?.data || res
-  } catch {
-    loadError.value = true
-  } finally {
-    isLoading.value = false
-  }
-}
-
 // ─── Similar products ─────────────────────────────────────────────────────────
 const loadSimilarProducts = async () => {
   if (!product.value) { similarProducts.value = []; return }
@@ -315,7 +304,8 @@ onMounted(() => {
   window.addEventListener('auth-changed', handleAuthChanged as EventListener)
   window.addEventListener('storage', handleAuthChanged as EventListener)
   window.addEventListener('keydown', handleLightboxKeydown)
-  fetchProduct()
+  // SSR-fetched product doesn't trigger the watcher below, so run its side effects once on mount
+  if (product.value) onProductLoaded(product.value)
 })
 
 onBeforeUnmount(() => {
@@ -325,7 +315,7 @@ onBeforeUnmount(() => {
 })
 
 // When product loads, fetch similar products and reset UI
-watch(product, (p) => {
+const onProductLoaded = (p: Record<string, any> | null) => {
   if (p) {
     currentImageIndex.value = 0
     quantity.value = 1
@@ -334,11 +324,14 @@ watch(product, (p) => {
     loadSimilarProducts()
     fetchAttributes()
   }
-})
+}
+watch(product, onProductLoaded)
 
-// If slug changes (navigating between products), re-fetch
-watch(() => route.params.slug, (newSlug) => {
-  if (newSlug) fetchProduct()
+useSeoMeta({
+  title: () => product.value ? `${product.value.name} | BimmerParts` : 'Product | BimmerParts',
+  description: () => (product.value?.short_description || product.value?.description || '').toString().replace(/<[^>]*>/g, '').slice(0, 160) || 'BMW & MINI onderdelen bij BimmerParts.',
+  ogTitle: () => product.value?.name,
+  ogImage: () => productImages.value?.[0],
 })
 </script>
 
@@ -382,7 +375,7 @@ watch(() => route.params.slug, (newSlug) => {
     <div v-else-if="loadError || !product" class="container mx-auto px-6 py-8 text-center">
       <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ t('productDetail.productNotFound') }}</h1>
       <p class="text-gray-600 mb-6">{{ t('productDetail.productNotFoundDesc') }}</p>
-      <NuxtLink to="/producten" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
+      <NuxtLink to="/producten" class="bg-orange-500 text-zinc-900 px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">
         {{ t('common.backToProducts') }}
       </NuxtLink>
     </div>
@@ -550,7 +543,7 @@ watch(() => route.params.slug, (newSlug) => {
             <div class="flex flex-wrap gap-2 sm:gap-4">
               <button
                 @click="handleBuyNow"
-                class="flex-1 min-w-0 bg-orange-500 text-white py-2 px-3 sm:px-4 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1.5"
+                class="flex-1 min-w-0 bg-orange-500 text-zinc-900 py-2 px-3 sm:px-4 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center space-x-1.5"
               >
                 <ShoppingCart class="h-4 w-4 flex-shrink-0" />
                 <span class="whitespace-nowrap">{{ t('productDetail.addToCart') }}</span>

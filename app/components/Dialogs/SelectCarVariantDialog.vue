@@ -240,7 +240,7 @@ function handleModelResolved(model: CarModel) {
               Sluiten
             </Button>
             <Button
-              class="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white gap-2"
+              class="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-zinc-900 gap-2"
               @click="handleChangeVariant"
             >
               <RefreshCw class="w-4 h-4" />
@@ -273,7 +273,7 @@ function handleModelResolved(model: CarModel) {
                       :class="[
                         'flex items-center justify-center w-9 h-9 rounded-full border-2 text-sm font-semibold transition-all duration-300',
                         s.step < currentStep
-                          ? 'bg-orange-500 border-orange-500 text-white'
+                          ? 'bg-orange-500 border-orange-500 text-zinc-900'
                           : s.step === currentStep
                             ? 'bg-white border-orange-500 text-orange-500'
                             : 'bg-white border-gray-200 text-gray-400 opacity-50',
@@ -343,7 +343,7 @@ function handleModelResolved(model: CarModel) {
             {{ currentStep === 1 ? 'Annuleren' : 'Terug' }}
           </Button>
           <Button
-            class="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white"
+            class="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-zinc-900"
             :disabled="!canGoNext && !isLastStep"
             @click="isLastStep ? handleSearchByModel() : nextStep()"
           >

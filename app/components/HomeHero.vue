@@ -112,7 +112,7 @@ onUnmounted(() => stopAutoSlide())
                 <ShoppingBag class="w-5 h-5" />
                 <span
                   v-if="totalItems > 0"
-                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-orange-500 rounded-full"
+                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-900 bg-orange-500 rounded-full"
                 >
                   {{ totalItems > 99 ? '99+' : totalItems }}
                 </span>
@@ -126,7 +126,7 @@ onUnmounted(() => stopAutoSlide())
                 <Heart class="w-5 h-5" />
                 <span
                   v-if="wishlistItems.length > 0"
-                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-orange-500 rounded-full"
+                  class="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-900 bg-orange-500 rounded-full"
                 >
                   {{ wishlistItems.length > 99 ? '99+' : wishlistItems.length }}
                 </span>

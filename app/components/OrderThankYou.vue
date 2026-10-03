@@ -150,7 +150,7 @@ const dhlTrackingUrl = (code: string) =>
       </template>
 
       <div class="flex items-center gap-3 mt-4">
-        <button @click="handleBackHome" class="px-5 py-3 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600">
+        <button @click="handleBackHome" class="px-5 py-3 rounded-lg bg-orange-500 text-zinc-900 font-medium hover:bg-orange-600">
           {{ t('thankyou.backHome') }}
         </button>
       </div>

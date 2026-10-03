@@ -52,7 +52,7 @@ const services = [
           </h2>
 
           <p class="text-gray-500 text-base leading-relaxed mb-8 max-w-lg">
-            Via onze partner <strong class="text-gray-800 font-semibold">TOFFER Automotive</strong> kunt u het
+            Via onze partner <a href="https://tofferautomotive.nl/" target="_blank" rel="noopener" class="text-gray-800 font-semibold underline decoration-orange-500 underline-offset-4 hover:text-orange-500 transition-colors">TOFFER Automotive</a> kunt u het
             bestelde onderdeel direct laten monteren door BMW&nbsp;&amp;&nbsp;MINI specialisten.
             Één aanspreekpunt — van het juiste onderdeel tot vakkundige installatie.
           </p>
@@ -77,7 +77,7 @@ const services = [
           <div class="flex flex-wrap items-center gap-3">
             <NuxtLink
               to="/contact"
-              class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-3 rounded-full transition-colors"
+              class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-zinc-900 text-sm font-semibold px-6 py-3 rounded-full transition-colors"
             >
               Montage aanvragen
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -148,9 +148,9 @@ const services = [
           </div>
 
           <!-- TOFFER badge -->
-          <div class="mt-5 flex items-center gap-3 bg-gray-900 text-white rounded-xl px-5 py-3.5">
+          <a href="https://tofferautomotive.nl/" target="_blank" rel="noopener" class="mt-5 flex items-center gap-3 bg-gray-900 hover:bg-gray-800 transition-colors text-white rounded-xl px-5 py-3.5">
             <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-zinc-900" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
             </div>
@@ -158,10 +158,10 @@ const services = [
               <p class="text-sm font-semibold leading-none">TOFFER Automotive</p>
               <p class="text-xs text-white/50 mt-0.5">Officieel montagepartner van BimmerParts</p>
             </div>
-            <span class="shrink-0 text-xs font-medium bg-orange-500 text-white rounded-full px-3 py-1">
+            <span class="shrink-0 text-xs font-medium bg-orange-500 text-zinc-900 rounded-full px-3 py-1">
               Partner
             </span>
-          </div>
+          </a>
         </div>
 
       </div>

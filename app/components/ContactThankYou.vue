@@ -24,7 +24,7 @@ const handleBackHome = () => emit('navigateToHome')
         {{ t('thankyou.contact.message') }}
       </p>
       <div class="flex items-center gap-3">
-        <button @click="handleBackHome" class="px-5 py-3 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600">{{ t('thankyou.backHome') }}</button>
+        <button @click="handleBackHome" class="px-5 py-3 rounded-lg bg-orange-500 text-zinc-900 font-medium hover:bg-orange-600">{{ t('thankyou.backHome') }}</button>
       </div>
     </div>
   </div>

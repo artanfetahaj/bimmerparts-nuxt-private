@@ -26,7 +26,7 @@ useSeoMeta({
             </p>
             <NuxtLink
               to="/contact"
-              class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-6 py-3 rounded-lg text-sm "
+              class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-medium px-6 py-3 rounded-lg text-sm "
             >
               Neem contact op
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
@@ -53,8 +53,16 @@ useSeoMeta({
             <div class="w-10 h-1 bg-orange-500 rounded-full" />
           </div>
           <div class="space-y-4 text-gray-300 leading-relaxed">
-            <p>BimmerParts werkt nauw samen met <strong class="text-white">TOFFER Automotive</strong>, een gespecialiseerde BMW & MINI werkplaats. Daardoor beschikken we over praktijkervaring die verder gaat dan alleen het verkopen van onderdelen. We sleutelen dagelijks aan BMW's en MINI's en weten uit eigen ervaring welke producten goed functioneren en welke oplossingen het beste resultaat bieden.</p>
+            <p>BimmerParts werkt nauw samen met <a href="https://tofferautomotive.nl/" target="_blank" rel="noopener" class="font-bold text-white underline decoration-orange-500 underline-offset-4 hover:text-orange-400 transition-colors">TOFFER Automotive</a>, een gespecialiseerde BMW & MINI werkplaats. Daardoor beschikken we over praktijkervaring die verder gaat dan alleen het verkopen van onderdelen. We sleutelen dagelijks aan BMW's en MINI's en weten uit eigen ervaring welke producten goed functioneren en welke oplossingen het beste resultaat bieden.</p>
             <p>Wilt u uw bestelling liever professioneel laten monteren? Ook dat is mogelijk via TOFFER Automotive. Zo heeft u één aanspreekpunt voor zowel het juiste onderdeel als de vakkundige montage.</p>
+            <a
+              href="https://tofferautomotive.nl/"
+              target="_blank" rel="noopener"
+              class="inline-flex items-center gap-2 mt-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-medium px-6 py-3 rounded-lg text-sm"
+            >
+              Bezoek TOFFER Automotive
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
           </div>
         </div>
       </div>

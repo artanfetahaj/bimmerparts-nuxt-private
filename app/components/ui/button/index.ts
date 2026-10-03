@@ -8,9 +8,9 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow ",
+        default: "bg-orange text-orange-foreground shadow hover:bg-orange-600",
         green: "bg-green text-purple",
-        orange: "bg-orange text-dark-purple",
+        orange: "bg-orange text-orange-foreground hover:bg-orange-600",
         purple: "bg-purple text-white",
         white: "bg-white text-dark-purple",
         "dark-purple": "bg-dark-purple text-green",

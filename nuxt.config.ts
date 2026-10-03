@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   //
   routeRules: {
-    '/': { prerender: true },
+    '/': { swr: 600 },
     '/over-ons': { prerender: true },
     '/contact': { prerender: true },
     '/bmw-model-codes': { swr: 3600 },

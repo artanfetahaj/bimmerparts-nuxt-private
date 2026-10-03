@@ -82,7 +82,7 @@
   --green: oklch(0.8958 0.1901 130.4);
   --green-foreground: oklch(0.145 0 0);
   --orange: #d3ba74;
-  --orange-foreground: oklch(1 0 0);
+  --orange-foreground: oklch(0.21 0.006 285.9); /* zinc-900: white on the #d3ba74 gold fails contrast */
   --black: oklch(0 0 0);
   --white: oklch(1 0 0);
   --muted: oklch(0.9791 0 0);

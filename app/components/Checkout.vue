@@ -601,7 +601,7 @@ const handleOrderNow = async () => {
               <div class="flex items-start gap-4">
                 <div
                   class="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
-                  :class="installationRequested ? 'bg-orange-500 shadow-md text-white' : 'bg-gray-200 text-gray-400'"
+                  :class="installationRequested ? 'bg-orange-500 shadow-md text-zinc-900' : 'bg-gray-200 text-gray-400'"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>

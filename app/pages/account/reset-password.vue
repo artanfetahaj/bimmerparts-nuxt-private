@@ -92,7 +92,7 @@ const handleSubmit = async () => {
           </div>
           <h1 class="text-2xl font-bold text-gray-900 mb-2">Wachtwoord gewijzigd</h1>
           <p class="text-gray-600 mb-6">{{ t('auth.resetSuccess') }}</p>
-          <NuxtLink to="/account/login" class="bg-orange-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors inline-block">
+          <NuxtLink to="/account/login" class="bg-orange-500 text-zinc-900 py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors inline-block">
             {{ t('auth.login') }}
           </NuxtLink>
         </div>
@@ -152,7 +152,7 @@ const handleSubmit = async () => {
             <button
               type="submit"
               :disabled="isLoading"
-              class="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              class="w-full bg-orange-500 text-zinc-900 py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <svg v-if="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

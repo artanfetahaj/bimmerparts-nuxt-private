@@ -143,7 +143,7 @@ const saveChanges = async () => {
     </div>
 
     <div class="mt-8">
-      <button @click="saveChanges" :disabled="isLoading" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium">
+      <button @click="saveChanges" :disabled="isLoading" class="bg-orange-500 hover:bg-orange-600 text-zinc-900 px-6 py-3 rounded-lg font-medium">
         {{ isLoading ? t('account.saving') : t('common.save') }}
       </button>
     </div>

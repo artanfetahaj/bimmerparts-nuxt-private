@@ -122,7 +122,7 @@ function yearRange(start?: number, end?: number) {
             :key="s.series"
             class="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap"
             :class="activeSeries === s.series
-              ? 'bg-orange-500 text-white'
+              ? 'bg-orange-500 text-zinc-900'
               : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
             @click="scrollToSeries(s.series)"
           >

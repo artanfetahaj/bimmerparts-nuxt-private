@@ -120,7 +120,7 @@ function openSearchDialog() { carVariantStore.openDialog() }
           aria-label="Cart"
         >
           <ShoppingBag class="w-5 h-5" />
-          <span v-if="totalItems > 0" class="absolute flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-orange-500 rounded-full -top-1 -right-1">
+          <span v-if="totalItems > 0" class="absolute flex items-center justify-center w-5 h-5 text-xs font-medium text-zinc-900 bg-orange-500 rounded-full -top-1 -right-1">
             {{ totalItems > 99 ? '99+' : totalItems }}
           </span>
         </NuxtLink>

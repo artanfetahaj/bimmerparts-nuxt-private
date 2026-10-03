@@ -33,7 +33,7 @@ function handleClear(e: MouseEvent) {
   <!-- ── Active variant pill ── -->
   <button
     v-if="variant"
-    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-white bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
+    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-zinc-900 bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
     @click="$emit('click')"
   >
     <div class="w-10 h-7 flex items-center justify-center shrink-0">
@@ -46,15 +46,15 @@ function handleClear(e: MouseEvent) {
       />
     </div>
     <div class="flex flex-col items-start leading-tight min-w-0">
-      <span class="text-[11px] text-white font-medium tracking-wide">
+      <span class="text-[11px] text-zinc-700 font-medium tracking-wide">
         {{ variantSeriesLabel }}
       </span>
-      <span class="text-xs text-white truncate max-w-[130px] font-semibold">
+      <span class="text-xs text-zinc-900 truncate max-w-[130px] font-semibold">
         <span class="uppercase font-semibold">{{ variant.car_model?.code }}</span> {{ variant.full_name }}
       </span>
     </div>
     <span
-      class="ml-1 w-5 h-5 rounded-full flex items-center justify-center text-orange-200 hover:text-white hover:bg-orange-400 transition-colors shrink-0"
+      class="ml-1 w-5 h-5 rounded-full flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-orange-400 transition-colors shrink-0"
       role="button"
       aria-label="Verwijder auto selectie"
       @click="handleClear"
@@ -66,7 +66,7 @@ function handleClear(e: MouseEvent) {
   <!-- ── Model-only pill ── -->
   <button
     v-else-if="model"
-    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-white bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
+    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-zinc-900 bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
     @click="$emit('click')"
   >
     <div class="w-10 h-7 flex items-center justify-center shrink-0">
@@ -79,15 +79,15 @@ function handleClear(e: MouseEvent) {
       />
     </div>
     <div class="flex flex-col items-start leading-tight min-w-0">
-      <span class="text-[11px] text-white font-medium tracking-wide">
+      <span class="text-[11px] text-zinc-700 font-medium tracking-wide">
         {{ modelSeriesLabel }}
       </span>
-      <span class="text-xs text-white truncate max-w-[130px] font-semibold uppercase font-semibold">
+      <span class="text-xs text-zinc-900 truncate max-w-[130px] font-semibold uppercase font-semibold">
         {{ model.code }}
       </span>
     </div>
     <span
-      class="ml-1 w-5 h-5 rounded-full flex items-center justify-center text-orange-200 hover:text-white hover:bg-orange-400 transition-colors shrink-0"
+      class="ml-1 w-5 h-5 rounded-full flex items-center justify-center text-zinc-700 hover:text-zinc-900 hover:bg-orange-400 transition-colors shrink-0"
       role="button"
       aria-label="Verwijder auto selectie"
       @click="handleClear"
@@ -99,7 +99,7 @@ function handleClear(e: MouseEvent) {
   <!-- ── Empty state pill ── -->
   <button
     v-else
-    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-white bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
+    class="h-10 pl-4 pr-5 rounded-full flex items-center gap-2 whitespace-nowrap text-sm focus:outline-none text-zinc-900 bg-orange-500 hover:bg-orange-600 border border-orange-500 transition-colors cursor-pointer"
     @click="$emit('click')"
   >
     <CarFront class="w-5 h-5 shrink-0" />

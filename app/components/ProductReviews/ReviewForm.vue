@@ -190,7 +190,7 @@ const setRating = (value: number) => {
       <button
         type="submit"
         :disabled="!canSubmit || isSubmitting"
-        class="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        class="w-full bg-orange-500 text-zinc-900 py-3 px-6 rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {{ isSubmitting ? 'Verzenden...' : 'Beoordeling Verzenden' }}
       </button>

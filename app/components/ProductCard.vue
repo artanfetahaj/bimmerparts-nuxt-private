@@ -85,7 +85,7 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
         v-for="badge in badges"
         :key="badge.key"
         class="text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium"
-        :class="badge.variant === 'discount' ? 'bg-orange-500 text-white' : badge.variant === 'low' ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'"
+        :class="badge.variant === 'discount' ? 'bg-orange-500 text-zinc-900' : badge.variant === 'low' ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'"
       >
         {{ badge.text }}
       </span>

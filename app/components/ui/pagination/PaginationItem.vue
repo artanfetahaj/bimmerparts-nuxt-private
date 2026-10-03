@@ -25,7 +25,7 @@ const delegatedProps = reactiveOmit(props, "class", "size", "isActive")
     :class="cn(
       'inline-flex items-center justify-center h-9 min-w-9 px-3 text-sm font-medium rounded-md transition-colors cursor-pointer',
       isActive
-        ? 'bg-orange-500 text-white hover:bg-orange-600'
+        ? 'bg-orange-500 text-zinc-900 hover:bg-orange-600'
         : 'bg-transparent text-gray-700 hover:bg-gray-100',
       props.class
     )"

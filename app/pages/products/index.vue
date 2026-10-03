@@ -293,9 +293,28 @@ async function resolveBrandFilter(): Promise<void> {
   }
 }
 
-onMounted(async () => {
+// Initial listing is fetched during SSR (query-param filters only; a selected car lives in
+// client-side store state) so product links are in the initial HTML for crawlers.
+const initialKey = `products-${route.fullPath}`
+const { data: initial } = await useAsyncData(initialKey, async () => {
   await resolveBrandFilter()
-  loadProducts(currentPage.value)
+  await fetchProducts(currentPage.value, getCacheKey(currentPage.value), false)
+  return { products: products.value, meta: meta.value, brand: brandFilter.value }
+})
+
+// On hydration the handler doesn't re-run, so restore its result from the payload.
+if (initial.value) {
+  products.value = initial.value.products
+  meta.value = initial.value.meta
+  brandFilter.value = initial.value.brand
+  cache.set(getCacheKey(currentPage.value), { products: initial.value.products, meta: initial.value.meta })
+  isLoading.value = false
+  isInitialLoad.value = false
+}
+
+onMounted(() => {
+  // A car chosen client-side (store) changes the filter, so refetch if we have one.
+  if (carVariantStore.selectedVariant || carVariantStore.selectedModel) loadProducts(currentPage.value)
 })
 </script>
 

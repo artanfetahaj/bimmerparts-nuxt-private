@@ -280,7 +280,7 @@ const handleSubmit = async () => {
                 :disabled="!acceptPrivacy"
                 class="w-full py-4 px-6 rounded-lg font-medium transition-all text-lg mt-auto"
                 :class="acceptPrivacy 
-                  ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer' 
+                  ? 'bg-orange-500 text-zinc-900 hover:bg-orange-600 cursor-pointer' 
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'"
               >
                 {{ t('contact.sendMessage') }}

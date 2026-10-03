@@ -48,7 +48,7 @@ const eventuriLink = computed(() =>
             <div class="flex flex-wrap gap-3">
               <NuxtLink
                 :to="eventuriLink"
-                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-medium px-6 py-3 rounded-lg text-sm"
+                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-medium px-6 py-3 rounded-lg text-sm"
               >
                 Bekijk alle Eventuri producten
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>
@@ -157,7 +157,7 @@ const eventuriLink = computed(() =>
         <p class="text-gray-600 max-w-xl mx-auto">Bekijk ons volledige Eventuri assortiment en vind de upgrade die past bij jouw model.</p>
         <NuxtLink
           :to="eventuriLink"
-          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-white font-semibold px-8 py-4 rounded-lg"
+          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors text-zinc-900 font-semibold px-8 py-4 rounded-lg"
         >
           Bekijk alle Eventuri producten
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="m9 18 6-6-6-6"/></svg>

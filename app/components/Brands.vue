@@ -222,7 +222,7 @@ onMounted(() => {
         <p class="text-red-600 mb-4">{{ error }}</p>
         <button 
           @click="loadBrands" 
-          class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+          class="px-6 py-2 bg-orange-500 text-zinc-900 rounded-lg hover:bg-orange-600 transition-colors"
         >
           {{ t('common.retry') || 'Try Again' }}
         </button>
@@ -368,7 +368,7 @@ onMounted(() => {
       <div v-if="hasMore && !loading && !error" class="text-center mt-8">
         <button
           @click="handleLoadMore"
-          class="px-8 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2 mx-auto"
+          class="px-8 py-3 bg-orange-500 text-zinc-900 rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2 mx-auto"
         >
           Load more
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
