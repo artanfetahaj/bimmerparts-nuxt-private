@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { CarModel, CarModelIncludes } from '@/models/CarModel'
 import { BMW_SERIES } from '@/collections/bmw-series'
 import type { CarVariant } from '@/models/CarVariant'
 import type { CarModel as CarModelType } from '@/models/CarModel'
 import { useCarVariantStore } from '@/stores/car-variant.store'
 
-const router = useRouter()
 const carVariantStore = useCarVariantStore()
 
 useHead({
@@ -64,14 +62,13 @@ function scrollToSeries(series: string) {
   el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function goToVariant(variant: CarVariant) {
+// Real <NuxtLink>s navigate (and are crawlable); these only sync the selected car into the store.
+function selectVariant(variant: CarVariant) {
   carVariantStore.setVariant(variant)
-  router.push({ path: '/producten', query: { car: variant.id } })
 }
 
-function goToModel(model: CarModelType) {
+function selectModel(model: CarModelType) {
   carVariantStore.setModel(model)
-  router.push({ path: '/producten', query: { car_model: String(model.id) } })
 }
 
 function seriesId(series: string) {
@@ -200,21 +197,23 @@ function yearRange(start?: number, end?: number) {
                     <span v-if="model.start_year" class="text-xs text-gray-400">{{ yearRange(model.start_year, model.end_year) }}</span>
                   </div>
                 </div>
-                <button
+                <NuxtLink
+                  :to="{ path: '/producten', query: { car_model: String(model.id) } }"
                   class="shrink-0 ml-auto text-xs font-semibold text-orange-500 hover:text-orange-600 border border-orange-200 hover:border-orange-400 px-3 py-1.5 rounded-lg transition-colors"
-                  @click="goToModel(model)"
+                  @click="selectModel(model)"
                 >
                   Alle uitvoeringen
-                </button>
+                </NuxtLink>
               </div>
 
               <!-- Variants table -->
               <div v-if="model.variants && model.variants.length" class="divide-y divide-gray-50">
-                <button
+                <NuxtLink
                   v-for="variant in model.variants"
                   :key="variant.id"
+                  :to="{ path: '/producten', query: { car: variant.id } }"
                   class="w-full flex items-center gap-4 px-5 py-3 text-left hover:bg-orange-50 transition-colors group"
-                  @click="goToVariant(variant)"
+                  @click="selectVariant(variant)"
                 >
                   <div class="flex-1 min-w-0">
                     <span class="text-sm font-medium text-gray-800 group-hover:text-orange-600 transition-colors">
@@ -229,7 +228,7 @@ function yearRange(start?: number, end?: number) {
                       <path d="M9 18l6-6-6-6" />
                     </svg>
                   </div>
-                </button>
+                </NuxtLink>
               </div>
               <div v-else class="px-5 py-3 text-xs text-gray-400 italic">
                 Geen uitvoeringen beschikbaar.
