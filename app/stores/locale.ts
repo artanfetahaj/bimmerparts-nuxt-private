@@ -58,7 +58,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'results.searchFor': 'Search results for',
     
     // Product
-    'price.taxIncluded': 'Tax Included',
+    'price.taxIncluded': 'excl. VAT',
     'price.youPay': 'You pay',
     'button.buyNow': 'Buy now',
     'button.addToCart': 'Add to cart',
@@ -539,7 +539,7 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'results.searchFor': 'Zoekresultaten voor',
     
     // Product
-    'price.taxIncluded': 'incl. BTW',
+    'price.taxIncluded': 'excl. BTW',
     'price.youPay': 'Je betaalt',
     'button.buyNow': 'Koop nu',
     'button.addToCart': 'In winkelwagen',

@@ -280,7 +280,7 @@ const openSections = ref(['price'])
             Geen categorieën beschikbaar
           </div>
           <!-- Tree -->
-          <div v-else class="max-h-60 overflow-y-auto space-y-0.5 pr-1 scrollbar-thin">
+          <div v-else class="max-h-72 overflow-y-auto space-y-0.5 pr-1 scrollbar-thin">
             <template v-for="mc in categoryStore.mainCategories" :key="mc.id">
               <!-- Main category -->
               <label class="flex items-center gap-2 py-1.5 px-1 rounded cursor-pointer hover:bg-gray-50 transition-colors">
@@ -297,21 +297,40 @@ const openSections = ref(['price'])
 
               <!-- Product categories (nested) -->
               <template v-if="mc.categories?.length">
-                <label
-                  v-for="pc in mc.categories"
-                  :key="pc.id"
-                  class="flex items-center gap-2 py-1 px-1 pl-6 rounded cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <input
-                    type="radio"
-                    name="product_category"
-                    :value="pc.id"
-                    :checked="selectedProductCategory === pc.id && !selectedSubcategory"
-                    @click="selectProductCategory(pc.id)"
-                    class="w-3.5 h-3.5 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
-                  />
-                  <span class="text-sm text-gray-700">{{ pc.name }}</span>
-                </label>
+                <template v-for="pc in mc.categories" :key="pc.id">
+                  <label
+                    class="flex items-center gap-2 py-1 px-1 pl-6 rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <input
+                      type="radio"
+                      name="product_category"
+                      :value="pc.id"
+                      :checked="selectedProductCategory === pc.id && !selectedSubcategory"
+                      @click="selectProductCategory(pc.id)"
+                      class="w-3.5 h-3.5 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
+                    />
+                    <span class="text-sm text-gray-700">{{ pc.name }}</span>
+                  </label>
+
+                  <!-- Subcategories (shown when this product category is selected) -->
+                  <template v-if="pc.subcategories?.length && selectedProductCategory === pc.id">
+                    <label
+                      v-for="sub in pc.subcategories"
+                      :key="sub.id"
+                      class="flex items-center gap-2 py-0.5 px-1 pl-11 rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        name="subcategory"
+                        :value="sub.slug"
+                        :checked="selectedSubcategory === sub.slug"
+                        @click="selectSubcategory(sub.slug)"
+                        class="w-3 h-3 text-orange-500 border-gray-300 focus:ring-orange-500 accent-orange-500"
+                      />
+                      <span class="text-xs text-gray-600">{{ sub.name }}</span>
+                    </label>
+                  </template>
+                </template>
               </template>
             </template>
 
