@@ -147,12 +147,13 @@ const formatPrice = (n: number) => n.toFixed(2).replace('.', ',')
         <template v-else>Art.nr. {{ product.product_number }}</template>
         <span v-if="oemMatched || productNumberMatched" class="sr-only"> (komt overeen met uw zoekopdracht)</span>
       </p>
-      <div class="mt-auto flex items-baseline gap-1 sm:gap-2">
+      <div class="mt-auto flex items-baseline gap-1 sm:gap-2 flex-wrap">
         <span class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">€ {{ formatPrice(displayPrice) }}</span>
         <span v-if="showOldPrice" class="text-xs sm:text-sm text-gray-500 line-through">
           € {{ formatPrice(originalPrice) }}
         </span>
       </div>
+      <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5">excl. BTW</p>
     </div>
   </article>
 </template>

@@ -161,7 +161,7 @@ const subtotal = computed(() => totalPrice.value)
 const deliveryFee = computed(() => {
   if (!needsShipping.value) return 0
   if (selectedShippingMethod.value !== 'post') return 0
-  return subtotal.value > 100 ? 0 : 10
+  return 10
 })
 const btwAmount = computed(() => subtotal.value * 0.21)
 const orderTotal = computed(() => subtotal.value + btwAmount.value + deliveryFee.value + reservationFee.value)
@@ -665,12 +665,29 @@ const handleOrderNow = async () => {
                   {{ itemsBeingInstalled.length }} van {{ cartItems.length }} producten wordt geïnstalleerd, de rest verzonden.
                 </template>
               </p>
-              <p v-if="itemsBeingInstalled.length > 0" class="text-xs text-gray-400 flex gap-1.5 items-start">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                €20,- reserveringskosten voor montage. Dit bedrag gaat af van de rekening bij montage.
-              </p>
+              <!-- Assembly fee notice — shown when at least one item will be installed -->
+              <div v-if="itemsBeingInstalled.length > 0" class="rounded-lg border border-orange-200 bg-orange-50 p-3 flex flex-col gap-1.5 mt-1">
+                <p class="text-[12.5px] font-bold text-orange-700 flex gap-1.5 items-center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  Montageservice is betaald en op offerte
+                </p>
+                <ul class="text-xs text-orange-800 space-y-1 pl-0.5">
+                  <li class="flex gap-1.5 items-start">
+                    <span class="font-bold mt-px">1.</span>
+                    <span>Je betaalt nu <strong>€20,- reserveringskosten</strong> om de afspraak vast te leggen.</span>
+                  </li>
+                  <li class="flex gap-1.5 items-start">
+                    <span class="font-bold mt-px">2.</span>
+                    <span>Wij bellen je op om de montage te bespreken en een <strong>offerte op maat</strong> op te stellen.</span>
+                  </li>
+                  <li class="flex gap-1.5 items-start">
+                    <span class="font-bold mt-px">3.</span>
+                    <span>Na akkoord op de offerte plannen we de montage in. De reserveringskosten worden verrekend.</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 

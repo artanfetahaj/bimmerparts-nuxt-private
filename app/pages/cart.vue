@@ -213,10 +213,15 @@ watch(cartItems, () => { loadBasketRecommendations() }, { immediate: true, deep:
                   <span class="text-gray-600">{{ t('cart.subtotal') }}</span>
                   <span class="font-medium">€{{ totalPrice.toFixed(2).replace('.', ',') }}</span>
                 </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Verzendkosten</span>
+                  <span class="font-medium text-gray-500">€10,00*</span>
+                </div>
+                <p class="text-xs text-gray-400 -mt-1">* Gratis bij montage door ons. Zie afrekenen voor details.</p>
                 <div class="border-t border-gray-200 pt-3">
                   <div class="flex justify-between text-lg font-bold">
                     <span>{{ t('cart.total') }}</span>
-                    <span>€{{ totalPrice.toFixed(2).replace('.', ',') }}</span>
+                    <span>€{{ (totalPrice + 10).toFixed(2).replace('.', ',') }}*</span>
                   </div>
                 </div>
               </div>

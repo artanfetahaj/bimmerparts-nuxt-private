@@ -18,6 +18,7 @@ const categoryStore = useCategoryStore()
 // ─── Accordion state ──────────────────────────────────────────────────────────
 const showCategoriesMenu = ref(false)
 const expandedMainCat = ref<string | null>(null)
+const expandedProductCat = ref<string | null>(null)
 
 function toggleCategoriesMenu() {
   showCategoriesMenu.value = !showCategoriesMenu.value
@@ -25,6 +26,11 @@ function toggleCategoriesMenu() {
 
 function toggleMainCat(id: string) {
   expandedMainCat.value = expandedMainCat.value === id ? null : id
+  expandedProductCat.value = null
+}
+
+function toggleProductCat(id: string) {
+  expandedProductCat.value = expandedProductCat.value === id ? null : id
 }
 
 function navigate() {
@@ -115,15 +121,49 @@ watch(() => props.open, (open) => {
                     <!-- Product categories -->
                     <Transition name="accordion">
                       <div v-if="expandedMainCat === mainCat.id && mainCat.categories?.length" class="pl-4 pb-1">
-                        <NuxtLink
-                          v-for="prodCat in mainCat.categories"
-                          :key="prodCat.id"
-                          :to="{ path: '/producten', query: { product_category: prodCat.id } }"
-                          class="block text-sm text-gray-600 py-1.5 hover:text-orange-500 transition-colors"
-                          @click="navigate"
-                        >
-                          {{ prodCat.name }}
-                        </NuxtLink>
+                        <div v-for="prodCat in mainCat.categories" :key="prodCat.id">
+                          <!-- If it has subcategories: show as toggle; otherwise navigate directly -->
+                          <div v-if="prodCat.subcategories?.length">
+                            <button
+                              @click="toggleProductCat(prodCat.id)"
+                              class="flex items-center justify-between w-full text-left text-sm text-gray-600 py-1.5 hover:text-orange-500 transition-colors"
+                            >
+                              {{ prodCat.name }}
+                              <ChevronDown
+                                class="w-3.5 h-3.5 transition-transform duration-200 text-gray-400 flex-shrink-0 ml-2"
+                                :class="{ 'rotate-180': expandedProductCat === prodCat.id }"
+                              />
+                            </button>
+                            <Transition name="accordion">
+                              <div v-if="expandedProductCat === prodCat.id" class="pl-4 pb-1">
+                                <NuxtLink
+                                  :to="{ path: '/producten', query: { product_category: prodCat.id } }"
+                                  class="block text-xs text-gray-500 py-1 hover:text-orange-500 transition-colors"
+                                  @click="navigate"
+                                >
+                                  Alles in {{ prodCat.name }}
+                                </NuxtLink>
+                                <NuxtLink
+                                  v-for="sub in prodCat.subcategories"
+                                  :key="sub.id"
+                                  :to="{ path: '/producten', query: { subcategory: sub.slug } }"
+                                  class="block text-xs text-gray-500 py-1 hover:text-orange-500 transition-colors"
+                                  @click="navigate"
+                                >
+                                  {{ sub.name }}
+                                </NuxtLink>
+                              </div>
+                            </Transition>
+                          </div>
+                          <NuxtLink
+                            v-else
+                            :to="{ path: '/producten', query: { product_category: prodCat.id } }"
+                            class="block text-sm text-gray-600 py-1.5 hover:text-orange-500 transition-colors"
+                            @click="navigate"
+                          >
+                            {{ prodCat.name }}
+                          </NuxtLink>
+                        </div>
                       </div>
                     </Transition>
                   </div>
