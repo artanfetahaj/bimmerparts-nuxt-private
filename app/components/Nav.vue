@@ -25,8 +25,9 @@ const showBmwSeriesMenu = ref(false)
 
 // ─── Pre-fetch categories as soon as the nav mounts ──────────────────────────
 const categoryStore = useCategoryStore()
-// Fetched during SSR so category links are in the initial HTML (state is hydrated via the payload)
-await callOnce('categories', () => categoryStore.fetchCategories())
+// callOnce without await: works in both components and pages; the MegaMenu
+// handles the loading state, so we don't need to block rendering here.
+callOnce('categories', () => categoryStore.fetchCategories())
 
 // ─── Mega-menu hover logic ───────────────────────────────────────────────────
 let closeTimer: ReturnType<typeof setTimeout> | null = null
