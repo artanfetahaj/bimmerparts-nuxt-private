@@ -1,0 +1,5 @@
+# Paths that existed on the old site but are intentionally gone on the new site (expected 404).
+# The redirect check treats a 404 for these as ok-expected-gone, not an error.
+# One path per line; lines starting with # are comments.
+/Files/2/21000/21945/Attachments/Product/4R3225Aq44076p1292D91bqKK7TEij74.pdf
+/Files/2/21000/21945/FileBrowser/documenten/montage-handleiding-diffuser.pdf

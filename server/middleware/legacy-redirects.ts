@@ -4,6 +4,14 @@ import redirects from '../data/legacy-redirects.json'
 // scripts/legacy-redirects/build.py (see the README next to it).
 const map = redirects as Record<string, string>
 
+// Real static-asset extensions that the old shop served and that we never want to redirect.
+// Intentionally narrow: product URLs like /bmw-z4-e85-3.0i end in ".0i" and must NOT be skipped.
+const ASSET_EXT = /\.(js|css|map|mjs|ts|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|eot|otf|pdf|xml|txt|json|csv|zip|gz|mp4|webm|mp3|ogg)$/i
+
+// Pages that exist on the new site at the same path and need no redirect.
+// If someone requests them with a trailing .html, we 301 to the clean path.
+const SAME_URL_PAGES = new Set(['/', '/contact', '/bmw-model-codes', '/mini-model-codes', '/cobra-suspension', '/eventuri'])
+
 const normalize = (path: string) => {
   let p = path
   try { p = decodeURIComponent(p) } catch { /* keep raw */ }
@@ -16,9 +24,10 @@ export default defineEventHandler((event) => {
 
   const url = getRequestURL(event)
   const path = url.pathname
-  // Skip Nuxt internals, API routes and static assets (anything with a file extension except .html)
   const isLegacyEntry = path.toLowerCase() === '/website/index.php'
-  if (!isLegacyEntry && (path.startsWith('/_') || path.startsWith('/api/') || (/\.[a-z0-9]+$/i.test(path) && !/\.html$/i.test(path)))) return
+  // Skip Nuxt internals, API routes, and real static assets.
+  // Do NOT skip paths that merely end in a dot-sequence (e.g. "-3.0i", "-1.8-1.9").
+  if (!isLegacyEntry && (path.startsWith('/_') || path.startsWith('/api/') || ASSET_EXT.test(path))) return
 
   const key = normalize(path)
   let target = map[key]
@@ -32,6 +41,11 @@ export default defineEventHandler((event) => {
 
   // Old shop's nested URLs, e.g. /Webwinkel-Product-123/Some-Product.html -> look up the last segment
   if (!target && key.startsWith('/webwinkel-product-')) target = map['/' + key.split('/').pop()]
+
+  // .html variant of a same-url page (e.g. /contact.html → /contact)
+  if (!target && SAME_URL_PAGES.has(key) && path.toLowerCase().endsWith('.html')) {
+    return sendRedirect(event, key, 301)
+  }
 
   if (target && target !== path) return sendRedirect(event, target, 301)
 })
