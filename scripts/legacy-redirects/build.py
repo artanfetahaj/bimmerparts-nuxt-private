@@ -24,7 +24,13 @@ HOST = re.compile(r"^https?://(www\.)?bimmerparts\.nl", re.I)
 
 def lines(name):
     p = os.path.join(INP, name)
-    return [HOST.sub("", l.strip()) for l in open(p) if l.strip()] if os.path.exists(p) else []
+    # Strip host; skip static-asset paths — they should 404 gracefully, not redirect.
+    out = []
+    for l in (open(p, encoding="utf-8-sig") if os.path.exists(p) else []):
+        l = HOST.sub("", l.strip())
+        if l and not re.search(r"\.(pdf|js|css|png|jpe?g|webp|gif|svg|woff2?|ttf|zip|mp4)$", l, re.I):
+            out.append(l)
+    return out
 
 def key(path):  # normalised lookup key, mirrors server/middleware/legacy-redirects.ts
     path = path.split("?")[0].split("#")[0]
@@ -67,7 +73,7 @@ for old, new in PAGES.items():
 SERIES_ANCHOR = {"1-serie": "1-Series", "2-serie": "2-Series", "3-serie": "3-Series", "4-serie": "4-Series",
                  "5-serie": "5-Series", "6-serie": "6-Series", "7-serie": "7-Series", "8-serie": "8-Series",
                  "x-serie": "X", "z-serie": "Z", "i-serie": "i"}
-models = json.load(open(os.path.join(INP, "car-models.json")))
+models = json.load(open(os.path.join(INP, "car-models.json"), encoding="utf-8"))
 models = models.get("data", models)
 by_code = {}
 for m in models:
@@ -88,7 +94,7 @@ for p in lines("old_categories.txt"):
         redirects[k] = "/producten"; cat_stats["fallback"] += 1
 
 # ── 3. Products ───────────────────────────────────────────────────────────────
-new = [p for p in json.load(open(os.path.join(INP, "new_products.json"))) if p.get("slug")]
+new = [p for p in json.load(open(os.path.join(INP, "new_products.json"), encoding="utf-8")) if p.get("slug")]
 by_slug = {slugify(p["slug"]): p for p in new}
 by_sku = {(p.get("sku") or "").strip().lower(): p for p in new if p.get("sku")}
 tokens = [(p, toks(p["slug"]) | toks(p.get("name") or "")) for p in new]
@@ -96,7 +102,7 @@ tokens = [(p, toks(p["slug"]) | toks(p.get("name") or "")) for p in new]
 sku_map = {}
 sku_csv = os.path.join(INP, "old_products_sku.csv")
 if os.path.exists(sku_csv):
-    for r in csv.DictReader(open(sku_csv)):
+    for r in csv.DictReader(open(sku_csv, encoding="utf-8")):
         sku_map[key(r["old_path"])] = (r["sku"] or "").strip().lower()
 
 # Extra signals: Search Console pages (traffic-weighted, also catches URLs missing from the old sitemap)
@@ -104,12 +110,15 @@ if os.path.exists(sku_csv):
 clicks = {}
 gsc = os.path.join(INP, "gsc_pages.csv")
 gsc_urls = []
+ASSET_RE = re.compile(r"\.(pdf|js|css|png|jpe?g|webp|gif|svg|woff2?|ttf|zip|mp4)$", re.I)
 if os.path.exists(gsc):
-    for r in csv.DictReader(open(gsc)):
-        clicks[key(HOST.sub("", r["url"]))] = int(r["clicks"]); gsc_urls.append(HOST.sub("", r["url"]))
+    for r in csv.DictReader(open(gsc, encoding="utf-8")):
+        u = HOST.sub("", r["url"])
+        if ASSET_RE.search(u): continue
+        clicks[key(u)] = int(r["clicks"]); gsc_urls.append(u)
 meta_by_key = {}
 meta_file = os.path.join(INP, "old_pages_meta.json")
-meta = json.load(open(meta_file)) if os.path.exists(meta_file) else {"categories": {}, "products": {}}
+meta = json.load(open(meta_file, encoding="utf-8")) if os.path.exists(meta_file) else {"categories": {}, "products": {}}
 for url, info in meta["products"].items():
     meta_by_key[key(HOST.sub("", url))] = info
 
@@ -118,6 +127,37 @@ def split_title(title):  # "BMW LED Portierprojectoren - 63312414105" -> (name, 
     return (m.group(1), re.sub(r"[^a-z0-9]", "", m.group(2).lower())) if m else (title, "")
 
 sku_norm = {re.sub(r"[^a-z0-9]", "", (p.get("sku") or "").lower()): p for p in new if p.get("sku")}
+
+# Chassis / generation codes that map to car_model filter pages.
+# Keep consistent with what build.py step 2 already stores under those codes.
+# 'mini' is NOT a code in by_code (codes are r50, r52, etc.) — omit it here.
+CHASSIS_RE = re.compile(
+    r"\b(e[0-9]{2}|f[0-9]{2}|g[0-9]{2}|r[0-9]{2}|u[0-9]{2}|b[0-9]{2}|"
+    r"r50|r52|r53|r55|r56|r57|r58|r59|r60|r61|"
+    r"f54|f55|f56|f57|f58|f60|f63|f66)\b", re.I
+)
+
+def _best_category_fallback(k, title):
+    """
+    Given an old URL key and its page title, try to find a car-model filter URL.
+    Returns (target_url, fallback_reason) or (None, '').
+    target_url is '/producten?car_model=<uuid>' or None.
+    fallback_reason describes how it was found, including 'multi-chassis:...' when ambiguous.
+    """
+    text = (title + " " + k).lower()
+    matches = [m.lower() for m in CHASSIS_RE.findall(text) if m.lower() in by_code]
+    # Deduplicate while preserving order
+    seen = set(); unique = []
+    for m in matches:
+        if m not in seen: seen.add(m); unique.append(m)
+    if not unique:
+        return None, ""
+    target = f"/producten?car_model={by_code[unique[0]][0]['id']}"
+    if len(unique) > 1:
+        reason = f"multi-chassis:{','.join(unique)}"
+    else:
+        reason = f"chassis:{unique[0]}"
+    return target, reason
 
 def best_match(ot):
     best, bs, second = None, 0, 0
@@ -158,9 +198,16 @@ for old in candidates:
     stats[tier] += 1
     if target:
         redirects[k] = f"/producten/{target}"
+        # Still add to review so the reviewer can confirm or improve high-confidence matches
+        # (only for 'review'/'none' tiers — sku/exact/partno/high are considered confirmed)
     else:
-        redirects[k] = "/producten"
-        review.append((old, title, guess, tier, score, clicks.get(k, 0)))
+        # Try to route to a car-model filter page before falling back to generic /producten.
+        fallback, fallback_reason = _best_category_fallback(k, title)
+        redirects[k] = fallback if fallback else "/producten"
+        current_fallback = fallback if fallback else "/producten"
+        # Always append unmatched products to review so the reviewer can see all of them,
+        # including those that got a chassis-code fallback.
+        review.append((old, title, guess, tier, score, clicks.get(k, 0), current_fallback, fallback_reason))
 
 # Old platform query-style category URLs: /website/index.php?ProductCategory=<id>  ->  same target as its canonical page
 for cid, canon_url in meta["categories"].items():
@@ -172,14 +219,27 @@ review.sort(key=lambda r: -r[5])
 # ── 4. Manual overrides (filled in from review.csv): old_path,new_slug ─────────────
 manual = os.path.join(INP, "manual.csv")
 if os.path.exists(manual):
-    for r in csv.DictReader(open(manual)):
+    for r in csv.DictReader(open(manual, encoding="utf-8")):
         if r.get("new_slug"):
             redirects[key(r["old_path"])] = "/producten/" + r["new_slug"].strip().strip("/"); stats["manual"] += 1
 
 # ── Write ─────────────────────────────────────────────────────────────────────
 os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
-json.dump(dict(sorted(redirects.items())), open(OUT_JSON, "w"), ensure_ascii=False, indent=0)
-with open(os.path.join(ROOT, "review.csv"), "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["old_path", "old_title", "best_guess_new_slug", "confidence", "score", "clicks_3m", "correct_new_slug (fill in)"])
+json.dump(dict(sorted(redirects.items())), open(OUT_JSON, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+with open(os.path.join(ROOT, "review.csv"), "w", newline="", encoding="utf-8") as f:
+    w = csv.writer(f)
+    w.writerow(["old_path", "old_title", "best_guess_new_slug", "confidence", "score", "clicks_3m",
+                "current_fallback", "fallback_reason", "correct_new_slug (fill in)"])
     w.writerows([r + ("",) for r in review])
-print("categories:", dict(cat_stats)); print("products:", dict(stats)); print("total redirects:", len(redirects))
+plain_producten = sum(1 for v in redirects.values() if v == "/producten")
+to_car_model    = sum(1 for v in redirects.values() if "?car_model=" in v)
+to_product      = sum(1 for v in redirects.values() if v.startswith("/producten/"))
+print("categories:", dict(cat_stats))
+print("products:", dict(stats))
+print("total redirects:", len(redirects))
+print(f"\nFallback quality:")
+print(f"  to /producten/<slug>  (product page) : {to_product}")
+print(f"  to /producten?car_model=<uuid>       : {to_car_model}")
+print(f"  to /producten  (generic fallback)    : {plain_producten}")
+print(f"  {stats.get('none',0)+stats.get('review',0)} unmatched products, "
+      f"{plain_producten} still land on generic /producten")
