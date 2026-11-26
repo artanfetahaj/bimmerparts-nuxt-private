@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import HeaderNav from './HeaderNav.vue'
 import SiteFooter from './SiteFooter.vue'
 import { useLocale } from '../stores/locale'
 import { submitContactForm } from '../services/contact'

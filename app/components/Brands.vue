@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import HeaderNav from './HeaderNav.vue'
 import SiteFooter from './SiteFooter.vue'
 import { useLocale } from '../stores/locale'
 import { getBmwBrands, type BmwBrand } from '../services/bmw'
@@ -183,7 +182,7 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-white">
     <!-- Header -->
-    <HeaderNav 
+    <Nav 
       variant="solid" 
       @navigate-to-products="(params) => emit('navigateToProducts', params)" 
       @navigate-to-home="emit('navigateToHome')" 

@@ -232,20 +232,14 @@ const handleOrderNow = async () => {
 
   const addressStr = `${formData.value.address} ${formData.value.houseNumber}, ${formData.value.postCode} ${formData.value.city}, ${formData.value.country}`
 
-  // Both card and iDEAL/Wero go through Mollie — order is only created after payment is confirmed
   const mollieMethodMap: Record<'bank' | 'card' | 'bancontact', string> = {
     bank: 'ideal',
     card: 'creditcard',
     bancontact: 'bancontact',
   }
-  const orderPaymentMethodMap: Record<'bank' | 'card' | 'bancontact', string> = {
-    bank: 'bank_transfer',
-    card: 'credit_card',
-    bancontact: 'bancontact',
-  }
 
   try {
-    sessionStorage.setItem('pending_checkout', JSON.stringify({
+    const result = await ordersService.createOrder({
       customer_name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
       customer_email: customerEmail,
       customer_phone: formData.value.phone,
@@ -257,26 +251,33 @@ const handleOrderNow = async () => {
       address_postcode: formData.value.postCode,
       address_city: formData.value.city,
       address_country_code: formData.value.country,
-      payment_method: orderPaymentMethodMap[selectedPaymentMethod.value],
+      payment_method: mollieMethodMap[selectedPaymentMethod.value],
       shipping_method: selectedShippingMethod.value,
       installation_requested: installationRequested.value,
       items: itemsPayload,
-    }))
-
-    const result = await ordersService.initiatePayment({
-      items: itemsPayload,
-      redirect_url: `${window.location.origin}/bestelling-bevestigd`,
-      method: mollieMethodMap[selectedPaymentMethod.value],
-      shipping_method: selectedShippingMethod.value,
-      installation_requested: installationRequested.value,
     })
 
-    sessionStorage.setItem('pending_payment_id', result.payment_id)
-    window.location.href = result.checkout_url
+    // Store order access token keyed by order number (needed by thank-you page to poll status)
+    sessionStorage.setItem(`order_token_${result.order_number}`, result.order_access_token)
+
+    // Step 2: initiate Mollie payment and get checkout URL
+    const payment = await ordersService.initiatePayment(
+      result.order_number,
+      result.order_access_token,
+      mollieMethodMap[selectedPaymentMethod.value],
+    )
+
+    if (!payment.checkout_url) {
+      orderError.value = 'Payment provider did not return a checkout URL. Please try again.'
+      isSubmitting.value = false
+      return
+    }
+
+    isOrderComplete.value = true
+    clearCart()
+    window.location.href = payment.checkout_url
   } catch (e: any) {
-    sessionStorage.removeItem('pending_checkout')
-    sessionStorage.removeItem('pending_payment_id')
-    orderError.value = e?.response?.data?.message || e?.message || 'Failed to initiate payment. Please try again.'
+    orderError.value = e?.response?.data?.message || e?.message || 'Failed to place order. Please try again.'
     isSubmitting.value = false
   }
 }
@@ -285,9 +286,6 @@ const handleOrderNow = async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <HeaderNav variant="solid" @navigate-to-products="handleNavigateToProducts" @navigate-to-home="handleHomeClick" @navigate-to-cart="handleNavigateToCart" @navigate-to-about="handleNavigateToAbout" @navigate-to-contact="handleNavigateToContact" @navigate-to-wishlist="handleNavigateToWishlist" @navigate-to-account="handleNavigateToAccount" @navigate-to-product="handleNavigateToProduct" />
-
     <!-- Main Content -->
     <div class="container mx-auto px-4 md:px-6 py-8">
       <!-- Breadcrumb -->
@@ -839,7 +837,7 @@ const handleOrderNow = async () => {
 
               <!-- Fine print & terms -->
               <div class="mb-6">
-                <p class="text-sm text-gray-600 mb-4" v-html="t('checkout.accountCreated')"></p>
+                <p class="text-sm text-gray-600 mb-4">{{ t('checkout.accountCreated') }}</p>
 
                 <label class="flex items-start space-x-3 cursor-pointer">
                   <input
