@@ -29,12 +29,16 @@ const confirmPasswordTouched = ref(false)
 
 const passwordRules = computed(() => [
   {
-    label: 'Minimaal 8 tekens',
-    met: formData.value.password.length >= 8,
+    label: 'Minimaal 10 tekens',
+    met: formData.value.password.length >= 10,
   },
   {
     label: 'Minimaal 1 hoofdletter',
     met: /[A-Z]/.test(formData.value.password),
+  },
+  {
+    label: 'Minimaal 1 kleine letter',
+    met: /[a-z]/.test(formData.value.password),
   },
   {
     label: 'Minimaal 1 cijfer',
@@ -67,7 +71,12 @@ const validateForm = () => {
 
   if (!formData.value.password) {
     errors.password = t('auth.validation.passwordRequired')
-  } else if (formData.value.password.length < 8) {
+  } else if (
+    formData.value.password.length < 10 ||
+    !/[A-Z]/.test(formData.value.password) ||
+    !/[a-z]/.test(formData.value.password) ||
+    !/[0-9]/.test(formData.value.password)
+  ) {
     errors.password = t('auth.validation.passwordMinLength')
   }
 

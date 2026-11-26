@@ -1,9 +1,17 @@
 import tailwindcss from '@tailwindcss/vite'
 
+// Fail the build if the API URL uses plain HTTP in production
+if (process.env.NODE_ENV === 'production') {
+  const apiUrl = process.env.API_URL || ''
+  if (apiUrl.startsWith('http://')) {
+    throw new Error(`[SECURITY] API_URL must use HTTPS in production, got: ${apiUrl}`)
+  }
+}
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
   //
   routeRules: {
     '/': { swr: 600 },
@@ -101,7 +109,67 @@ export default defineNuxtConfig({
       robots: 'index, follow',
     }
   },
-  modules: ['shadcn-nuxt', '@nuxtjs/seo', '@nuxt/image', '@pinia/nuxt'],
+  modules: ['nuxt-security', 'shadcn-nuxt', '@nuxtjs/seo', '@nuxt/image', '@pinia/nuxt'],
+
+  security: {
+    // Disable entirely in dev — Nuxt dev server injects Vite HMR scripts, devtools and inline
+    // bootstrap code without nonces, which would all be blocked by a strict CSP.
+    // Headers are only meaningful (and enforced by Amplify's customHttp.yml) in production.
+    enabled: process.env.NODE_ENV === 'production',
+
+    // nuxt-security rate-limiter and request-size-limiter conflict with SWR/ISR caching on Nitro,
+    // where prerender routes are served without going through the Node handler at all.
+    // The API already enforces its own rate limits; disabling here avoids false 429s on cached routes.
+    rateLimiter: false,
+    requestSizeLimiter: false,
+
+    headers: {
+      strictTransportSecurity: {
+        maxAge: 31536000,
+        includeSubdomains: true,
+        preload: true,
+      },
+      xFrameOptions: 'DENY',
+      xContentTypeOptions: 'nosniff',
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      permissionsPolicy: {
+        camera: [],
+        microphone: [],
+        geolocation: [],
+        payment: [],
+        usb: [],
+      },
+      contentSecurityPolicy: {
+        'default-src': ["'self'"],
+        'script-src': [
+          "'self'",
+          "'strict-dynamic'",
+          'https://www.googletagmanager.com',
+        ],
+        'connect-src': [
+          "'self'",
+          process.env.API_URL || 'http://localhost:8000',
+          'https://*.google-analytics.com',
+          'https://*.googletagmanager.com',
+        ],
+        'img-src': [
+          "'self'",
+          'data:',
+          // Product images (the actual CDN bucket used by bimmerparts)
+          'https://bimmerparts-public.s3.eu-central-1.amazonaws.com',
+          // Legacy / CRM bucket referenced in some admin-uploaded images
+          'https://besa-crm.s3.eu-central-1.amazonaws.com',
+          'https://www.google-analytics.com',
+          'https://www.googletagmanager.com',
+        ],
+        'frame-src': ['https://www.googletagmanager.com'],
+        'form-action': ["'self'", 'https://www.mollie.com'],
+        'base-uri': ["'self'"],
+        'object-src': ["'none'"],
+        'upgrade-insecure-requests': true,
+      },
+    },
+  },
   buildModules: ["@nuxtjs/svg"],
   
   image: {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import HeaderNav from './HeaderNav.vue'
 import SiteFooter from './SiteFooter.vue'
 import { useLocale } from '../stores/locale'
 
@@ -58,7 +57,7 @@ const handleNavigateToPrivacy = () => {
 <template>
   <div class="min-h-screen bg-white">
     <!-- Header -->
-    <HeaderNav variant="solid" @navigate-to-products="handleNavigateToProducts" @navigate-to-home="handleHomeClick" @navigate-to-cart="handleNavigateToCart" @navigate-to-about="handleNavigateToAbout" @navigate-to-contact="handleNavigateToContact" @navigate-to-wishlist="handleNavigateToWishlist" @navigate-to-account="handleNavigateToAccount" />
+    <Nav variant="solid" @navigate-to-products="handleNavigateToProducts" @navigate-to-home="handleHomeClick" @navigate-to-cart="handleNavigateToCart" @navigate-to-about="handleNavigateToAbout" @navigate-to-contact="handleNavigateToContact" @navigate-to-wishlist="handleNavigateToWishlist" @navigate-to-account="handleNavigateToAccount" />
 
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">

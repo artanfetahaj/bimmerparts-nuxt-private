@@ -1,4 +1,5 @@
-import api, { storage } from './api'
+import api, { storage, clearAllAuthAndOrderTokens } from './api'
+import { devLog } from '../utils/log'
 
 export interface LoginCredentials {
   email: string
@@ -52,25 +53,26 @@ class AuthService {
   /**
    * Login customer
    */
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials & { rememberMe?: boolean }): Promise<AuthResponse> {
     try {
-      const response = await api.post('/auth/login', credentials)
-      
+      const { rememberMe, ...creds } = credentials
+      const response = await api.post('/auth/login', creds)
+
       if (response.data.success) {
-        storage.set('customer_token', response.data.data.token)
-        storage.set('customer_data', JSON.stringify(response.data.data.customer))
+        storage.set('customer_token', response.data.data.token, rememberMe === true)
+        storage.set('customer_data', JSON.stringify(response.data.data.customer), rememberMe === true)
         
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
           // await api.post('/wishlist/merge')
         } catch (mergeError) {
-          console.warn('Failed to merge cart/wishlist:', mergeError)
+          devLog.warn('Failed to merge cart/wishlist:', mergeError)
         }
-        
+
         dispatchAuthChanged()
       }
-      
+
       return response.data
     } catch (error: any) {
       if (error.response?.data) {
@@ -89,17 +91,17 @@ class AuthService {
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
       const response = await api.post('/auth/register', data)
-      
+
       if (response.data.success) {
         storage.set('customer_token', response.data.data.token)
         storage.set('customer_data', JSON.stringify(response.data.data.customer))
-        
+
         // Merge guest cart and wishlist with customer account
         try {
           await api.post('/cart/merge')
           // await api.post('/wishlist/merge')
         } catch (mergeError) {
-          console.warn('Failed to merge cart/wishlist:', mergeError)
+          devLog.warn('Failed to merge cart/wishlist:', mergeError)
         }
         
         dispatchAuthChanged()
@@ -125,11 +127,10 @@ class AuthService {
       if (this.isAuthenticated()) {
         await api.post('/customer/logout')
       }
-    } catch (error) {
-      console.error('Logout API error:', error)
+    } catch {
+      // Intentionally swallowed — still clear local auth state
     } finally {
-      storage.remove('customer_token')
-      storage.remove('customer_data')
+      clearAllAuthAndOrderTokens()
       dispatchAuthChanged()
     }
   }
@@ -216,9 +217,8 @@ class AuthService {
       const profile = await this.getProfile()
       storage.set('customer_data', JSON.stringify(profile))
       return true
-    } catch (error) {
-      storage.remove('customer_token')
-      storage.remove('customer_data')
+    } catch {
+      clearAllAuthAndOrderTokens()
       dispatchAuthChanged()
       return false
     }

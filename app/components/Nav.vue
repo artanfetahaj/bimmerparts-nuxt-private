@@ -25,9 +25,10 @@ const showBmwSeriesMenu = ref(false)
 
 // ─── Pre-fetch categories as soon as the nav mounts ──────────────────────────
 const categoryStore = useCategoryStore()
-// callOnce without await: works in both components and pages; the MegaMenu
-// handles the loading state, so we don't need to block rendering here.
-callOnce('categories', () => categoryStore.fetchCategories())
+// fetchCategories() is already idempotent (guarded by loaded/loading flags),
+// so calling it here on every mount is safe and ensures client-only pages
+// (ssr: false) also trigger the fetch without relying on callOnce's payload key.
+onMounted(() => categoryStore.fetchCategories())
 
 // ─── Mega-menu hover logic ───────────────────────────────────────────────────
 let closeTimer: ReturnType<typeof setTimeout> | null = null

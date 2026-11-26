@@ -42,8 +42,13 @@ const saveChanges = async () => {
     return
   }
 
-  // Validate password length
-  if (form.value.new_password && form.value.new_password.length < 8) {
+  // Validate password strength (min 10, upper, lower, number)
+  if (form.value.new_password && (
+    form.value.new_password.length < 10 ||
+    !/[A-Z]/.test(form.value.new_password) ||
+    !/[a-z]/.test(form.value.new_password) ||
+    !/[0-9]/.test(form.value.new_password)
+  )) {
     error.value = t('auth.validation.passwordMinLength')
     return
   }

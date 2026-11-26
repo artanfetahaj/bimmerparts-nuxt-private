@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useLocale } from '../stores/locale'
 import { useCart } from '../stores/cart'
 import ordersService from '../services/orders'
@@ -16,58 +16,64 @@ const emit = defineEmits<{
 const { t } = useLocale()
 const { clearCart } = useCart()
 
-const paymentStatus       = ref<'pending' | 'paid' | 'failed' | 'checking'>('checking')
+const paymentStatus       = ref<'pending' | 'paid' | 'failed' | 'processing' | 'checking'>('checking')
 const resolvedOrderNumber = ref<string | undefined>(props.orderNumber)
 
-onMounted(async () => {
-  // Card payment flow: sessionStorage holds the payment_id and checkout data
-  const pendingPaymentId = sessionStorage.getItem('pending_payment_id')
+let pollTimer: ReturnType<typeof setTimeout> | null = null
 
-  if (pendingPaymentId) {
-    try {
-      const { status } = await ordersService.verifyPayment(pendingPaymentId)
+function getOrderToken(orderNumber: string): string | null {
+  return sessionStorage.getItem(`order_token_${orderNumber}`)
+}
 
-      if (status === 'paid') {
-        const raw = sessionStorage.getItem('pending_checkout')
-        const checkoutData = raw ? JSON.parse(raw) : null
+function clearOrderToken(orderNumber: string): void {
+  sessionStorage.removeItem(`order_token_${orderNumber}`)
+}
 
-        if (checkoutData) {
-          checkoutData.mollie_payment_id = pendingPaymentId
-          const orderResult = await ordersService.create(checkoutData)
-          resolvedOrderNumber.value = orderResult.order_number
-        }
-
-        paymentStatus.value = 'paid'
-        clearCart()
-        sessionStorage.removeItem('pending_payment_id')
-        sessionStorage.removeItem('pending_checkout')
-      } else if (status === 'failed') {
-        paymentStatus.value = 'failed'
-        sessionStorage.removeItem('pending_payment_id')
-        sessionStorage.removeItem('pending_checkout')
-      } else {
-        paymentStatus.value = 'pending'
-      }
-    } catch {
-      paymentStatus.value = 'pending'
-    }
-    return
-  }
-
-  // Bank transfer flow: order already exists, just check its payment status
-  if (!props.orderNumber) {
-    paymentStatus.value = 'pending'
+async function pollPaymentStatus(orderNumber: string, token: string | null, startedAt: number, attempt: number) {
+  const elapsed = Date.now() - startedAt
+  if (elapsed > 30_000) {
+    paymentStatus.value = 'processing'
+    if (token) clearOrderToken(orderNumber)
     return
   }
 
   try {
-    const result = await ordersService.getPaymentStatus(props.orderNumber)
-    const status = result.payment_status as 'pending' | 'paid' | 'failed'
-    paymentStatus.value = status
-    if (status === 'paid') clearCart()
+    const result = await ordersService.getPaymentStatus(orderNumber, token || undefined)
+    const status = result.payment_status as string
+
+    if (status === 'paid') {
+      paymentStatus.value = 'paid'
+      clearCart()
+      if (token) clearOrderToken(orderNumber)
+    } else if (status === 'failed' || status === 'canceled') {
+      paymentStatus.value = 'failed'
+      if (token) clearOrderToken(orderNumber)
+    } else {
+      // Still open/pending — backoff: 1s, 2s, 3s, then 4s intervals
+      const delay = Math.min(1000 * (attempt + 1), 4000)
+      pollTimer = setTimeout(() => pollPaymentStatus(orderNumber, token, startedAt, attempt + 1), delay)
+    }
   } catch {
-    paymentStatus.value = 'pending'
+    // On error, keep checking until timeout
+    const delay = Math.min(2000 * (attempt + 1), 8000)
+    pollTimer = setTimeout(() => pollPaymentStatus(orderNumber, token, startedAt, attempt + 1), delay)
   }
+}
+
+onMounted(async () => {
+  const orderNumber = props.orderNumber
+  if (!orderNumber) {
+    paymentStatus.value = 'processing'
+    return
+  }
+
+  resolvedOrderNumber.value = orderNumber
+  const token = getOrderToken(orderNumber)
+  await pollPaymentStatus(orderNumber, token, Date.now(), 0)
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearTimeout(pollTimer)
 })
 
 const handleBackHome = () => emit('navigateToHome')
@@ -136,7 +142,7 @@ const dhlTrackingUrl = (code: string) =>
       </template>
 
       <!-- Pending (bank transfer waiting) -->
-      <template v-else>
+      <template v-else-if="paymentStatus === 'pending'">
         <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 text-orange-500">
             <path d="M20 6L9 17l-5-5" />
@@ -144,6 +150,20 @@ const dhlTrackingUrl = (code: string) =>
         </div>
         <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ t('thankyou.order.title') }}</h1>
         <p class="text-gray-600 max-w-xl mb-8">{{ t('thankyou.order.message') }}</p>
+        <div v-if="resolvedOrderNumber" class="mb-4 text-sm text-gray-500">
+          {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ resolvedOrderNumber }}</span>
+        </div>
+      </template>
+
+      <!-- Payment still processing after 30s timeout -->
+      <template v-else>
+        <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 text-blue-500">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ t('thankyou.processing.title') || 'Betaling wordt verwerkt' }}</h1>
+        <p class="text-gray-600 max-w-xl mb-8">{{ t('thankyou.processing.message') || 'Uw betaling wordt nog verwerkt. U ontvangt een bevestiging per e-mail.' }}</p>
         <div v-if="resolvedOrderNumber" class="mb-4 text-sm text-gray-500">
           {{ t('thankyou.orderNumber') }}: <span class="font-semibold text-gray-800">{{ resolvedOrderNumber }}</span>
         </div>

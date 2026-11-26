@@ -9,6 +9,19 @@ import { useWishlist } from '@/stores/wishlist'
 import { useLocale } from '@/stores/locale'
 import authService from '@/services/auth'
 import productService from '@/services/product'
+import DOMPurify from 'isomorphic-dompurify'
+
+const DESCRIPTION_ALLOW_TAGS = ['p', 'br', 'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'h2', 'h3', 'h4', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a']
+const DESCRIPTION_ALLOW_ATTR = ['href', 'title', 'target', 'rel']
+
+function sanitizeDescription(html: string): string {
+  const clean = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: DESCRIPTION_ALLOW_TAGS,
+    ALLOWED_ATTR: DESCRIPTION_ALLOW_ATTR,
+  })
+  // Force noopener noreferrer on all links
+  return clean.replace(/<a\s/gi, '<a rel="noopener noreferrer" ')
+}
 
 const { t, currentLocale } = useLocale()
 const route = useRoute()
@@ -626,7 +639,7 @@ useSeoMeta({
             <div
               v-if="product.description"
               class="text-gray-700 leading-relaxed break-words"
-              v-html="product.description"
+              v-html="sanitizeDescription(product.description)"
             />
             <p v-else class="text-gray-500 italic">{{ t('productDetail.noDescription') }}</p>
           </div>

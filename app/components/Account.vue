@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import HeaderNav from './HeaderNav.vue'
 import SiteFooter from './SiteFooter.vue'
 import PersonalInformation from './account/PersonalInformation.vue'
 import Security from './account/Security.vue'
