@@ -112,7 +112,10 @@ const handleRegister = async () => {
   } catch (error: any) {
     const apiError = error as ApiError
 
-    if (apiError.errors) {
+    if ((error as any)?.status === 429 || (error as any)?.response?.status === 429) {
+      const data = (error as any)?.response?.data || error
+      registerError.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else if (apiError.errors) {
       validationErrors.value = {}
       Object.keys(apiError.errors).forEach(field => {
         const formField = field === 'first_name' ? 'firstName' : field === 'last_name' ? 'lastName' : field
@@ -280,6 +283,9 @@ const handleRegister = async () => {
             </p>
             <p v-else-if="validationErrors.confirmPassword" class="text-red-500 text-sm mt-1">{{ validationErrors.confirmPassword }}</p>
           </div>
+
+          <!-- Honeypot -->
+          <HoneypotField />
 
           <!-- Submit -->
           <button

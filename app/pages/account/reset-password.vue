@@ -51,12 +51,24 @@ const handleSubmit = async () => {
     })
     success.value = true
   } catch (error: any) {
-    if (error.errors) {
+    const data = error?.response?.data || error
+    if ((error?.response?.status || error?.status) === 429) {
+      serverError.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else if (data?.errors) {
+      Object.keys(data.errors).forEach(field => {
+        errors.value[field] = data.errors[field][0]
+      })
+    } else if (error.errors) {
       Object.keys(error.errors).forEach(field => {
         errors.value[field] = error.errors[field][0]
       })
     } else {
-      serverError.value = error.message || t('auth.invalidResetLink')
+      const msg = data?.message || error.message || ''
+      if (msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('invalid')) {
+        linkInvalid.value = true
+      } else {
+        serverError.value = msg || t('auth.invalidResetLink')
+      }
     }
   } finally {
     isLoading.value = false

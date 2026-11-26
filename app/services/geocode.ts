@@ -1,6 +1,3 @@
-import { Config } from '../models/Config';
-import axios from 'axios';
-
 export type GeocodeAutocompleteResponse = {
   constructionYear: number;
   country: string;
@@ -21,25 +18,13 @@ export const autocompleteAddress = async (payload: {
   postcode: string;
   house_number: string;
   house_number_addition?: string;
-}) => {
-  const defaultHeaders: { [key: string]: string } = {
-    'X-Api-Key': `${import.meta.env.VITE_GEOCODE_API_KEY}`
-  }
-
-  const token = Config.get('access')
-  if (typeof token !== 'undefined') {
-    defaultHeaders.Authorization = `Bearer ${token}`
-  }
-
-  const apiUrl = `${import.meta.env.VITE_GEOCODE_API_URL}/autocomplete`;
-
+}): Promise<GeocodeAutocompleteResponse | null> => {
   try {
-    const response = await axios.get(apiUrl, {
-      headers: defaultHeaders,
-      params: payload,
-    });
-    return response.data as GeocodeAutocompleteResponse;
-  } catch (error) {
-    return null;
+    const params = new URLSearchParams({ postcode: payload.postcode, house_number: payload.house_number })
+    if (payload.house_number_addition) params.set('house_number_addition', payload.house_number_addition)
+    const response = await $fetch<GeocodeAutocompleteResponse>(`/api/geocode?${params}`)
+    return response
+  } catch {
+    return null
   }
 }

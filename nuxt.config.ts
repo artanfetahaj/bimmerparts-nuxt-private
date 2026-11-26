@@ -21,15 +21,75 @@ export default defineNuxtConfig({
     '/mini-model-codes': { swr: 3600 },
     '/producten': { swr: 3600 },
     '/producten/**': { swr: 600 },
-    // Private / transactional pages: client-only and kept out of search results
+    // Private / transactional pages: client-only and kept out of search results.
+    // Strictest CSP: no GTM hosts (GTM is intentionally not loaded on these routes).
     '/winkelwagen': { ssr: false, robots: false },
-    '/kassa': { ssr: false, robots: false },
-    '/bestelling-bevestigd': { ssr: false, robots: false },
-    '/account/**': { ssr: false, robots: false },
+    '/kassa': {
+      ssr: false, robots: false,
+      security: {
+        headers: {
+          contentSecurityPolicy: {
+            'default-src': ["'self'"],
+            'script-src': ["'self'", "'nonce-{{nonce}}'", "'strict-dynamic'"],
+            'style-src': ["'self'", "'unsafe-inline'"],
+            'connect-src': ["'self'", process.env.API_URL || 'http://localhost:8000'],
+            'img-src': ["'self'", 'data:', 'https://bimmerparts-public.s3.eu-central-1.amazonaws.com', 'https://besa-crm.s3.eu-central-1.amazonaws.com'],
+            'frame-src': ['https://www.mollie.com'],
+            'form-action': ["'self'", 'https://www.mollie.com'],
+            'frame-ancestors': ["'none'"],
+            'base-uri': ["'self'"],
+            'object-src': ["'none'"],
+            'upgrade-insecure-requests': true,
+          },
+        },
+      },
+    },
+    '/bestelling-bevestigd': {
+      ssr: false, robots: false,
+      security: {
+        headers: {
+          contentSecurityPolicy: {
+            'default-src': ["'self'"],
+            'script-src': ["'self'", "'nonce-{{nonce}}'", "'strict-dynamic'"],
+            'style-src': ["'self'", "'unsafe-inline'"],
+            'connect-src': ["'self'", process.env.API_URL || 'http://localhost:8000'],
+            'img-src': ["'self'", 'data:'],
+            'frame-src': ["'none'"],
+            'form-action': ["'self'"],
+            'frame-ancestors': ["'none'"],
+            'base-uri': ["'self'"],
+            'object-src': ["'none'"],
+            'upgrade-insecure-requests': true,
+          },
+        },
+      },
+    },
+    '/account/**': {
+      ssr: false, robots: false,
+      security: {
+        headers: {
+          contentSecurityPolicy: {
+            'default-src': ["'self'"],
+            'script-src': ["'self'", "'nonce-{{nonce}}'", "'strict-dynamic'"],
+            'style-src': ["'self'", "'unsafe-inline'"],
+            'connect-src': ["'self'", process.env.API_URL || 'http://localhost:8000'],
+            'img-src': ["'self'", 'data:'],
+            'frame-src': ["'none'"],
+            'form-action': ["'self'"],
+            'frame-ancestors': ["'none'"],
+            'base-uri': ["'self'"],
+            'object-src': ["'none'"],
+            'upgrade-insecure-requests': true,
+          },
+        },
+      },
+    },
     '/wishlist': { robots: false },
   },
 
   runtimeConfig: {
+    geocodeApiUrl: process.env.NUXT_GEOCODE_API_URL || '',
+    geocodeApiKey: process.env.NUXT_GEOCODE_API_KEY || '',
     public: {
       apiUrl: process.env.API_URL || 'http://127.0.0.1:8000/api',
       // Google Tag Manager container (e.g. GTM-XXXXXXX). Only loaded when set; consent mode gates what fires.
@@ -117,6 +177,8 @@ export default defineNuxtConfig({
     // Headers are only meaningful (and enforced by Amplify's customHttp.yml) in production.
     enabled: process.env.NODE_ENV === 'production',
 
+    nonce: true,
+
     // nuxt-security rate-limiter and request-size-limiter conflict with SWR/ISR caching on Nitro,
     // where prerender routes are served without going through the Node handler at all.
     // The API already enforces its own rate limits; disabling here avoids false 429s on cached routes.
@@ -139,13 +201,18 @@ export default defineNuxtConfig({
         payment: [],
         usb: [],
       },
-      contentSecurityPolicy: {
+      // When NUXT_CSP_REPORT_ONLY=true, switch to report-only mode (Amplify env var).
+      // SWR/prerender routes bypass the Nitro handler, so CSP for those pages is set
+      // in customHttp.yml using hash-based allowlists instead of nonces.
+      contentSecurityPolicy: process.env.NUXT_CSP_REPORT_ONLY === 'true' ? false : {
         'default-src': ["'self'"],
         'script-src': [
           "'self'",
+          "'nonce-{{nonce}}'",
           "'strict-dynamic'",
           'https://www.googletagmanager.com',
         ],
+        'style-src': ["'self'", "'unsafe-inline'"],
         'connect-src': [
           "'self'",
           process.env.API_URL || 'http://localhost:8000',
@@ -164,6 +231,7 @@ export default defineNuxtConfig({
         ],
         'frame-src': ['https://www.googletagmanager.com'],
         'form-action': ["'self'", 'https://www.mollie.com'],
+        'frame-ancestors': ["'none'"],
         'base-uri': ["'self'"],
         'object-src': ["'none'"],
         'upgrade-insecure-requests': true,

@@ -34,7 +34,12 @@ const handleSubmit = async () => {
     await authService.forgotPassword(email.value)
     submitted.value = true
   } catch (error: any) {
-    serverError.value = error.message || 'Er is een fout opgetreden. Probeer het opnieuw.'
+    const data = error?.response?.data || error
+    if ((error?.response?.status || error?.status) === 429) {
+      serverError.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else {
+      serverError.value = data?.message || error.message || 'Er is een fout opgetreden. Probeer het opnieuw.'
+    }
   } finally {
     isLoading.value = false
   }

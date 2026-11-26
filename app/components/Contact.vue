@@ -146,8 +146,14 @@ const handleSubmit = async () => {
     emit('navigateToContactThanks')
   } catch (error: any) {
     console.error('Error submitting contact form:', error)
-    validationErrors.value = {
-      message: error.response?.data?.message || t('contact.submissionError') || 'Failed to submit contact form. Please try again.'
+    const status = error?.response?.status
+    const data = error?.response?.data || error
+    if (status === 429) {
+      validationErrors.value = { message: data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.' }
+    } else {
+      validationErrors.value = {
+        message: data?.message || t('contact.submissionError') || 'Failed to submit contact form. Please try again.'
+      }
     }
   }
 }
@@ -273,17 +279,11 @@ const handleSubmit = async () => {
                 <p v-if="validationErrors.privacy" class="text-red-500 text-sm mt-2 ml-8 font-medium">{{ validationErrors.privacy }}</p>
               </div>
               
+              <!-- Honeypot -->
+              <HoneypotField />
+
               <!-- Submit Button -->
-              <button 
-                type="submit"
-                :disabled="!acceptPrivacy"
-                class="w-full py-4 px-6 rounded-lg font-medium transition-all text-lg mt-auto"
-                :class="acceptPrivacy 
-                  ? 'bg-orange-500 text-zinc-900 hover:bg-orange-600 cursor-pointer' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'"
-              >
-                {{ t('contact.sendMessage') }}
-              </button>
+
             </form>
           </div>
 

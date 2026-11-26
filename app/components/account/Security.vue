@@ -73,7 +73,17 @@ const saveChanges = async () => {
       error.value = t('account.noChanges')
     }
   } catch (e: any) {
-    error.value = e?.message || t('account.passwordChangeError')
+    const data = e?.response?.data || e
+    const status = e?.response?.status || e?.status
+    if (status === 429) {
+      error.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else if (data?.errors) {
+      // 422: surface first field error (e.g. breached password)
+      const firstField = Object.keys(data.errors)[0]
+      error.value = data.errors[firstField]?.[0] || data?.message || t('account.passwordChangeError')
+    } else {
+      error.value = data?.message || e?.message || t('account.passwordChangeError')
+    }
   } finally {
     isLoading.value = false
   }
