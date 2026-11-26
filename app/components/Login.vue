@@ -49,7 +49,10 @@ const handleLogin = async () => {
   } catch (error: any) {
     const apiError = error as ApiError
 
-    if (apiError.errors) {
+    if ((error as any)?.response?.status === 429 || (error as any)?.status === 429) {
+      const data = (error as any)?.response?.data || error
+      loginError.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else if (apiError.errors) {
       validationErrors.value = {}
       Object.keys(apiError.errors).forEach(field => {
         validationErrors.value[field] = apiError.errors![field][0]

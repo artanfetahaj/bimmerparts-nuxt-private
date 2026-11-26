@@ -51,7 +51,7 @@ const handleSubmit = async () => {
     const reviewData: SubmitReviewData = {
       product_id: props.productId,
       rating: rating.value,
-      comment: comment.value
+      comment: comment.value,
     }
 
     if (!isAuthenticated.value) {
@@ -76,7 +76,13 @@ const handleSubmit = async () => {
       submitSuccess.value = false
     }, 5000)
   } catch (error: any) {
-    submitError.value = error.response?.data?.message || 'Er is een fout opgetreden bij het versturen van je beoordeling.'
+    const status = error?.response?.status
+    const data = error?.response?.data || error
+    if (status === 429) {
+      submitError.value = data?.message || 'Te veel pogingen. Probeer het over een paar minuten opnieuw.'
+    } else {
+      submitError.value = data?.message || 'Er is een fout opgetreden bij het versturen van je beoordeling.'
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -185,6 +191,9 @@ const setRating = (value: number) => {
           </div>
         </div>
       </template>
+
+      <!-- Honeypot -->
+      <HoneypotField />
 
       <!-- Submit Button -->
       <button

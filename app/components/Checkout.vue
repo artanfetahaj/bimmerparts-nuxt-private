@@ -277,7 +277,13 @@ const handleOrderNow = async () => {
     clearCart()
     window.location.href = payment.checkout_url
   } catch (e: any) {
-    orderError.value = e?.response?.data?.message || e?.message || 'Failed to place order. Please try again.'
+    const data = e?.response?.data || e
+    if (e?.response?.status === 429) {
+      const retryMsg = data?.retry_after ? ` Probeer het over ${data.retry_after} seconden opnieuw.` : ''
+      orderError.value = data?.message || `Te veel pogingen. Probeer het over een paar minuten opnieuw.${retryMsg}`
+    } else {
+      orderError.value = data?.message || e?.message || 'Failed to place order. Please try again.'
+    }
     isSubmitting.value = false
   }
 }
