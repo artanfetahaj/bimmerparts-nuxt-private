@@ -273,6 +273,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'auth.confirmNewPassword': 'Confirm new password',
     'auth.resetSuccess': 'Password changed successfully. You can now log in.',
     'auth.invalidResetLink': 'This reset link is invalid or has expired.',
+    'auth.invalidCredentials': 'Email address or password is incorrect.',
+    'auth.validation.passwordCompromised': 'This password has appeared in a data leak. Please choose a different password.',
 
     // Account
     'account.title': 'My Account',
@@ -282,6 +284,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'account.wishlist': 'Wishlist',
     'account.settings': 'Settings',
     'account.logout': 'Logout',
+    'account.logoutConfirmTitle': 'Log out?',
+    'account.logoutConfirmMessage': 'Are you sure you want to log out of your account?',
     'account.editProfile': 'Edit Profile',
     'account.saveChanges': 'Save Changes',
     'account.cancel': 'Cancel',
@@ -754,6 +758,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'auth.confirmNewPassword': 'Bevestig nieuw wachtwoord',
     'auth.resetSuccess': 'Wachtwoord succesvol gewijzigd. U kunt nu inloggen.',
     'auth.invalidResetLink': 'Deze resetlink is ongeldig of verlopen.',
+    'auth.invalidCredentials': 'E-mailadres of wachtwoord klopt niet.',
+    'auth.validation.passwordCompromised': 'Dit wachtwoord is aangetroffen in een datalek. Kies een ander wachtwoord.',
 
     // Account
     'account.title': 'Mijn Account',
@@ -763,6 +769,8 @@ const messages: Record<SupportedLocale, Record<string, string>> = {
     'account.wishlist': 'Verlanglijst',
     'account.settings': 'Instellingen',
     'account.logout': 'Uitloggen',
+    'account.logoutConfirmTitle': 'Uitloggen?',
+    'account.logoutConfirmMessage': 'Weet je zeker dat je wilt uitloggen?',
     'account.editProfile': 'Profiel Bewerken',
     'account.saveChanges': 'Wijzigingen Opslaan',
     'account.cancel': 'Annuleren',
