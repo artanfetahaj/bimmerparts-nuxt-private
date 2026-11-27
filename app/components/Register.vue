@@ -24,27 +24,7 @@ const isLoading = ref(false)
 const registerError = ref('')
 
 // ─── Live password validation ─────────────────────────────────────────────────
-const passwordTouched = ref(false)
 const confirmPasswordTouched = ref(false)
-
-const passwordRules = computed(() => [
-  {
-    label: 'Minimaal 10 tekens',
-    met: formData.value.password.length >= 10,
-  },
-  {
-    label: 'Minimaal 1 hoofdletter',
-    met: /[A-Z]/.test(formData.value.password),
-  },
-  {
-    label: 'Minimaal 1 kleine letter',
-    met: /[a-z]/.test(formData.value.password),
-  },
-  {
-    label: 'Minimaal 1 cijfer',
-    met: /[0-9]/.test(formData.value.password),
-  },
-])
 
 const passwordsMatch = computed(() =>
   formData.value.confirmPassword.length > 0 &&
@@ -119,7 +99,10 @@ const handleRegister = async () => {
       validationErrors.value = {}
       Object.keys(apiError.errors).forEach(field => {
         const formField = field === 'first_name' ? 'firstName' : field === 'last_name' ? 'lastName' : field
-        validationErrors.value[formField] = apiError.errors![field][0]
+        const msg = apiError.errors![field][0]
+        validationErrors.value[formField] = msg.includes('data leak')
+          ? t('auth.validation.passwordCompromised')
+          : msg
       })
     } else {
       registerError.value = apiError.message || t('auth.registrationFailed') || 'Registratie mislukt. Probeer opnieuw.'
@@ -208,7 +191,7 @@ const handleRegister = async () => {
             <div class="relative">
               <input
                 v-model="formData.password"
-                @input="validationErrors.password = ''; registerError = ''; passwordTouched = true"
+                @input="validationErrors.password = ''; registerError = ''"
                 :type="showPassword ? 'text' : 'password'"
                 :disabled="isLoading"
                 class="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -225,24 +208,7 @@ const handleRegister = async () => {
                 </svg>
               </button>
             </div>
-            <!-- Live password rules -->
-            <div v-if="passwordTouched" class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-              <span
-                v-for="rule in passwordRules"
-                :key="rule.label"
-                class="flex items-center gap-1 text-xs"
-                :class="rule.met ? 'text-green-600' : 'text-red-500'"
-              >
-                <svg v-if="rule.met" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <svg v-else class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                {{ rule.label }}
-              </span>
-            </div>
-            <p v-else-if="validationErrors.password" class="text-red-500 text-sm mt-1">{{ validationErrors.password }}</p>
+            <p v-if="validationErrors.password" class="text-red-500 text-sm mt-1">{{ validationErrors.password }}</p>
           </div>
 
           <!-- Confirm Password -->

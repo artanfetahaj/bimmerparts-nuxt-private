@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { X, ChevronDown, Loader2 } from 'lucide-vue-next'
+import { X, ChevronDown, Loader2, User } from 'lucide-vue-next'
 import { useLocale } from '../../stores/locale'
 import { useCategoryStore } from '../../stores/category.store'
 import { useCarVariantStore } from '../../stores/car-variant.store'
 import SelectedCarVariant from './SelectedCarVariant.vue'
+import authService from '../../services/auth'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
@@ -199,6 +200,18 @@ watch(() => props.open, (open) => {
             {{ t('nav.contact') }}
           </NuxtLink>
         </nav>
+
+        <!-- Account / Login button -->
+        <div class="px-5 py-5 border-t border-gray-200">
+          <NuxtLink
+            :to="authService.isAuthenticated() ? '/account' : '/account/login'"
+            class="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-orange-500 text-white font-semibold text-base hover:bg-orange-600 transition-colors"
+            @click="navigate"
+          >
+            <User class="w-5 h-5" />
+            {{ authService.isAuthenticated() ? t('nav.myProfile') : t('auth.login') }}
+          </NuxtLink>
+        </div>
 
       </div>
     </Transition>

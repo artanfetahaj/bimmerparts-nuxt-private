@@ -58,7 +58,7 @@ const handleLogin = async () => {
         validationErrors.value[field] = apiError.errors![field][0]
       })
     } else {
-      loginError.value = apiError.message || t('auth.loginFailed') || 'Login mislukt. Probeer opnieuw.'
+      loginError.value = t('auth.invalidCredentials') || 'E-mailadres of wachtwoord klopt niet.'
     }
   } finally {
     isLoading.value = false
